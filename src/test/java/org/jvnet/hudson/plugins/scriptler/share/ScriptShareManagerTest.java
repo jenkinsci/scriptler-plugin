@@ -3,6 +3,7 @@ package org.jvnet.hudson.plugins.scriptler.share;
 import java.io.File;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class ScriptShareManagerTest {
@@ -13,6 +14,7 @@ public class ScriptShareManagerTest {
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testGetScriptCatalog() throws Exception {
 		File catalog = File.createTempFile("scriptler", ".xml");
 		if (catalog.exists()) {
