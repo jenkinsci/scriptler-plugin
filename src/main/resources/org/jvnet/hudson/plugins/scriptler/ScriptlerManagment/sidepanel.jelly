@@ -1,7 +1,7 @@
 <!--
 The MIT License
 
-Copyright (c) 2010, Dominik Bartholdi
+Copyright (c) 2004-2009, Sun Microsystems, Inc., Kohsuke Kawaguchi
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,21 +23,17 @@ THE SOFTWARE.
 -->
 
 <!--
-  Side panel for a slave.
+  Side panel for Scriptler.
 -->
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
   <l:header />
   <l:side-panel>
     <l:tasks>
-      <l:task icon="images/24x24/up.gif" href="${rootURL}/scriptler" title="${%Back to List}" />
+      <l:task icon="images/24x24/setting.gif" href="${rootURL}/manage" title="${%Manage Hudson}" />
+      <l:task icon="images/24x24/next.gif" href="${rootURL}/scriptler" title="${%Run/Edit Scripts}" />
       <l:task icon="images/24x24/new-package.gif" href="scriptsettings" title="${%Add a new Script}" />
-      <l:task icon="images/24x24/folder.gif" href="catalog" title="${%Script catalog}" />
+      <l:task icon="images/24x24/folder.gif" href="catalog" title="${%Remote Script catalog}" />
       <!-- 
-      <l:task icon="images/24x24/search.gif" href="${rootURL}/${it.url}" title="${%Status}" />
-      <l:task icon="images/24x24/edit-delete.gif" href="delete" title="${%Delete Slave}" permission="${it.DELETE}" />
-      <l:task icon="images/24x24/setting.gif" href="configure" title="${%Configure}" permission="${it.CONFIGURE}" />
-      <l:task icon="images/24x24/notepad.gif" href="builds" title="${%Build History}" />
-      <l:task icon="images/24x24/monitor.gif" href="load-statistics" title="${%Load Statistics}" />
       <l:task icon="images/24x24/terminal.gif" href="script" title="${%Script Console}" permission="${app.ADMINISTER}" />
       <st:include page="sidepanel2.jelly" optional="true" />
 --><!-- hook for derived class to add more items

@@ -43,7 +43,7 @@
 							<td class="pane" width="20">
 								<a href="downloadScript?name=${t.name}">
 									<img width="16" height="16" title="${%import script} ${t.name}"
-										src="${imagesURL}/16x16/go-next.gif" />
+										src="${imagesURL}/16x16/save.gif" />
 								</a>
 							</td>
 							<td class="pane-header">

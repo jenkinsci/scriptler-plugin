@@ -70,7 +70,7 @@ THE SOFTWARE.
 								<j:out value=" " />
 								<a href="runScript?name=${t.name}">
 									<img width="16" height="16" title="${%run script} ${t.name}"
-										src="${imagesURL}/16x16/go-next.gif" />
+										src="${imagesURL}/16x16/terminal.gif" />
 								</a>
 							</td>
 							<td class="pane-header">
