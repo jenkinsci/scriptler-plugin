@@ -1,0 +1,93 @@
+<!--
+The MIT License
+
+Copyright (c) 2010, Dominik Bartholdi
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+-->
+
+
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+	<l:layout permission="${app.ADMINISTER}" norefresh="true">
+		<!--
+			<st:include it="${it.primaryView}" page="sidepanel.jelly"
+			xmlns:st="jelly:stapler" />
+		-->
+		<st:include page="sidepanel.jelly" />
+		<l:main-panel>
+			<h1>
+				<img src="${rootURL}/${it.iconFileName}" alt="" />
+				<j:out value="${%title}" />
+			</h1>
+
+			<j:out value="${%intro}" />
+			<h4>
+				<j:out value="${%scriptdirectorytext}" />
+			</h4>
+			<j:out value="${it.scriptDirectory}" />
+
+			<div class="excerpt">
+				<table class="pane">
+					<j:forEach var="t" items="${it.configuration.scripts}">
+						<tr valign="center" style="border-top: 0px;">
+							<td class="pane" width="70">
+								<j:choose>
+									<j:when test="${t.available == false}">
+										<img width="16" height="16" title="${%fileNotAvailable}"
+											src="${imagesURL}/16x16/red.gif" />
+									</j:when>
+									<j:otherwise>
+										<img width="16" height="16" src="${imagesURL}/16x16/empty.gif" />
+									</j:otherwise>
+								</j:choose>
+								<j:out value=" " />
+								<a href="editScript?name=${t.name}">
+									<img width="16" height="16" title="${%edit script} ${t.name}"
+										src="${imagesURL }/16x16/document_edit.gif" />
+								</a>
+								<j:out value=" " />
+								<a href="removeScript?name=${t.name}">
+									<img width="16" height="16" title="${%remove script} ${t.name}"
+										src="${imagesURL}/16x16/edit-delete.gif" />
+								</a>
+								<j:out value=" " />
+								<a href="runScript?name=${t.name}">
+									<img width="16" height="16" title="${%run script} ${t.name}"
+										src="${imagesURL}/16x16/go-next.gif" />
+								</a>
+							</td>
+							<td class="pane-header">
+								<j:out value="${t.name}" />
+							</td>
+						</tr>
+						<tr valign="left">
+							<td class="pane">
+							</td>
+							<td colspan="4" class="pane">
+								<j:out value="${t.comment}" />
+							</td>
+						</tr>
+					</j:forEach>
+				</table>
+			</div>
+
+		</l:main-panel>
+	</l:layout>
+</j:jelly>

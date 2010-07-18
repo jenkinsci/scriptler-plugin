@@ -1,0 +1,6 @@
+<div>
+	Scriptler allows you to store/edit/execute groovy scripts on any of the
+	slaves/nodes... no need for copy paste groovy code anymore. Beside
+	administer your scripts, Scritpler also provides a way to share scripts
+	between users via hosted script catalogs on the internet.
+</div>

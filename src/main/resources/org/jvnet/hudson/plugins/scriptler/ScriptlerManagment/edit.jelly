@@ -1,0 +1,64 @@
+<!--
+The MIT License
+
+Copyright (c) 2010, Dominik Bartholdi
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+-->
+
+
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+	<l:layout>
+		<st:include page="sidepanel.jelly" />
+		<l:main-panel>
+			<h1>${%Edit Script}</h1>
+
+			<f:form method="post" action="scriptAdd">
+				<j:jelly xmlns:j="jelly:core">
+					<f:entry title="${%Name}">
+						<f:textbox name="name" value="${script.name}" />
+					</f:entry>
+					<f:entry title="${%Comment}">
+						<f:textbox name="comment" value="${script.comment}" />
+					</f:entry>
+					<f:entry title="${%Script}">
+						<textarea id="script" name="script" style="width:100%; height:10em">
+							<j:out value="${script.script}" />
+						</textarea>
+					</f:entry>
+				</j:jelly>
+				<f:block>
+					<f:submit value="${%Submit}" />
+				</f:block>
+			</f:form>
+
+			<!--
+				because i don't now how to pass more then the file in a multipart
+				action, we can't overwrite an existing file for now <h1>${%Overwrite
+				Script}</h1> <f:form method="post" action="uploadScript"
+				name="uploadScript" enctype="multipart/form-data"> <f:block> <div
+				style="margin-bottom: 1em;"> ${%uploadtext} </div> </f:block>
+				<f:block> ${%File}: <input type="file" name="name"
+				class="setting-input" style="width:80%" size='40' /> </f:block>
+				<f:block> <f:submit value="${%Upload}" /> </f:block> </f:form>
+			-->
+		</l:main-panel>
+	</l:layout>
+</j:jelly>
