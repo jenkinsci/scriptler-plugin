@@ -33,6 +33,7 @@ THE SOFTWARE.
       <l:task icon="images/24x24/next.gif" href="${rootURL}/scriptler" title="${%Run/Edit Scripts}" />
       <l:task icon="images/24x24/new-package.gif" href="scriptsettings" title="${%Add a new Script}" />
       <l:task icon="images/24x24/folder.gif" href="catalog" title="${%Remote Script catalog}" />
+      <l:task icon="images/24x24/setting.gif" href="settings" title="${%Scriptler settings}" />
       <!-- 
       <l:task icon="images/24x24/terminal.gif" href="script" title="${%Script Console}" permission="${app.ADMINISTER}" />
       <st:include page="sidepanel2.jelly" optional="true" />

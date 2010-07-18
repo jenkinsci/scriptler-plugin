@@ -31,10 +31,13 @@ import hudson.util.XStream2;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.jvnet.hudson.plugins.scriptler.ScriptlerManagment;
+import org.jvnet.hudson.plugins.scriptler.share.CatalogInfo;
 import org.jvnet.hudson.plugins.scriptler.util.ByNameSorter;
 
 import com.thoughtworks.xstream.XStream;
@@ -43,10 +46,36 @@ import com.thoughtworks.xstream.XStream;
  */
 public final class ScriptlerConfiguration extends ScriptSet implements Saveable {
 
+	private List<CatalogInfo> catalogInfos = new ArrayList<CatalogInfo>();
+
 	public ScriptlerConfiguration(SortedSet<Script> scripts) {
 		if (scripts != null) {
 			this.scriptSet = scripts;
 		}
+	}
+
+	public List<CatalogInfo> getCatalogInfos() {
+		return catalogInfos;
+	}
+
+	public void setCatalogInfos(List<CatalogInfo> catalogInfos) {
+		this.catalogInfos = catalogInfos;
+	}
+
+	/**
+	 * Gets the catalog info by its name.
+	 * 
+	 * @param name
+	 *            the name of the catalog to search for
+	 * @return <code>null</code> if no info with the given name can be found.
+	 */
+	public CatalogInfo getCatalogInfo(String name) {
+		for (CatalogInfo catInfo : getCatalogInfos()) {
+			if (catInfo.name.equals(name)) {
+				return catInfo;
+			}
+		}
+		return null;
 	}
 
 	public synchronized void save() throws IOException {
@@ -80,6 +109,7 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
 	static {
 		XSTREAM.alias("scriptler", ScriptlerConfiguration.class);
 		XSTREAM.alias("script", Script.class);
+		XSTREAM.alias("catalog", CatalogInfo.class);
 	}
 
 }

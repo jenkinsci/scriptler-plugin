@@ -39,13 +39,22 @@ import com.thoughtworks.xstream.XStream;
  */
 public final class Catalog {
 
-	public final transient String location;
+	// do not save to XML
+	private transient CatalogInfo info;
 
 	// have it sorted
 	protected Set<CatalogEntry> entrySet = new HashSet<CatalogEntry>();
 
-	public Catalog(String location) {
-		this.location = location;
+	public Catalog(CatalogInfo info) {
+		this.info = info;
+	}
+
+	public void setInfo(CatalogInfo info) {
+		this.info = info;
+	}
+
+	public CatalogInfo getInfo() {
+		return info;
 	}
 
 	public CatalogEntry getEntryByName(String name) {

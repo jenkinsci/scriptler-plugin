@@ -38,6 +38,7 @@ import java.util.logging.Logger;
 
 import org.jvnet.hudson.plugins.scriptler.config.Script;
 import org.jvnet.hudson.plugins.scriptler.config.ScriptlerConfiguration;
+import org.jvnet.hudson.plugins.scriptler.share.CatalogInfo;
 
 /**
  * @author domi
@@ -46,6 +47,10 @@ import org.jvnet.hudson.plugins.scriptler.config.ScriptlerConfiguration;
 public class ScritplerPluginImpl extends Plugin {
 
 	private final static Logger LOGGER = Logger.getLogger(ScritplerPluginImpl.class.getName());
+
+	private static String DEFAULT_LOCATION = "http://hudson.fortysix.ch/scriptler";
+
+	private static String DEFAULT_CATALOG = DEFAULT_LOCATION + "/scriptler-catalog.xml";
 
 	@Override
 	public void start() throws Exception {
@@ -96,6 +101,15 @@ public class ScritplerPluginImpl extends Plugin {
 		}
 		for (Script script : unavailableScripts) {
 			cfg.addOrReplace(script);
+		}
+
+		// if there is no catalog defined, we add the default catalog
+		if (cfg.getCatalogInfos() == null) {
+			cfg.setCatalogInfos(new ArrayList<CatalogInfo>());
+		}
+		if (cfg.getCatalogInfos().size() == 0) {
+			CatalogInfo catInfo = new CatalogInfo("default", DEFAULT_CATALOG, DEFAULT_LOCATION + "/{0}");
+			cfg.getCatalogInfos().add(catInfo);
 		}
 
 		cfg.save();

@@ -23,14 +23,11 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
 	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 	<l:layout permission="${app.ADMINISTER}" norefresh="true">
-		<!--
-			<st:include it="${it.primaryView}" page="sidepanel.jelly"
-			xmlns:st="jelly:stapler" />
-		-->
 		<st:include page="sidepanel.jelly" />
 		<l:main-panel>
 			<h1>
-				<img src="${rootURL}/${it.iconFileName}" alt="" />
+				<img width="48" height="48" src="${imagesURL}/48x48/folder.gif" />
+				<img width="16" height="16" src="${imagesURL}/16x16/empty.gif" />
 				<j:out value="${%title}" />
 			</h1>
 
@@ -38,37 +35,44 @@
 
 			<div class="excerpt">
 				<table class="pane">
-					<j:forEach var="t" items="${it.catalog.entries}">
-						<tr valign="center" style="border-top: 0px;">
-							<td class="pane" width="20">
-								<a href="downloadScript?name=${t.name}">
-									<img width="16" height="16" title="${%import script} ${t.name}"
-										src="${imagesURL}/16x16/save.gif" />
-								</a>
-							</td>
-							<td class="pane-header">
-								<j:out value="${t.name}" />
-							</td>
-							<td class="pane-header">
-								<j:out value="${%Provider}" />
-								:
-								<j:out value="${t.provider}" />
-							</td>
-						</tr>
-						<tr>
-							<td colspan="3">
-								<a href="${t.url}">
-									<j:out value="${t.url}" />
-								</a>
-							</td>
-						</tr>
-						<tr valign="left">
-							<td class="pane">
-							</td>
-							<td colspan="3" class="pane">
-								<j:out value="${t.comment}" />
-							</td>
-						</tr>
+					<j:forEach var="c" items="${it.catalogs}">
+						<j:forEach var="t" items="${c.entries}">
+							<tr valign="center" style="border-top: 0px;">
+								<td class="pane" width="20">
+									<a href="downloadScript?name=${t.name}&#38;catalog=${c.info.name}">
+										<img width="16" height="16" title="${%import script} ${t.name}"
+											src="${imagesURL}/16x16/save.gif" />
+									</a>
+								</td>
+								<td class="pane-header">
+									<j:out value="${t.name}" />
+								</td>
+								<td class="pane-header">
+									<j:out value="${%Provider}" />
+									:
+									<j:out value="${t.provider}" />
+								</td>
+								<td class="pane-header">
+									<j:out value="${%Catalog}" />
+									:
+									<j:out value="${c.info.name}" />
+								</td>
+							</tr>
+							<tr>
+								<td colspan="4">
+									<a href="${t.url}">
+										<j:out value="${t.url}" />
+									</a>
+								</td>
+							</tr>
+							<tr valign="left">
+								<td class="pane">
+								</td>
+								<td colspan="4" class="pane">
+									<j:out value="${t.comment}" />
+								</td>
+							</tr>
+						</j:forEach>
 					</j:forEach>
 				</table>
 			</div>

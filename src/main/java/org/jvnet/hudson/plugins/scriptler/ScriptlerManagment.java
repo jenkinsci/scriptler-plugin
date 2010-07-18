@@ -59,7 +59,8 @@ import org.jvnet.hudson.plugins.scriptler.config.Script;
 import org.jvnet.hudson.plugins.scriptler.config.ScriptlerConfiguration;
 import org.jvnet.hudson.plugins.scriptler.share.Catalog;
 import org.jvnet.hudson.plugins.scriptler.share.CatalogEntry;
-import org.jvnet.hudson.plugins.scriptler.share.ShareManager;
+import org.jvnet.hudson.plugins.scriptler.share.CatalogInfo;
+import org.jvnet.hudson.plugins.scriptler.share.CatalogManager;
 import org.kohsuke.stapler.HttpRedirect;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.QueryParameter;
@@ -77,8 +78,6 @@ public class ScriptlerManagment extends ManagementLink {
 
 	// always retrieve via getter
 	private ScriptlerConfiguration cfg = null;
-
-	private ShareManager shareManager = new ShareManager();
 
 	/*
 	 * (non-Javadoc)
@@ -129,11 +128,14 @@ public class ScriptlerManagment extends ManagementLink {
 		return cfg;
 	}
 
-	public HttpResponse doDownloadScript(StaplerRequest res, StaplerResponse rsp, @QueryParameter("name") String name) throws IOException {
+	public HttpResponse doDownloadScript(StaplerRequest res, StaplerResponse rsp, @QueryParameter("name") String name,
+			@QueryParameter("catalog") String catalogName) throws IOException {
 
-		Catalog catalog = shareManager.loadCatalog();
+		CatalogInfo catInfo = getConfiguration().getCatalogInfo(catalogName);
+		CatalogManager catalogManager = new CatalogManager(catInfo);
+		Catalog catalog = catalogManager.loadCatalog();
 		CatalogEntry entry = catalog.getEntryByName(name);
-		String source = shareManager.downloadScript(name);
+		String source = catalogManager.downloadScript(name);
 
 		return doScriptAdd(res, rsp, name, entry.comment, source);
 	}
@@ -323,12 +325,23 @@ public class ScriptlerManagment extends ManagementLink {
 	}
 
 	/**
-	 * Gets the remote catalog containing the available scripts for download.
+	 * Gets the remote catalogs containing the available scripts for download.
 	 * 
 	 * @return the catalog
 	 */
-	public Catalog getCatalog() {
-		return shareManager.loadCatalog();
+	public List<Catalog> getCatalogs() {
+		List<Catalog> catalogs = new ArrayList<Catalog>();
+		List<CatalogInfo> catalogInfos = getConfiguration().getCatalogInfos();
+		for (CatalogInfo catalogInfo : catalogInfos) {
+			CatalogManager mgr = new CatalogManager(catalogInfo);
+			Catalog catalog = mgr.loadCatalog();
+			// as catalogInfo is marked as transient, we have to set it
+			catalog.setInfo(catalogInfo);
+			if (catalog != null) {
+				catalogs.add(catalog);
+			}
+		}
+		return catalogs;
 	}
 
 	/**

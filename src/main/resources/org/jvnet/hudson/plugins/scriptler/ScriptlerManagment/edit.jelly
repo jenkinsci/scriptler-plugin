@@ -28,8 +28,11 @@ THE SOFTWARE.
 	<l:layout>
 		<st:include page="sidepanel.jelly" />
 		<l:main-panel>
-			<h1>${%Edit Script}</h1>
-
+			<h1>
+				<img width="48" height="48" src="${imagesURL}/16x16/document_edit.gif" />
+				<img width="16" height="16" src="${imagesURL}/16x16/empty.gif" />
+				<j:out value="${%title}" />
+			</h1>
 			<f:form method="post" action="scriptAdd">
 				<j:jelly xmlns:j="jelly:core">
 					<f:entry title="${%Name}">
