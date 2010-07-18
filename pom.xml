@@ -19,7 +19,7 @@
 		get every artifact through maven.glassfish.org, which proxies all the
 		artifacts that we need
 	-->
-	<description>Scriptler allows you to store/edit/execute groovy scripts on any of the slaves/nodes... no need for copy paste groovy code anymore. Beside administer  your scripts, Scritpler also provides a way to share scripts between users via hosted script catalogs on the internet.</description>
+	<description>Scriptler allows you to store/edit/execute groovy scripts on any of the slaves/nodes... no need to copy paste groovy code anymore. Beside administer  your scripts, Scritpler also provides a way to share scripts between users via hosted script catalogs on the internet.</description>
 	<url>http://wiki.hudson-ci.org/display/HUDSON/Scriptler</url>
 	<inceptionYear>2010</inceptionYear>
 	<developers>

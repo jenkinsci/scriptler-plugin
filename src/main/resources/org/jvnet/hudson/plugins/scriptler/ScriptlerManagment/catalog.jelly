@@ -55,7 +55,9 @@
 								<td class="pane-header">
 									<j:out value="${%Catalog}" />
 									:
-									<j:out value="${c.info.name}" />
+									<a href="settings">
+										<j:out value="${c.info.name}" />
+									</a>
 								</td>
 							</tr>
 							<tr>
@@ -65,9 +67,7 @@
 									</a>
 								</td>
 							</tr>
-							<tr valign="left">
-								<td class="pane">
-								</td>
+							<tr>
 								<td colspan="4" class="pane">
 									<j:out value="${t.comment}" />
 								</td>
