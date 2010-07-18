@@ -23,6 +23,13 @@
 	<description>Scriptler allows you to store/edit/execute groovy scripts on any of the slaves/nodes... no need for copy paste groovy code anymore. Beside administer  your scripts, Scritpler also provides a way to share scripts between users via hosted script catalogs on the internet.</description>
 	<url>http://wiki.hudson-ci.org/display/HUDSON/Scriptler</url>
 	<inceptionYear>2010</inceptionYear>
+	<developers>
+		<developer>
+			<id>domi</id>
+			<name>domi</name>
+			<email>-</email>
+		</developer>
+	</developers>
 	<repositories>
 		<repository>
 			<id>m.g.o-public</id>
