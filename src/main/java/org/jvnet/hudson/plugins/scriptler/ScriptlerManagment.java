@@ -28,6 +28,7 @@ import hudson.Util;
 import hudson.model.Computer;
 import hudson.model.ComputerSet;
 import hudson.model.Hudson;
+import hudson.model.Hudson.MasterComputer;
 import hudson.model.ManagementLink;
 import hudson.security.Permission;
 import hudson.util.RemotingDiagnostics;
@@ -366,12 +367,16 @@ public class ScriptlerManagment extends ManagementLink {
 			try {
 
 				Computer comp = Hudson.getInstance().getComputer(node);
-				if (comp == null) {
+				if (comp == null && "(master)".equals(node)) {
+					output = RemotingDiagnostics.executeGroovy(scriptTxt, MasterComputer.localChannel);
+				} else if (comp == null) {
 					output = Messages.node_not_found(node);
 				} else {
 					if (comp.getChannel() == null) {
 						output = Messages.node_not_online(node);
-					} else {
+					}
+
+					else {
 						output = RemotingDiagnostics.executeGroovy(scriptTxt, comp.getChannel());
 					}
 				}
