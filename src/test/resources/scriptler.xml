@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<scriptler>
+  <scriptSet class="tree-set">
+    <comparator class="org.jvnet.hudson.plugins.scriptler.util.ByNameSorter"/>
+    <script>
+      <name>changeMvnJVMSettingsInFreestyleJobs.groovy</name>
+      <comment>This script finds all Maven Tasks registered in freestyle jobs and replace JVM Options by a new value.</comment>
+      <available>true</available>
+    </script>
+    <script>
+      <name>displayJobParameters.groovy</name>
+      <comment>This scripts displays the parameters for all the jobs along with their default values (if applicable).</comment>
+      <available>true</available>
+    </script>
+    <script>
+      <name>listFailedJobs.groovy</name>
+      <comment>If you have a lot of job configured on your Hudson installation, you maybe want to have a list of job which last run fails.</comment>
+      <available>true</available>
+    </script>
+    <script>
+      <name>simple.groovy</name>
+      <comment>just a simple echo</comment>
+      <available>true</available>
+    </script>
+  </scriptSet>
+  <catalogInfos>
+    <catalog>
+      <name>default</name>
+      <catalogLocation>http://hudson.fortysix.ch/scriptler/scriptler-catalog.xml</catalogLocation>
+      <scriptDownloadUrl>http://hudson.fortysix.ch/scriptler/{0}</scriptDownloadUrl>
+    </catalog>
+  </catalogInfos>
+</scriptler>
