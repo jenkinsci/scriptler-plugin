@@ -76,11 +76,14 @@ THE SOFTWARE.
 							<td class="pane-header">
 								<j:out value="${t.name}" />
 							</td>
+							<td><j:if test="${!empty(t.originScript)}" >
+									Origin info: <a target="_blank" href="${it.getCatalogInfoByName(t.originCatalog).getReplacedDetailUrl(t.name, t.originScript)}"><j:out value="${t.originScript}" /></a>, import date: <j:out value="${t.originDate}" />
+								</j:if></td>
 						</tr>
 						<tr valign="left">
 							<td class="pane">
 							</td>
-							<td colspan="4" class="pane">
+							<td colspan="5" class="pane">
 								<j:out value="${t.comment}" />
 							</td>
 						</tr>

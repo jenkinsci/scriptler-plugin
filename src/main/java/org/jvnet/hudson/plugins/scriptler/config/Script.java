@@ -30,6 +30,9 @@ public class Script implements Comparable<Script>, NamedResource {
 	public final String name;
 	public final String comment;
 	public final boolean available;
+	public final String originCatalog;
+	public final String originScript;
+	public final String originDate;
 
 	/**
 	 * script is only transient, because it will not be saved in the xml but on
@@ -42,12 +45,37 @@ public class Script implements Comparable<Script>, NamedResource {
 		this.name = name;
 		this.comment = comment;
 		this.available = true;
+		this.originCatalog = null;
+		this.originScript = null;
+		this.originDate = null;
 	}
 
 	public Script(String name, String comment, boolean available) {
 		this.name = name;
 		this.comment = comment;
 		this.available = available;
+		this.originCatalog = null;
+		this.originScript = null;
+		this.originDate = null;
+	}
+
+	/**
+	 * Constructor to create a script imported from a foreign catalog.
+	 * 
+	 * @param name
+	 * @param comment
+	 * @param available
+	 * @param originCatalog
+	 * @param originScript
+	 * @param originDate
+	 */
+	public Script(String name, String comment, boolean available, String originCatalog, String originScript, String originDate) {
+		this.name = name;
+		this.comment = comment;
+		this.available = available;
+		this.originCatalog = originCatalog;
+		this.originScript = originScript;
+		this.originDate = originDate;
 	}
 
 	/*

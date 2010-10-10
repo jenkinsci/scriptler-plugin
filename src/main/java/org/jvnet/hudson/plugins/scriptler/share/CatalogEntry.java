@@ -4,12 +4,14 @@ import org.jvnet.hudson.plugins.scriptler.config.NamedResource;
 
 public class CatalogEntry implements NamedResource {
 
+	public final String id;
 	public final String name;
 	public final String comment;
 	public final String provider;
 	public final String url;
 
-	public CatalogEntry(String name, String comment, String provider, String url) {
+	public CatalogEntry(String id, String name, String comment, String provider, String url) {
+		this.id = id;
 		this.name = name;
 		this.comment = comment;
 		this.provider = provider;

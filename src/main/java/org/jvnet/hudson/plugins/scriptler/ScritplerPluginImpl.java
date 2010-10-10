@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -104,12 +105,23 @@ public class ScritplerPluginImpl extends Plugin {
 		}
 
 		// if there is no catalog defined, we add the default catalog
-		if (cfg.getCatalogInfos() == null) {
+		final List<CatalogInfo> catalogInfos = cfg.getCatalogInfos();
+		if (catalogInfos == null) {
 			cfg.setCatalogInfos(new ArrayList<CatalogInfo>());
 		}
-		if (cfg.getCatalogInfos().size() == 0) {
-			CatalogInfo catInfo = new CatalogInfo("default", DEFAULT_CATALOG, DEFAULT_LOCATION + "/{0}");
-			cfg.getCatalogInfos().add(catInfo);
+		// remove the old catalog, we now rely on scriptlerweb!
+		for (Iterator<CatalogInfo> iterator = catalogInfos.iterator(); iterator.hasNext();) {
+			CatalogInfo catalogInfo = iterator.next();
+			if(catalogInfo.name.equals("default")){
+				iterator.remove();
+			}
+		}
+		if (catalogInfos.size() == 0) {
+//			CatalogInfo defaultCat = new CatalogInfo("default", DEFAULT_CATALOG, DEFAULT_LOCATION + "/{0}", DEFAULT_LOCATION + "/{0}");
+//			catalogInfos.add(defaultCat);
+			CatalogInfo scriptlerWeb = new CatalogInfo("scriptlerweb", "http://scriptlerweb.appspot.com/catalog/xml",
+					"http://scriptlerweb.appspot.com/script/show/{1}", "http://scriptlerweb.appspot.com/script/download/{1}");
+			catalogInfos.add(scriptlerWeb);
 		}
 
 		cfg.save();

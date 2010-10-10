@@ -25,11 +25,11 @@ package org.jvnet.hudson.plugins.scriptler;
 
 import hudson.Extension;
 import hudson.Util;
+import hudson.model.ManagementLink;
 import hudson.model.Computer;
 import hudson.model.ComputerSet;
 import hudson.model.Hudson;
 import hudson.model.Hudson.MasterComputer;
-import hudson.model.ManagementLink;
 import hudson.security.Permission;
 import hudson.util.RemotingDiagnostics;
 
@@ -39,7 +39,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -141,17 +143,18 @@ public class ScriptlerManagment extends ManagementLink {
 	 * @return same forward as from <code>doScriptAdd</code>
 	 * @throws IOException
 	 */
-	public HttpResponse doDownloadScript(StaplerRequest res, StaplerResponse rsp, @QueryParameter("name") String name,
-			@QueryParameter("catalog") String catalogName) throws IOException {
+	public HttpResponse doDownloadScript(StaplerRequest res, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("catalog") String catalogName)
+			throws IOException {
 		checkPermission(Hudson.ADMINISTER);
 
 		CatalogInfo catInfo = getConfiguration().getCatalogInfo(catalogName);
 		CatalogManager catalogManager = new CatalogManager(catInfo);
 		Catalog catalog = catalogManager.loadCatalog();
-		CatalogEntry entry = catalog.getEntryByName(name);
-		String source = catalogManager.downloadScript(name);
+		CatalogEntry entry = catalog.getEntryById(id);
+		String name = entry.name;
+		String source = catalogManager.downloadScript(name, id);
 
-		return doScriptAdd(res, rsp, name, entry.comment, source);
+		return doScriptAdd(res, rsp, name, entry.comment, source, catalogName, id);
 	}
 
 	/**
@@ -167,17 +170,22 @@ public class ScriptlerManagment extends ManagementLink {
 	 *            a comment
 	 * @param script
 	 *            script code
+	 * @param catalogName
+	 *            (optional) the name of the catalog the script is loaded/added
+	 *            from
+	 * @param originId
+	 *            (optional) the original id the script had at the catalog
 	 * @return forward to 'index'
 	 * @throws IOException
 	 */
 	public HttpResponse doScriptAdd(StaplerRequest res, StaplerResponse rsp, @QueryParameter("name") String name, @QueryParameter("comment") String comment,
-			@QueryParameter("script") String script) throws IOException {
+			@QueryParameter("script") String script, String originCatalogName, String originId) throws IOException {
 		checkPermission(Hudson.ADMINISTER);
 
 		if (StringUtils.isEmpty(script) || StringUtils.isEmpty(name)) {
-			throw new IllegalArgumentException("name and script must not be empty");
+			throw new IllegalArgumentException("'name' and 'script' must not be empty!");
 		}
-		name = fixFileName(name);
+		name = fixFileName(originCatalogName, name);
 
 		// save (overwrite) the file/script
 		File newScriptFile = new File(getScriptDirectory(), name);
@@ -185,8 +193,13 @@ public class ScriptlerManagment extends ManagementLink {
 		writer.write(script);
 		writer.close();
 
-		// save (overwrite) the meta information
-		Script newScript = new Script(name, comment);
+		Script newScript = null;
+		if (!StringUtils.isEmpty(originId)) {
+			newScript = new Script(name, comment, true, originCatalogName, originId, new SimpleDateFormat("dd MMM yyyy HH:mm:ss a").format(new Date()));
+		} else {
+			// save (overwrite) the meta information
+			newScript = new Script(name, comment);
+		}
 		ScriptlerConfiguration cfg = getConfiguration();
 		cfg.addOrReplace(newScript);
 		cfg.save();
@@ -243,7 +256,8 @@ public class ScriptlerManagment extends ManagementLink {
 			if (StringUtils.isEmpty(fileName)) {
 				return new HttpRedirect(".");
 			}
-			fileName = fixFileName(fileName);
+			// upload can only be to/from local catalog
+			fileName = fixFileName(null, fileName);
 
 			fileItem.write(new File(rootDir, fileName));
 
@@ -451,6 +465,16 @@ public class ScriptlerManagment extends ManagementLink {
 		return catalogs;
 	}
 
+	public CatalogInfo getCatalogInfoByName(String catalogName) {
+		List<CatalogInfo> catalogInfos = getConfiguration().getCatalogInfos();
+		for (CatalogInfo catalogInfo : catalogInfos) {
+			if (catalogInfo.name.equals(catalogName)) {
+				return catalogInfo;
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * returns the directory where the script files get stored
 	 * 
@@ -468,12 +492,16 @@ public class ScriptlerManagment extends ManagementLink {
 		Hudson.getInstance().checkPermission(permission);
 	}
 
-	private String fixFileName(String name) {
+	private String fixFileName(String catalogName, String name) {
 		if (!name.endsWith(".groovy")) {
+			if (!StringUtils.isEmpty(catalogName)) {
+				name += "." + catalogName;
+			}
 			name += ".groovy";
 		}
 		// make sure we don't have spaces in the filename
 		name = name.replace(" ", "_").trim();
+		LOGGER.fine("set file name to: " + name);
 		return name;
 	}
 }

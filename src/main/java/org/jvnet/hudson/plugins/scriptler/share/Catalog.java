@@ -57,18 +57,13 @@ public final class Catalog {
 		return info;
 	}
 
-	public CatalogEntry getEntryByName(String name) {
+	public CatalogEntry getEntryById(String id) {
 		for (CatalogEntry scr : entrySet) {
-			if (scr.getName().equals(name)) {
+			if (scr.id != null && scr.id.equals(id)) {
 				return scr;
 			}
 		}
 		return null;
-	}
-
-	public void removeCatalogEntry(String name) {
-		CatalogEntry s = getEntryByName(name);
-		entrySet.remove(s);
 	}
 
 	public void addOrReplace(CatalogEntry script) {

@@ -21,7 +21,7 @@ public class ScriptShareManagerTest {
 			catalog.delete();
 		}
 		Assert.assertTrue(catalog + " must be deleted befor test", !catalog.exists());
-		CatalogManager shareManager = new CatalogManager(new CatalogInfo("name", "catLocation", "scriptDownloadUrl"));
+		CatalogManager shareManager = new CatalogManager(new CatalogInfo("name", "catLocation", null, "scriptDownloadUrl"));
 		shareManager.downloadDefaultScriptCatalog(catalog);
 
 		Assert.assertTrue(catalog + " not downloaded", catalog.exists());
@@ -33,8 +33,8 @@ public class ScriptShareManagerTest {
 
 	@Test
 	public void testSaveCatalog() throws Exception {
-		Catalog cat = new Catalog(new CatalogInfo("name", "local", "local/dir"));
-		cat.addOrReplace(new CatalogEntry("name.groovy", "comment", "N/A", null));
+		Catalog cat = new Catalog(new CatalogInfo("name", "local", null, "local/dir"));
+		cat.addOrReplace(new CatalogEntry("id","name.groovy", "comment", "N/A", null));
 		cat.save(File.createTempFile("scriptler-catalog", ".xml"));
 	}
 }

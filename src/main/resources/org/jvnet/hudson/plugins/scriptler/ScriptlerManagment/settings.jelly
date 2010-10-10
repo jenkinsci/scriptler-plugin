@@ -32,8 +32,12 @@
 			</h1>
 
 			<j:out value="${%intro}" />
+			<h4>Directories:</h4>
+			<j:out value="${%scriptlerdirectorytext}" /> <j:out value="${it.scriptlerHomeDirectory}" /><br />
+			<j:out value="${%scriptdirectorytext}" /> <j:out value="${it.scriptDirectory}" />
 
 			<div class="excerpt">
+				<h4>Catalogs:</h4>
 				<table class="pane">
 					<j:forEach var="c" items="${it.configuration.catalogInfos}">
 						<tr valign="center" style="border-top: 0px;">

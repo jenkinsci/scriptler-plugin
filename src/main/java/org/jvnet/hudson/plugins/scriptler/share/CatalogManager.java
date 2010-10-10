@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.MessageFormat;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.jvnet.hudson.plugins.scriptler.ScriptlerManagment;
@@ -47,6 +48,8 @@ import org.jvnet.hudson.plugins.scriptler.ScriptlerManagment;
  */
 public class CatalogManager {
 
+	private final static Logger LOGGER = Logger.getLogger(CatalogManager.class.getName());
+
 	private final CatalogInfo catalogInfo;
 
 	public CatalogManager(CatalogInfo info) {
@@ -54,8 +57,8 @@ public class CatalogManager {
 	}
 
 	/**
-	 * Downloads the catalog from the remote location.
-	 * Package private for ease testing...
+	 * Downloads the catalog from the remote location. Package private for ease
+	 * testing...
 	 * 
 	 * @param catalogFileTarget
 	 *            the file to be retrieved.
@@ -83,11 +86,11 @@ public class CatalogManager {
 	 * @see CatalogInfo#catalogLocation
 	 * @return
 	 */
-	public String downloadScript(String scriptName) {
+	public String downloadScript(String scriptName, String id) {
 		String source = null;
 		try {
-			String fileUrl = MessageFormat.format(catalogInfo.scriptDownloadUrl, scriptName);
-
+			String fileUrl = catalogInfo.getReplacedDownloadUrl(scriptName, id);
+			LOGGER.info("download script from: " + fileUrl);
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			Util.copyStreamAndClose(ProxyConfiguration.open(new URL(fileUrl)).getInputStream(), out);
 			source = out.toString("UTF-8");
@@ -107,7 +110,7 @@ public class CatalogManager {
 	 * @return the catalog - never <code>null</code>, even if download failed.
 	 */
 	public Catalog loadCatalog() {
-		File catFile = new File(ScriptlerManagment.getScriptlerHomeDirectory(), catalogInfo.name + "-catalog.xml");
+		File catFile = new File(ScriptlerManagment.getScriptlerHomeDirectory(), catalogInfo.name.trim() + "-catalog.xml");
 
 		// right now we always download the file - this should be optimized
 		// (maybe only once every hour?)

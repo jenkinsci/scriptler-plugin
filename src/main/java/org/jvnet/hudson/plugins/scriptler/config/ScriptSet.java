@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.lang.StringUtils;
 
 /**
  * @author domi
@@ -54,10 +55,22 @@ public class ScriptSet {
 	public void addOrReplace(Script script) {
 		if (script != null) {
 			if (scriptSet.contains(script)) {
+				Script oldScript = this.getScriptByName(script.name);
+				Script mergedScript = merge(oldScript, script);
 				scriptSet.remove(script);
+				scriptSet.add(mergedScript);
+			} else {
+				scriptSet.add(script);
 			}
-			scriptSet.add(script);
 		}
+	}
+
+	private Script merge(Script origin, Script newScript) {
+		String comment = StringUtils.isEmpty(newScript.comment) ? origin.comment : newScript.comment;
+		String originCatalog = StringUtils.isEmpty(newScript.originCatalog) ? origin.originCatalog : newScript.originCatalog;
+		String originScript = StringUtils.isEmpty(newScript.originScript) ? origin.originScript : newScript.originScript;
+		String originDate = StringUtils.isEmpty(newScript.originDate) ? origin.originDate : newScript.originDate;
+		return new Script(origin.getName(), comment, newScript.available, originCatalog, originScript, originDate);
 	}
 
 	public final Set<Script> getScripts() {
