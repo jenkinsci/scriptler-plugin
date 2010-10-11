@@ -44,6 +44,9 @@ THE SOFTWARE.
 			<j:out value="${it.scriptDirectory}" />
 
 			<div class="excerpt">
+				<j:if test="${it.configuration.scripts.size() == 0}">
+	                <h3><j:out value="${%noScriptsAvailable}" /></h3>
+	            </j:if>
 				<table class="pane">
 					<j:forEach var="t" items="${it.configuration.scripts}">
 						<tr valign="center" style="border-top: 0px;">
