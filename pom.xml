@@ -14,7 +14,7 @@
 	<version>1.5-SNAPSHOT</version>
 	<packaging>hpi</packaging>
 	<description>Scriptler allows you to store/edit/execute groovy scripts on any of the slaves/nodes... no need to copy paste groovy code anymore. Beside administer  your scripts, Scritpler also provides a way to share scripts between users via hosted script catalogs on the internet.</description>
-	<url>http://wiki.hudson-ci.org/display/HUDSON/Scriptler+Plugin</url>
+	<url>http://wiki.jenkins-ci.org/display/JENKINS/Scriptler+Plugin</url>
 	<inceptionYear>2010</inceptionYear>
 	<developers>
 		<developer>
@@ -58,14 +58,14 @@
 		</plugins>
 	</build>
 	<scm>
-		<connection>scm:git:git://github.com/hudson/scriptler-plugin.git</connection>
-		<developerConnection>scm:git:git@github.com:hudson/scriptler-plugin.git</developerConnection>
-		<url>http://github.com/hudson/scriptler-plugin</url>
+		<connection>scm:git:git://github.com/jenkinsci/scriptler-plugin.git</connection>
+		<developerConnection>scm:git:git@github.com:jenkinsci/scriptler-plugin.git</developerConnection>
+		<url>http://github.com/jenkinsci/scriptler-plugin</url>
 	</scm>
 	<distributionManagement>
 		<repository>
 			<id>java.net-m2-repository</id>
-			<url>http://maven.hudson-labs.org:8081/content/repositories/releases/</url>
+			<url>http://maven.jenkins-ci.org:8081/content/repositories/releases/</url>
 		</repository>
 		<snapshotRepository>
 			<!-- prevent accidental deployment of SNAPSHOTS to repository -->
