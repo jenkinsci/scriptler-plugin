@@ -1,1 +1,5 @@
 /target
+/work
+/.settings
+/.classpath
+/.project
