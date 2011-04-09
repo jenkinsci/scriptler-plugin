@@ -23,8 +23,15 @@ THE SOFTWARE.
 -->
 
 
+
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
 	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+	<script src="${it.pluginResourcePath}lib/codemirror.js"></script>
+	<link rel="stylesheet" href="${it.pluginResourcePath}lib/codemirror.css" ></link>
+	<script src="${it.pluginResourcePath}mode/clike/clike.js"></script>
+	<link rel="stylesheet" href="${it.pluginResourcePath}mode/clike/clike.css" ></link>
+	<style>.CodeMirror {border: 2px inset #dee;}</style>
+	
 	<l:layout norefresh="true">
 		<st:include page="sidepanel.jelly" />
 		<l:main-panel>
@@ -51,17 +58,13 @@ THE SOFTWARE.
 					<f:submit value="${%Submit}" />
 				</f:block>
 			</f:form>
-
-			<!--
-				because i don't now how to pass more then the file in a multipart
-				action, we can't overwrite an existing file for now <h1>${%Overwrite
-				Script}</h1> <f:form method="post" action="uploadScript"
-				name="uploadScript" enctype="multipart/form-data"> <f:block> <div
-				style="margin-bottom: 1em;"> ${%uploadtext} </div> </f:block>
-				<f:block> ${%File}: <input type="file" name="name"
-				class="setting-input" style="width:80%" size='40' /> </f:block>
-				<f:block> <f:submit value="${%Upload}" /> </f:block> </f:form>
-			-->
 		</l:main-panel>
 	</l:layout>
+	<script>
+      var editor = CodeMirror.fromTextArea(document.getElementById("script"), {
+        lineNumbers: true,
+        matchBrackets: true,
+        mode: "text/x-groovy"
+      });
+    </script>
 </j:jelly>

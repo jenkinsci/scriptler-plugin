@@ -22,6 +22,11 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
 	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
 	xmlns:p="/lib/hudson/scriptler">
+	<script src="${it.pluginResourcePath}lib/codemirror.js"></script>
+	<link rel="stylesheet" href="${it.pluginResourcePath}lib/codemirror.css" ></link>
+	<script src="${it.pluginResourcePath}mode/clike/clike.js"></script>
+	<link rel="stylesheet" href="${it.pluginResourcePath}mode/clike/clike.css" ></link>
+	<style>.CodeMirror {border: 2px inset #dee;}</style>
 
 	<l:layout norefresh="true">
 		<st:include page="sidepanel.jelly" />
@@ -93,4 +98,11 @@
 			</j:if>
 		</l:main-panel>
 	</l:layout>
+	<script>
+      var editor = CodeMirror.fromTextArea(document.getElementById("script"), {
+        lineNumbers: true,
+        matchBrackets: true,
+        mode: "text/x-groovy"
+      });
+    </script>
 </j:jelly>

@@ -35,6 +35,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jvnet.hudson.plugins.scriptler.ScriptlerManagment;
 import org.jvnet.hudson.plugins.scriptler.share.CatalogInfo;
@@ -46,7 +48,11 @@ import com.thoughtworks.xstream.XStream;
  */
 public final class ScriptlerConfiguration extends ScriptSet implements Saveable {
 
+	private final static Logger LOGGER = Logger.getLogger(ScriptlerConfiguration.class.getName());
+
 	private List<CatalogInfo> catalogInfos = new ArrayList<CatalogInfo>();
+
+	private boolean disbableRemoteCatalog = false;
 
 	public ScriptlerConfiguration(SortedSet<Script> scripts) {
 		if (scripts != null) {
@@ -104,12 +110,34 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
 		}
 	}
 
+	// always retrieve via getter
+	private static transient ScriptlerConfiguration cfg = null;
+
+	public static ScriptlerConfiguration getConfiguration() {
+		if (cfg == null) {
+			try {
+				cfg = ScriptlerConfiguration.load();
+			} catch (IOException e) {
+				LOGGER.log(Level.SEVERE, "Failed to load scriptler configuration", e);
+			}
+		}
+		return cfg;
+	}
+
 	private static final XStream XSTREAM = new XStream2();
 
 	static {
 		XSTREAM.alias("scriptler", ScriptlerConfiguration.class);
 		XSTREAM.alias("script", Script.class);
 		XSTREAM.alias("catalog", CatalogInfo.class);
+	}
+
+	public boolean isDisbableRemoteCatalog() {
+		return disbableRemoteCatalog;
+	}
+
+	public void setDisbableRemoteCatalog(boolean disbableRemoteCatalog) {
+		this.disbableRemoteCatalog = disbableRemoteCatalog;
 	}
 
 }

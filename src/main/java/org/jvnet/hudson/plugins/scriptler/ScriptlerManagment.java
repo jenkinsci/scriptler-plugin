@@ -24,26 +24,21 @@
 package org.jvnet.hudson.plugins.scriptler;
 
 import hudson.Extension;
+import hudson.PluginWrapper;
 import hudson.Util;
 import hudson.model.ManagementLink;
-import hudson.model.Computer;
 import hudson.model.ComputerSet;
 import hudson.model.Hudson;
-import hudson.model.Hudson.MasterComputer;
 import hudson.security.Permission;
-import hudson.util.RemotingDiagnostics;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Reader;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -51,7 +46,6 @@ import javax.servlet.ServletException;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jvnet.hudson.plugins.scriptler.config.Script;
 import org.jvnet.hudson.plugins.scriptler.config.ScriptlerConfiguration;
@@ -59,6 +53,7 @@ import org.jvnet.hudson.plugins.scriptler.share.Catalog;
 import org.jvnet.hudson.plugins.scriptler.share.CatalogEntry;
 import org.jvnet.hudson.plugins.scriptler.share.CatalogInfo;
 import org.jvnet.hudson.plugins.scriptler.share.CatalogManager;
+import org.jvnet.hudson.plugins.scriptler.util.ScriptHelper;
 import org.kohsuke.stapler.HttpRedirect;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.QueryParameter;
@@ -76,9 +71,6 @@ import org.kohsuke.stapler.StaplerResponse;
 public class ScriptlerManagment extends ManagementLink {
 
 	private final static Logger LOGGER = Logger.getLogger(ScriptlerManagment.class.getName());
-
-	// always retrieve via getter
-	private ScriptlerConfiguration cfg = null;
 
 	/*
 	 * (non-Javadoc)
@@ -100,6 +92,10 @@ public class ScriptlerManagment extends ManagementLink {
 		return "scriptler";
 	}
 
+	public boolean disableRemoteCatalog() {
+		return getConfiguration().isDisbableRemoteCatalog();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -119,14 +115,23 @@ public class ScriptlerManagment extends ManagementLink {
 	}
 
 	public ScriptlerConfiguration getConfiguration() {
-		if (cfg == null) {
-			try {
-				cfg = ScriptlerConfiguration.load();
-			} catch (IOException e) {
-				LOGGER.log(Level.SEVERE, "Failed to load scriptler configuration", e);
-			}
-		}
-		return cfg;
+		return ScriptlerConfiguration.getConfiguration();
+	}
+
+	public String getPluginResourcePath() {
+		PluginWrapper wrapper = Hudson.getInstance().getPluginManager().getPlugin(ScritplerPluginImpl.class);
+		return Hudson.getInstance().getRootUrl() + "plugin/" + wrapper.getShortName() + "/";
+	}
+
+	public HttpResponse doScriptlerSettings(StaplerRequest res, StaplerResponse rsp,
+			@QueryParameter("disableRemoteCatalog") boolean disableRemoteCatalog) throws IOException {
+		checkPermission(Hudson.ADMINISTER);
+
+		ScriptlerConfiguration cfg = getConfiguration();
+		cfg.setDisbableRemoteCatalog(disableRemoteCatalog);
+		cfg.save();
+
+		return new HttpRedirect("settings");
 	}
 
 	/**
@@ -143,11 +148,16 @@ public class ScriptlerManagment extends ManagementLink {
 	 * @return same forward as from <code>doScriptAdd</code>
 	 * @throws IOException
 	 */
-	public HttpResponse doDownloadScript(StaplerRequest res, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("catalog") String catalogName)
-			throws IOException {
+	public HttpResponse doDownloadScript(StaplerRequest res, StaplerResponse rsp, @QueryParameter("id") String id,
+			@QueryParameter("catalog") String catalogName) throws IOException {
 		checkPermission(Hudson.ADMINISTER);
 
-		CatalogInfo catInfo = getConfiguration().getCatalogInfo(catalogName);
+		ScriptlerConfiguration c = getConfiguration();
+		if (c.isDisbableRemoteCatalog()) {
+			return new HttpRedirect("index");
+		}
+
+		CatalogInfo catInfo = c.getCatalogInfo(catalogName);
 		CatalogManager catalogManager = new CatalogManager(catInfo);
 		Catalog catalog = catalogManager.loadCatalog();
 		CatalogEntry entry = catalog.getEntryById(id);
@@ -178,8 +188,9 @@ public class ScriptlerManagment extends ManagementLink {
 	 * @return forward to 'index'
 	 * @throws IOException
 	 */
-	public HttpResponse doScriptAdd(StaplerRequest res, StaplerResponse rsp, @QueryParameter("name") String name, @QueryParameter("comment") String comment,
-			@QueryParameter("script") String script, String originCatalogName, String originId) throws IOException {
+	public HttpResponse doScriptAdd(StaplerRequest res, StaplerResponse rsp, @QueryParameter("name") String name,
+			@QueryParameter("comment") String comment, @QueryParameter("script") String script, String originCatalogName, String originId)
+			throws IOException {
 		checkPermission(Hudson.ADMINISTER);
 
 		if (StringUtils.isEmpty(script) || StringUtils.isEmpty(name)) {
@@ -195,7 +206,8 @@ public class ScriptlerManagment extends ManagementLink {
 
 		Script newScript = null;
 		if (!StringUtils.isEmpty(originId)) {
-			newScript = new Script(name, comment, true, originCatalogName, originId, new SimpleDateFormat("dd MMM yyyy HH:mm:ss a").format(new Date()));
+			newScript = new Script(name, comment, true, originCatalogName, originId,
+					new SimpleDateFormat("dd MMM yyyy HH:mm:ss a").format(new Date()));
 		} else {
 			// save (overwrite) the meta information
 			newScript = new Script(name, comment);
@@ -261,7 +273,7 @@ public class ScriptlerManagment extends ManagementLink {
 
 			fileItem.write(new File(rootDir, fileName));
 
-			Script script = getScript(fileName, false);
+			Script script = ScriptHelper.getScript(fileName, false);
 			if (script == null) {
 				script = new Script(fileName, "uploaded");
 			}
@@ -275,30 +287,6 @@ public class ScriptlerManagment extends ManagementLink {
 		} catch (Exception e) {
 			throw new ServletException(e);
 		}
-	}
-
-	/**
-	 * Loads the script information.
-	 * 
-	 * @param scriptName
-	 *            the name of the script
-	 * @param withSrc
-	 *            should the script sources be loaded too?
-	 * @return the script
-	 */
-	protected Script getScript(String scriptName, boolean withSrc) {
-		Script s = getConfiguration().getScriptByName(scriptName);
-		File scriptSrc = new File(getScriptDirectory(), scriptName);
-		if (withSrc) {
-			try {
-				Reader reader = new FileReader(scriptSrc);
-				String src = IOUtils.toString(reader);
-				s.setScript(src);
-			} catch (IOException e) {
-				LOGGER.log(Level.SEVERE, "not able to load sources for script [" + scriptName + "]", e);
-			}
-		}
-		return s;
 	}
 
 	/**
@@ -318,7 +306,7 @@ public class ScriptlerManagment extends ManagementLink {
 	public void doRunScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("name") String scriptName) throws IOException, ServletException {
 		checkPermission(Hudson.ADMINISTER);
 
-		Script script = getScript(scriptName, true);
+		Script script = ScriptHelper.getScript(scriptName, true);
 		req.setAttribute("script", script);
 		// set default selection
 		req.setAttribute("currentNode", "(master)");
@@ -352,55 +340,14 @@ public class ScriptlerManagment extends ManagementLink {
 
 		// set the script info back to the request, to display it together with
 		// the output.
-		Script tempScript = getScript(scriptName, false);
+		Script tempScript = ScriptHelper.getScript(scriptName, false);
 		tempScript.setScript(script);
 		req.setAttribute("script", tempScript);
 		req.setAttribute("currentNode", node);
 
-		String output = doScript(node, script);
+		String output = ScriptHelper.doScript(node, script);
 		req.setAttribute("output", output);
 		req.getView(this, "runscript.jelly").forward(req, rsp);
-	}
-
-	/**
-	 * Runs the execution on a given slave.
-	 * 
-	 * @param node
-	 *            where to run the script.
-	 * @param scriptTxt
-	 *            the script (groovy) to be executed.
-	 * @return the output
-	 * @throws IOException
-	 * @throws ServletException
-	 */
-	private String doScript(String node, String scriptTxt) throws IOException, ServletException {
-
-		String output = "[no output]";
-		if (node != null && scriptTxt != null) {
-
-			try {
-
-				Computer comp = Hudson.getInstance().getComputer(node);
-				if (comp == null && "(master)".equals(node)) {
-					output = RemotingDiagnostics.executeGroovy(scriptTxt, MasterComputer.localChannel);
-				} else if (comp == null) {
-					output = Messages.node_not_found(node);
-				} else {
-					if (comp.getChannel() == null) {
-						output = Messages.node_not_online(node);
-					}
-
-					else {
-						output = RemotingDiagnostics.executeGroovy(scriptTxt, comp.getChannel());
-					}
-				}
-
-			} catch (InterruptedException e) {
-				throw new ServletException(e);
-			}
-		}
-		return output;
-
 	}
 
 	/**
@@ -418,7 +365,7 @@ public class ScriptlerManagment extends ManagementLink {
 	public void doEditScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("name") String scriptName) throws IOException, ServletException {
 		checkPermission(Hudson.ADMINISTER);
 
-		Script script = getScript(scriptName, true);
+		Script script = ScriptHelper.getScript(scriptName, true);
 		req.setAttribute("script", script);
 		req.getView(this, "edit.jelly").forward(req, rsp);
 	}

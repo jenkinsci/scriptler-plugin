@@ -112,13 +112,15 @@ public class ScritplerPluginImpl extends Plugin {
 		// remove the old catalog, we now rely on scriptlerweb!
 		for (Iterator<CatalogInfo> iterator = catalogInfos.iterator(); iterator.hasNext();) {
 			CatalogInfo catalogInfo = iterator.next();
-			if(catalogInfo.name.equals("default")){
+			if (catalogInfo.name.equals("default")) {
 				iterator.remove();
 			}
 		}
 		if (catalogInfos.size() == 0) {
-//			CatalogInfo defaultCat = new CatalogInfo("default", DEFAULT_CATALOG, DEFAULT_LOCATION + "/{0}", DEFAULT_LOCATION + "/{0}");
-//			catalogInfos.add(defaultCat);
+			// CatalogInfo defaultCat = new CatalogInfo("default",
+			// DEFAULT_CATALOG, DEFAULT_LOCATION + "/{0}", DEFAULT_LOCATION +
+			// "/{0}");
+			// catalogInfos.add(defaultCat);
 			CatalogInfo scriptlerWeb = new CatalogInfo("scriptlerweb", "http://scriptlerweb.appspot.com/catalog/xml",
 					"http://scriptlerweb.appspot.com/script/show/{1}", "http://scriptlerweb.appspot.com/script/download/{1}");
 			catalogInfos.add(scriptlerWeb);
@@ -130,16 +132,15 @@ public class ScritplerPluginImpl extends Plugin {
 	/**
 	 * search into the declared backup directory for backup archives
 	 */
-	@SuppressWarnings("unchecked")
 	public List<File> getAvailableScripts() throws IOException {
 		File scriptDirectory = ScriptlerManagment.getScriptDirectory();
 		LOGGER.log(Level.FINE, "Listing files of {0}", scriptDirectory.getAbsoluteFile());
 
 		File[] scriptFiles = scriptDirectory.listFiles();
 
-		List fileList;
+		List<File> fileList;
 		if (scriptFiles == null) {
-			fileList = new ArrayList();
+			fileList = new ArrayList<File>();
 		} else {
 			fileList = Arrays.asList(scriptFiles);
 		}

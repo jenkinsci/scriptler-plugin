@@ -35,34 +35,52 @@
 			<h4>Directories:</h4>
 			<j:out value="${%scriptlerdirectorytext}" /> <j:out value="${it.scriptlerHomeDirectory}" /><br />
 			<j:out value="${%scriptdirectorytext}" /> <j:out value="${it.scriptDirectory}" />
-
-			<div class="excerpt">
-				<h4>Catalogs:</h4>
-				<table class="pane">
-					<j:forEach var="c" items="${it.configuration.catalogInfos}">
-						<tr valign="center" style="border-top: 0px;">
-							<td class="pane-header" colspan="2">
-								<j:out value="${c.name}" />
-							</td>
-						</tr>
-						<tr>
-							<td class="pane">
-								<j:out value="${%Catalog file}" />
-								:
-								<a href="${c.catalogLocation}">
-									<j:out value="${c.catalogLocation}" />
-								</a>
-							</td>
-							<td class="pane">
-								<j:out value="${%Download url}" />
-								:
-								<j:out value="${c.scriptDownloadUrl}" />
-							</td>
-
-						</tr>
-					</j:forEach>
-				</table>
-			</div>
+			<p />
+			<f:form method="post" action="scriptlerSettings">
+				<j:jelly xmlns:j="jelly:core">
+					<f:entry title="${%Disable remote catalog}">
+						<f:checkbox name="disableRemoteCatalog" checked="${it.disableRemoteCatalog()}" />
+					</f:entry>
+				</j:jelly>
+				<f:block>
+					<f:submit value="${%Submit}" />
+				</f:block>
+			</f:form>
+			
+			<j:if test="${it.disableRemoteCatalog()}">
+			  <br />
+              <b>${%disabledtext}</b>
+            </j:if>
+			
+			<j:if test="${!it.disableRemoteCatalog()}">
+				<div class="excerpt">
+					<h4>Catalogs:</h4>
+					<table class="pane">
+						<j:forEach var="c" items="${it.configuration.catalogInfos}">
+							<tr valign="center" style="border-top: 0px;">
+								<td class="pane-header" colspan="2">
+									<j:out value="${c.name}" />
+								</td>
+							</tr>
+							<tr>
+								<td class="pane">
+									<j:out value="${%Catalog file}" />
+									:
+									<a href="${c.catalogLocation}">
+										<j:out value="${c.catalogLocation}" />
+									</a>
+								</td>
+								<td class="pane">
+									<j:out value="${%Download url}" />
+									:
+									<j:out value="${c.scriptDownloadUrl}" />
+								</td>
+	
+							</tr>
+						</j:forEach>
+					</table>
+				</div>
+			</j:if>
 
 		</l:main-panel>
 	</l:layout>
