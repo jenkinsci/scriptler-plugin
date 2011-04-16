@@ -60,8 +60,8 @@
 	<scm>
 		<connection>scm:git:git://github.com/jenkinsci/scriptler-plugin.git</connection>
 <!--		<developerConnection>scm:git:https://github.com/jenkinsci/scriptler-plugin.git</developerConnection>-->
-<!--		<developerConnection>scm:git:ssh://git@github.com/jenkinsci/scriptler-plugin.git</developerConnection>-->
-		<developerConnection>scm:git:git@github.com:jenkinsci/scriptler-plugin.git</developerConnection>
+		<developerConnection>scm:git:ssh://git@github.com/jenkinsci/scriptler-plugin.git</developerConnection>
+<!--		<developerConnection>scm:git:git@github.com:jenkinsci/scriptler-plugin.git</developerConnection>-->
 		<url>https://github.com/jenkinsci/criptler-plugin</url>
 	</scm>
 	<distributionManagement>
