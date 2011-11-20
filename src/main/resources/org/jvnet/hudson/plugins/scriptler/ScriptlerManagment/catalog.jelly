@@ -68,7 +68,7 @@
 								</td>
 							</tr>
 							<tr>
-								<td colspan="4" class="pane">
+								<td colspan="4" style="white-space: normal;">
 									<j:out value="${t.comment}" />
 								</td>
 							</tr>
