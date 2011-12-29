@@ -345,7 +345,29 @@ public class ScriptlerManagment extends ManagementLink {
 		req.setAttribute("script", tempScript);
 		req.setAttribute("currentNode", node);
 
-		String output = ScriptHelper.doScript(node, script);
+		String output = null;
+		if(node.equalsIgnoreCase("all"))
+		{
+			
+			List<String> slaves = this.getSlaveNames();
+			slaves.add(("master"));
+			for (int x = 0; x < slaves.size(); x++)
+			{ 
+				output = ScriptHelper.doScript(slaves.get(x), script);
+			}
+		}
+		if(node.equalsIgnoreCase("all slaves"))
+		{
+			List<String> slaves = this.getSlaveNames();
+			for (int x = 0; x < slaves.size(); x++)
+			{ 
+				output = ScriptHelper.doScript(slaves.get(x), script);
+			}
+		}
+		else
+		{
+			output = ScriptHelper.doScript(node, script);
+		}
 		req.setAttribute("output", output);
 		req.getView(this, "runscript.jelly").forward(req, rsp);
 	}
@@ -388,6 +410,18 @@ public class ScriptlerManagment extends ManagementLink {
 		// add 'magic' name for master, so all nodes can be handled the same way
 		if (!test.contains("(master)")) {
 			test.add("(master)");
+		}
+
+		if(slaveNames.size() > 0)
+		{
+			if (!test.contains("all"))
+			{
+				test.add("all");
+			}
+			if (!test.contains("all slaves"))
+			{
+				test.add("all slaves");
+			}
 		}
 		return test;
 	}
