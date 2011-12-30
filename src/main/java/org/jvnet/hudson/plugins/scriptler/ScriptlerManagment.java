@@ -147,6 +147,7 @@ public class ScriptlerManagment extends ManagementLink {
 	 *            the catalog to download the file from
 	 * @return same forward as from <code>doScriptAdd</code>
 	 * @throws IOException
+     *           Throw an IOException if we can not download the script.
 	 */
 	public HttpResponse doDownloadScript(StaplerRequest res, StaplerResponse rsp, @QueryParameter("id") String id,
 			@QueryParameter("catalog") String catalogName) throws IOException {
@@ -335,9 +336,13 @@ public class ScriptlerManagment extends ManagementLink {
 	 * @throws ServletException
 	 */
 	public void doTriggerScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("scriptName") String scriptName,
-			@QueryParameter("script") String script, @QueryParameter("node") String node) throws IOException, ServletException {
+			@QueryParameter("script") String script, @QueryParameter("node") String node) throws IOException, ServletException 
+    {
 		checkPermission(Hudson.ADMINISTER);
 
+        
+
+        
 		// set the script info back to the request, to display it together with
 		// the output.
 		Script tempScript = ScriptHelper.getScript(scriptName, false);
@@ -345,27 +350,27 @@ public class ScriptlerManagment extends ManagementLink {
 		req.setAttribute("script", tempScript);
 		req.setAttribute("currentNode", node);
 
+        //System.getProperties().list(System.out);
+        
 		String output = null;
-		if(node.equalsIgnoreCase("all"))
+        System.out.println("here is the node -> " + node);
+		if(node.equalsIgnoreCase("all") || node.equalsIgnoreCase("all slaves"))
 		{
-			
+            System.out.println("in the all if statement");
 			List<String> slaves = this.getSlaveNames();
-			slaves.add(("master"));
+            if(node.equalsIgnoreCase("all"))
+            {
+			    slaves.add("(master)");
+            }
 			for (int x = 0; x < slaves.size(); x++)
 			{ 
-				output = ScriptHelper.doScript(slaves.get(x), script);
-			}
-		}
-		if(node.equalsIgnoreCase("all slaves"))
-		{
-			List<String> slaves = this.getSlaveNames();
-			for (int x = 0; x < slaves.size(); x++)
-			{ 
+                System.out.println("about to execute on " + slaves.get(x));
 				output = ScriptHelper.doScript(slaves.get(x), script);
 			}
 		}
 		else
 		{
+            System.out.println("now in the else");
 			output = ScriptHelper.doScript(node, script);
 		}
 		req.setAttribute("output", output);
@@ -439,7 +444,7 @@ public class ScriptlerManagment extends ManagementLink {
 			Catalog catalog = mgr.loadCatalog();
 			// as catalogInfo is marked as transient, we have to set it
 			catalog.setInfo(catalogInfo);
-			if (catalog != null) {
+			if (!catalog.getEntries().isEmpty()) {
 				catalogs.add(catalog);
 			}
 		}

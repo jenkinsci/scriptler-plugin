@@ -63,20 +63,26 @@ public class ScriptHelper {
 
 		String output = "[no output]";
 		if (node != null && scriptTxt != null) {
-
+                System.out.println("now in doScript");
 			try {
 
 				Computer comp = Hudson.getInstance().getComputer(node);
-				if (comp == null && "(master)".equals(node)) {
+				if (comp == null && "(master)".equals(node))
+                {
 					output = RemotingDiagnostics.executeGroovy(scriptTxt, MasterComputer.localChannel);
-				} else if (comp == null) {
+				}
+                else if (comp == null)
+                {
 					output = Messages.node_not_found(node);
-				} else {
-					if (comp.getChannel() == null) {
+				}
+                else
+                {
+					if (comp.getChannel() == null)
+                    {
 						output = Messages.node_not_online(node);
 					}
-
-					else {
+					else
+                    {
 						output = RemotingDiagnostics.executeGroovy(scriptTxt, comp.getChannel());
 					}
 				}
