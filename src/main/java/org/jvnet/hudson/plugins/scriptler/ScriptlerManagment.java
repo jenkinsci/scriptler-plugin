@@ -141,7 +141,7 @@ public class ScriptlerManagment extends ManagementLink {
 	 *            request
 	 * @param rsp
 	 *            response
-	 * @param name
+	 * @param id
 	 *            the name of the file to be downloaded
 	 * @param catalogName
 	 *            the catalog to download the file from
@@ -180,7 +180,7 @@ public class ScriptlerManagment extends ManagementLink {
 	 *            a comment
 	 * @param script
 	 *            script code
-	 * @param catalogName
+	 * @param originCatalogName
 	 *            (optional) the name of the catalog the script is loaded/added
 	 *            from
 	 * @param originId
