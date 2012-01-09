@@ -70,11 +70,21 @@ public class ScriptSet {
 		String originCatalog = StringUtils.isEmpty(newScript.originCatalog) ? origin.originCatalog : newScript.originCatalog;
 		String originScript = StringUtils.isEmpty(newScript.originScript) ? origin.originScript : newScript.originScript;
 		String originDate = StringUtils.isEmpty(newScript.originDate) ? origin.originDate : newScript.originDate;
-		return new Script(origin.getName(), comment, newScript.available, originCatalog, originScript, originDate);
+		return new Script(origin.getName(), comment, newScript.available, originCatalog, originScript, originDate,newScript.nonAdministerUsing);
 	}
 
 	public final Set<Script> getScripts() {
 		return Collections.unmodifiableSet(scriptSet);
+	}
+        
+        public final Set<Script> getUserScripts() {
+                Set<Script> userScripts = new TreeSet<Script>();
+                for(Script script: scriptSet){
+                    if(script.nonAdministerUsing){
+                        userScripts.add(script);
+                    }
+                }
+		return userScripts;
 	}
 
 	public void setScripts(Set<Script> scripts) {
@@ -82,3 +92,4 @@ public class ScriptSet {
 	}
 
 }
+
