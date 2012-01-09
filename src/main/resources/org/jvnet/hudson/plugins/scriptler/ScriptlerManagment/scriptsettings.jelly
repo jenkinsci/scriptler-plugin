@@ -49,6 +49,9 @@
 				<f:entry title="${%Comment}">
 					<f:textbox name="comment" />
 				</f:entry>
+                                <f:entry title="${%Permission}">
+					<f:checkbox name="nonAdministerUsing" />
+				</f:entry>
 				<f:entry title="${%Script}">
 					<textarea id="script" name="script" style="width:100%; height:20em">
 					</textarea>
@@ -64,6 +67,10 @@
               </div>
 			<f:form method="post" action="uploadScript" name="uploadScript"
 				enctype="multipart/form-data">
+                                    
+                                <f:entry title="${%Permission}">
+					<f:checkbox name="nonAdministerUsing" />
+				</f:entry>
 				<f:block>
 					<f:entry title="${File}">
 						<!-- @size is for other browsers, @style is for IE -->

@@ -48,6 +48,9 @@ THE SOFTWARE.
 					<f:entry title="${%Comment}">
 						<f:textbox name="comment" value="${script.comment}" />
 					</f:entry>
+                                        <f:entry title="${%Permission}">
+						<f:checkbox name="nonAdministerUsing" checked="${script.nonAdministerUsing}" />
+					</f:entry>
 					<f:entry title="${%Script}">
 						<textarea id="script" name="script" style="width:100%; height:20em">
 							<j:out value="${script.script}" />

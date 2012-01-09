@@ -25,7 +25,7 @@ THE SOFTWARE.
 
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
 	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-	<l:layout permission="${app.ADMINISTER}" norefresh="true">
+	<l:layout permission="${app.READ}" norefresh="true">
 		<!--
 			<st:include it="${it.primaryView}" page="sidepanel.jelly"
 			xmlns:st="jelly:stapler" />
@@ -48,7 +48,15 @@ THE SOFTWARE.
 	                <h3><j:out value="${%noScriptsAvailable}" /></h3>
 	            </j:if>
 				<table class="pane">
-					<j:forEach var="t" items="${it.configuration.scripts}">
+                                    <j:choose>
+                                        <j:when test="${app.ADMINISTER==null or h.hasPermission(it,app.ADMINISTER)}">
+                                            <j:set var="items" value = "${it.configuration.scripts}"/>
+                                        </j:when>
+                                        <j:otherwise>
+                                            <j:set var="items" value = "${it.configuration.UserScripts}"/>
+                                        </j:otherwise>
+                                    </j:choose>
+					<j:forEach var="t" items="${items}">
 						<tr valign="center" style="border-top: 0px;">
 							<td class="pane" width="70">
 								<j:choose>
@@ -61,15 +69,17 @@ THE SOFTWARE.
 									</j:otherwise>
 								</j:choose>
 								<j:out value=" " />
-								<a href="editScript?name=${t.name}">
+                                                                <j:if test="${app.ADMINISTER==null or h.hasPermission(it,app.ADMINISTER)}">
+                                                                    <a href="editScript?name=${t.name}">
 									<img width="16" height="16" title="${%edit script} ${t.name}"
 										src="${imagesURL }/16x16/document_edit.gif" />
-								</a>
-								<j:out value=" " />
-								<a href="removeScript?name=${t.name}">
+                                                                    </a>
+                                                                    <j:out value=" " />
+                                                                    <a href="removeScript?name=${t.name}">
 									<img width="16" height="16" title="${%remove script} ${t.name}"
 										src="${imagesURL}/16x16/edit-delete.gif" />
-								</a>
+                                                                    </a>
+                                                                </j:if>
 								<j:out value=" " />
 								<a href="runScript?name=${t.name}">
 									<img width="16" height="16" title="${%run script} ${t.name}"
