@@ -29,6 +29,7 @@ import hudson.Util;
 import hudson.model.ManagementLink;
 import hudson.model.ComputerSet;
 import hudson.model.Hudson;
+import hudson.model.RootAction;
 import hudson.security.Permission;
 
 import java.io.File;
@@ -68,7 +69,7 @@ import org.kohsuke.stapler.StaplerResponse;
  * 
  */
 @Extension
-public class ScriptlerManagment extends ManagementLink {
+public class ScriptlerManagment extends ManagementLink implements RootAction{
 
 	private final static Logger LOGGER = Logger.getLogger(ScriptlerManagment.class.getName());
 
@@ -164,7 +165,7 @@ public class ScriptlerManagment extends ManagementLink {
 		String name = entry.name;
 		String source = catalogManager.downloadScript(name, id);
 
-		return doScriptAdd(res, rsp, name, entry.comment, source, catalogName, id);
+		return doScriptAdd(res, rsp, name, entry.comment, source, false, catalogName, id);
 	}
 
 	/**
@@ -189,7 +190,7 @@ public class ScriptlerManagment extends ManagementLink {
 	 * @throws IOException
 	 */
 	public HttpResponse doScriptAdd(StaplerRequest res, StaplerResponse rsp, @QueryParameter("name") String name,
-			@QueryParameter("comment") String comment, @QueryParameter("script") String script, String originCatalogName, String originId)
+			@QueryParameter("comment") String comment, @QueryParameter("script") String script, @QueryParameter("nonAdministerUsing") boolean nonAdministerUsing, String originCatalogName, String originId)
 			throws IOException {
 		checkPermission(Hudson.ADMINISTER);
 
@@ -210,7 +211,7 @@ public class ScriptlerManagment extends ManagementLink {
 					new SimpleDateFormat("dd MMM yyyy HH:mm:ss a").format(new Date()));
 		} else {
 			// save (overwrite) the meta information
-			newScript = new Script(name, comment);
+			newScript = new Script(name, comment, nonAdministerUsing);
 		}
 		ScriptlerConfiguration cfg = getConfiguration();
 		cfg.addOrReplace(newScript);
@@ -260,10 +261,9 @@ public class ScriptlerManagment extends ManagementLink {
 		checkPermission(Hudson.ADMINISTER);
 		try {
 			File rootDir = getScriptDirectory();
-
-			ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
-
-			FileItem fileItem = (FileItem) upload.parseRequest(req).get(0);
+                        
+			FileItem fileItem = req.getFileItem("file");                      
+                        boolean nonAdministerUsing = req.getSubmittedForm().getBoolean("nonAdministerUsing");
 			String fileName = Util.getFileName(fileItem.getName());
 			if (StringUtils.isEmpty(fileName)) {
 				return new HttpRedirect(".");
@@ -277,7 +277,7 @@ public class ScriptlerManagment extends ManagementLink {
 			if (script == null) {
 				script = new Script(fileName, "uploaded");
 			}
-
+                        script.setNonAdministerUsing(nonAdministerUsing);
 			ScriptlerConfiguration config = getConfiguration();
 			config.addOrReplace(script);
 
@@ -304,9 +304,11 @@ public class ScriptlerManagment extends ManagementLink {
 	 * @throws ServletException
 	 */
 	public void doRunScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("name") String scriptName) throws IOException, ServletException {
-		checkPermission(Hudson.ADMINISTER);
-
 		Script script = ScriptHelper.getScript(scriptName, true);
+                if(!script.nonAdministerUsing){
+                  checkPermission(Hudson.ADMINISTER);  
+                }
+
 		req.setAttribute("script", script);
 		// set default selection
 		req.setAttribute("currentNode", "(master)");
@@ -336,11 +338,13 @@ public class ScriptlerManagment extends ManagementLink {
 	 */
 	public void doTriggerScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("scriptName") String scriptName,
 			@QueryParameter("script") String script, @QueryParameter("node") String node) throws IOException, ServletException {
-		checkPermission(Hudson.ADMINISTER);
 
 		// set the script info back to the request, to display it together with
 		// the output.
 		Script tempScript = ScriptHelper.getScript(scriptName, false);
+                if(!tempScript.nonAdministerUsing){
+                  checkPermission(Hudson.ADMINISTER);  
+                }
 		tempScript.setScript(script);
 		req.setAttribute("script", tempScript);
 		req.setAttribute("currentNode", node);

@@ -39,24 +39,38 @@ public class Script implements Comparable<Script>, NamedResource {
 	 * the file system. Therefore it has to be materialized before usage!
 	 */
 	public transient String script;
+        //for user with overall permission read
+        public boolean nonAdministerUsing;
 
 	@DataBoundConstructor
-	public Script(String name, String comment) {
+	public Script(String name, String comment, boolean nonAdministerUsing) {
 		this.name = name;
 		this.comment = comment;
 		this.available = true;
 		this.originCatalog = null;
 		this.originScript = null;
 		this.originDate = null;
+                this.nonAdministerUsing=nonAdministerUsing;
+	}
+        
+        public Script(String name, String comment) {
+		this.name = name;
+		this.comment = comment;
+		this.available = true;
+		this.originCatalog = null;
+		this.originScript = null;
+		this.originDate = null;
+                this.nonAdministerUsing=false;
 	}
 
-	public Script(String name, String comment, boolean available) {
+	public Script(String name, String comment, boolean available,boolean nonAdministerUsing) {
 		this.name = name;
 		this.comment = comment;
 		this.available = available;
 		this.originCatalog = null;
 		this.originScript = null;
 		this.originDate = null;
+                this.nonAdministerUsing=nonAdministerUsing;
 	}
 
 	/**
@@ -76,6 +90,19 @@ public class Script implements Comparable<Script>, NamedResource {
 		this.originCatalog = originCatalog;
 		this.originScript = originScript;
 		this.originDate = originDate;
+                this.nonAdministerUsing=false;
+                
+	}
+        
+        public Script(String name, String comment, boolean available, String originCatalog, String originScript, String originDate, boolean nonAdministerUsing) {
+		this.name = name;
+		this.comment = comment;
+		this.available = available;
+		this.originCatalog = originCatalog;
+		this.originScript = originScript;
+		this.originDate = originDate;
+                this.nonAdministerUsing=nonAdministerUsing;
+                
 	}
 
 	/*
@@ -89,6 +116,10 @@ public class Script implements Comparable<Script>, NamedResource {
 
 	public void setScript(String script) {
 		this.script = script;
+	}
+        
+        public void setNonAdministerUsing(boolean nonAdministerUsing) {
+		this.nonAdministerUsing = nonAdministerUsing;
 	}
 
 	/*

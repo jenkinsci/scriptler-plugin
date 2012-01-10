@@ -29,13 +29,13 @@ THE SOFTWARE.
   <l:header />
   <l:side-panel>
     <l:tasks>
-      <l:task icon="images/24x24/setting.png" href="${rootURL}/manage" title="${%Manage Hudson}" />
+      <l:task icon="images/24x24/setting.png" href="${rootURL}/manage" title="${%Manage Jenkins}" permission="${app.ADMINISTER}" />
       <l:task icon="images/24x24/next.png" href="${rootURL}/scriptler" title="${%Run/Edit Scripts}" />
-      <l:task icon="images/24x24/new-package.png" href="scriptsettings" title="${%Add a new Script}" />
+      <l:task icon="images/24x24/new-package.png" href="scriptsettings" title="${%Add a new Script}" permission="${app.ADMINISTER}" />
       <j:if test="${!it.disableRemoteCatalog()}">
-      		<l:task icon="images/24x24/folder.png" href="catalog" title="${%Remote Script catalogs}" />
+      		<l:task icon="images/24x24/folder.png" href="catalog" title="${%Remote Script catalogs}" permission="${app.ADMINISTER}" />
       </j:if>
-      <l:task icon="images/24x24/setting.png" href="settings" title="${%Scriptler settings}" />
+      <l:task icon="images/24x24/setting.png" href="settings" title="${%Scriptler settings}" permission="${app.ADMINISTER}" />
     </l:tasks>
     <t:executors computers="${h.singletonList(it)}" />
   </l:side-panel>
