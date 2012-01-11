@@ -48,96 +48,115 @@ import com.thoughtworks.xstream.XStream;
  */
 public final class ScriptlerConfiguration extends ScriptSet implements Saveable {
 
-	private final static Logger LOGGER = Logger.getLogger(ScriptlerConfiguration.class.getName());
+    private final static Logger LOGGER = Logger.getLogger(ScriptlerConfiguration.class.getName());
 
-	private List<CatalogInfo> catalogInfos = new ArrayList<CatalogInfo>();
+    private List<CatalogInfo> catalogInfos = new ArrayList<CatalogInfo>();
 
-	private boolean disbableRemoteCatalog = false;
+    private boolean disbableRemoteCatalog = false;
 
-	public ScriptlerConfiguration(SortedSet<Script> scripts) {
-		if (scripts != null) {
-			this.scriptSet = scripts;
-		}
-	}
+    private boolean allowRunScriptPermission = false;
 
-	public List<CatalogInfo> getCatalogInfos() {
-		return catalogInfos;
-	}
+    private boolean allowRunScriptEdit = false;
 
-	public void setCatalogInfos(List<CatalogInfo> catalogInfos) {
-		this.catalogInfos = catalogInfos;
-	}
+    public ScriptlerConfiguration(SortedSet<Script> scripts) {
+        if (scripts != null) {
+            this.scriptSet = scripts;
+        }
+    }
 
-	/**
-	 * Gets the catalog info by its name.
-	 * 
-	 * @param name
-	 *            the name of the catalog to search for
-	 * @return <code>null</code> if no info with the given name can be found.
-	 */
-	public CatalogInfo getCatalogInfo(String name) {
-		for (CatalogInfo catInfo : getCatalogInfos()) {
-			if (catInfo.name.equals(name)) {
-				return catInfo;
-			}
-		}
-		return null;
-	}
+    public List<CatalogInfo> getCatalogInfos() {
+        return catalogInfos;
+    }
 
-	public synchronized void save() throws IOException {
-		if (BulkChange.contains(this))
-			return;
-		getXmlFile().write(this);
-		SaveableListener.fireOnChange(this, getXmlFile());
-	}
+    public void setCatalogInfos(List<CatalogInfo> catalogInfos) {
+        this.catalogInfos = catalogInfos;
+    }
 
-	public static XmlFile getXmlFile() {
-		return new XmlFile(XSTREAM, new File(ScriptlerManagment.getScriptlerHomeDirectory(), "scriptler.xml"));
-	}
+    /**
+     * Gets the catalog info by its name.
+     * 
+     * @param name
+     *            the name of the catalog to search for
+     * @return <code>null</code> if no info with the given name can be found.
+     */
+    public CatalogInfo getCatalogInfo(String name) {
+        for (CatalogInfo catInfo : getCatalogInfos()) {
+            if (catInfo.name.equals(name)) {
+                return catInfo;
+            }
+        }
+        return null;
+    }
 
-	public static ScriptlerConfiguration load() throws IOException {
-		XmlFile f = getXmlFile();
-		if (f.exists()) {
-			// As it might be that we have an unsorted set, we ensure the
-			// sorting at load time.
-			ScriptlerConfiguration sc = (ScriptlerConfiguration) f.read();
-			SortedSet<Script> sorted = new TreeSet<Script>(new ByNameSorter());
-			sorted.addAll(sc.getScripts());
-			sc.setScripts(sorted);
-			return sc;
-		} else {
-			return null;
-		}
-	}
+    public synchronized void save() throws IOException {
+        if (BulkChange.contains(this))
+            return;
+        getXmlFile().write(this);
+        SaveableListener.fireOnChange(this, getXmlFile());
+    }
 
-	// always retrieve via getter
-	private static transient ScriptlerConfiguration cfg = null;
+    public static XmlFile getXmlFile() {
+        return new XmlFile(XSTREAM, new File(ScriptlerManagment.getScriptlerHomeDirectory(), "scriptler.xml"));
+    }
 
-	public static ScriptlerConfiguration getConfiguration() {
-		if (cfg == null) {
-			try {
-				cfg = ScriptlerConfiguration.load();
-			} catch (IOException e) {
-				LOGGER.log(Level.SEVERE, "Failed to load scriptler configuration", e);
-			}
-		}
-		return cfg;
-	}
+    public static ScriptlerConfiguration load() throws IOException {
+        XmlFile f = getXmlFile();
+        if (f.exists()) {
+            // As it might be that we have an unsorted set, we ensure the
+            // sorting at load time.
+            ScriptlerConfiguration sc = (ScriptlerConfiguration) f.read();
+            SortedSet<Script> sorted = new TreeSet<Script>(new ByNameSorter());
+            sorted.addAll(sc.getScripts());
+            sc.setScripts(sorted);
+            return sc;
+        } else {
+            return null;
+        }
+    }
 
-	private static final XStream XSTREAM = new XStream2();
+    // always retrieve via getter
+    private static transient ScriptlerConfiguration cfg = null;
 
-	static {
-		XSTREAM.alias("scriptler", ScriptlerConfiguration.class);
-		XSTREAM.alias("script", Script.class);
-		XSTREAM.alias("catalog", CatalogInfo.class);
-	}
+    public static ScriptlerConfiguration getConfiguration() {
+        if (cfg == null) {
+            try {
+                cfg = ScriptlerConfiguration.load();
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, "Failed to load scriptler configuration", e);
+            }
+        }
+        return cfg;
+    }
 
-	public boolean isDisbableRemoteCatalog() {
-		return disbableRemoteCatalog;
-	}
+    private static final XStream XSTREAM = new XStream2();
 
-	public void setDisbableRemoteCatalog(boolean disbableRemoteCatalog) {
-		this.disbableRemoteCatalog = disbableRemoteCatalog;
-	}
+    static {
+        XSTREAM.alias("scriptler", ScriptlerConfiguration.class);
+        XSTREAM.alias("script", Script.class);
+        XSTREAM.alias("catalog", CatalogInfo.class);
+    }
 
+    public boolean isDisbableRemoteCatalog() {
+        return disbableRemoteCatalog;
+    }
+
+    public void setDisbableRemoteCatalog(boolean disbableRemoteCatalog) {
+        this.disbableRemoteCatalog = disbableRemoteCatalog;
+    }
+
+    public void setAllowRunScriptEdit(boolean allowRunScriptEdit) {
+        this.allowRunScriptEdit = allowRunScriptEdit;
+    }
+
+    public void setAllowRunScriptPermission(boolean allowRunScriptPermission) {
+        this.allowRunScriptPermission = allowRunScriptPermission;
+    }
+
+    public boolean isAllowRunScriptEdit() {
+        return allowRunScriptEdit;
+    }
+
+    public boolean isAllowRunScriptPermission() {
+        return allowRunScriptPermission;
+    }
 }

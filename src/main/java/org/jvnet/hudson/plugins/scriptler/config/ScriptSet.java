@@ -35,61 +35,60 @@ import org.apache.commons.lang.StringUtils;
  */
 public class ScriptSet {
 
-	// have it sorted
-	protected Set<Script> scriptSet = new TreeSet<Script>();
+    // have it sorted
+    protected Set<Script> scriptSet = new TreeSet<Script>();
 
-	public Script getScriptByName(String name) {
-		for (Script scr : scriptSet) {
-			if (scr.name.equals(name)) {
-				return scr;
-			}
-		}
-		return null;
-	}
+    public Script getScriptByName(String name) {
+        for (Script scr : scriptSet) {
+            if (scr.name.equals(name)) {
+                return scr;
+            }
+        }
+        return null;
+    }
 
-	public void removeScript(String name) {
-		Script s = getScriptByName(name);
-		scriptSet.remove(s);
-	}
+    public void removeScript(String name) {
+        Script s = getScriptByName(name);
+        scriptSet.remove(s);
+    }
 
-	public void addOrReplace(Script script) {
-		if (script != null) {
-			if (scriptSet.contains(script)) {
-				Script oldScript = this.getScriptByName(script.name);
-				Script mergedScript = merge(oldScript, script);
-				scriptSet.remove(script);
-				scriptSet.add(mergedScript);
-			} else {
-				scriptSet.add(script);
-			}
-		}
-	}
+    public void addOrReplace(Script script) {
+        if (script != null) {
+            if (scriptSet.contains(script)) {
+                Script oldScript = this.getScriptByName(script.name);
+                Script mergedScript = merge(oldScript, script);
+                scriptSet.remove(script);
+                scriptSet.add(mergedScript);
+            } else {
+                scriptSet.add(script);
+            }
+        }
+    }
 
-	private Script merge(Script origin, Script newScript) {
-		String comment = StringUtils.isEmpty(newScript.comment) ? origin.comment : newScript.comment;
-		String originCatalog = StringUtils.isEmpty(newScript.originCatalog) ? origin.originCatalog : newScript.originCatalog;
-		String originScript = StringUtils.isEmpty(newScript.originScript) ? origin.originScript : newScript.originScript;
-		String originDate = StringUtils.isEmpty(newScript.originDate) ? origin.originDate : newScript.originDate;
-		return new Script(origin.getName(), comment, newScript.available, originCatalog, originScript, originDate,newScript.nonAdministerUsing);
-	}
+    private Script merge(Script origin, Script newScript) {
+        String comment = StringUtils.isEmpty(newScript.comment) ? origin.comment : newScript.comment;
+        String originCatalog = StringUtils.isEmpty(newScript.originCatalog) ? origin.originCatalog : newScript.originCatalog;
+        String originScript = StringUtils.isEmpty(newScript.originScript) ? origin.originScript : newScript.originScript;
+        String originDate = StringUtils.isEmpty(newScript.originDate) ? origin.originDate : newScript.originDate;
+        return new Script(origin.getName(), comment, newScript.available, originCatalog, originScript, originDate, newScript.nonAdministerUsing);
+    }
 
-	public final Set<Script> getScripts() {
-		return Collections.unmodifiableSet(scriptSet);
-	}
-        
-        public final Set<Script> getUserScripts() {
-                Set<Script> userScripts = new TreeSet<Script>();
-                for(Script script: scriptSet){
-                    if(script.nonAdministerUsing){
-                        userScripts.add(script);
-                    }
-                }
-		return userScripts;
-	}
+    public final Set<Script> getScripts() {
+        return Collections.unmodifiableSet(scriptSet);
+    }
 
-	public void setScripts(Set<Script> scripts) {
-		this.scriptSet = scripts;
-	}
+    public final Set<Script> getUserScripts() {
+        Set<Script> userScripts = new TreeSet<Script>();
+        for (Script script : scriptSet) {
+            if (script.nonAdministerUsing) {
+                userScripts.add(script);
+            }
+        }
+        return userScripts;
+    }
+
+    public void setScripts(Set<Script> scripts) {
+        this.scriptSet = scripts;
+    }
 
 }
-

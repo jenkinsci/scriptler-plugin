@@ -38,9 +38,15 @@
 			<p />
 			<f:form method="post" action="scriptlerSettings">
 				<j:jelly xmlns:j="jelly:core">
-					<f:entry title="${%Disable remote catalog}">
+					<f:entry title="${%Disable remote catalog}" help="/plugin/scriptler/help-disableRemoterCatalog.html">
 						<f:checkbox name="disableRemoteCatalog" checked="${it.disableRemoteCatalog()}" />
 					</f:entry>
+                    <f:entry title="${%Allow RunScript permission}" help="/plugin/scriptler/help-allowRunScriptPermission.html">
+                        <f:checkbox name="allowRunScriptPermission" checked="${it.allowRunScriptPermission()}" />
+                    </f:entry>
+                    <f:entry title="${%Allow RunScript editing}" help="/plugin/scriptler/help-allowRunScriptEdit.html">
+                        <f:checkbox name="allowRunScriptEdit" checked="${it.allowRunScriptEdit()}" />
+                    </f:entry>
 				</j:jelly>
 				<f:block>
 					<f:submit value="${%Submit}" />

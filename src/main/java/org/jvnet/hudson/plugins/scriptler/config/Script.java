@@ -27,148 +27,148 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 public class Script implements Comparable<Script>, NamedResource {
 
-	public final String name;
-	public final String comment;
-	public final boolean available;
-	public final String originCatalog;
-	public final String originScript;
-	public final String originDate;
+    public final String name;
+    public final String comment;
+    public final boolean available;
+    public final String originCatalog;
+    public final String originScript;
+    public final String originDate;
 
-	/**
-	 * script is only transient, because it will not be saved in the xml but on
-	 * the file system. Therefore it has to be materialized before usage!
-	 */
-	public transient String script;
-        //for user with overall permission read
-        public boolean nonAdministerUsing;
+    /**
+     * script is only transient, because it will not be saved in the xml but on the file system. Therefore it has to be materialized before usage!
+     */
+    public transient String script;
 
-	@DataBoundConstructor
-	public Script(String name, String comment, boolean nonAdministerUsing) {
-		this.name = name;
-		this.comment = comment;
-		this.available = true;
-		this.originCatalog = null;
-		this.originScript = null;
-		this.originDate = null;
-                this.nonAdministerUsing=nonAdministerUsing;
-	}
-        
-        public Script(String name, String comment) {
-		this.name = name;
-		this.comment = comment;
-		this.available = true;
-		this.originCatalog = null;
-		this.originScript = null;
-		this.originDate = null;
-                this.nonAdministerUsing=false;
-	}
+    // for user with RUN_SCRIPT permission
+    public boolean nonAdministerUsing;
 
-	public Script(String name, String comment, boolean available,boolean nonAdministerUsing) {
-		this.name = name;
-		this.comment = comment;
-		this.available = available;
-		this.originCatalog = null;
-		this.originScript = null;
-		this.originDate = null;
-                this.nonAdministerUsing=nonAdministerUsing;
-	}
+    @DataBoundConstructor
+    public Script(String name, String comment, boolean nonAdministerUsing) {
+        this.name = name;
+        this.comment = comment;
+        this.available = true;
+        this.originCatalog = null;
+        this.originScript = null;
+        this.originDate = null;
+        this.nonAdministerUsing = nonAdministerUsing;
+    }
 
-	/**
-	 * Constructor to create a script imported from a foreign catalog.
-	 * 
-	 * @param name
-	 * @param comment
-	 * @param available
-	 * @param originCatalog
-	 * @param originScript
-	 * @param originDate
-	 */
-	public Script(String name, String comment, boolean available, String originCatalog, String originScript, String originDate) {
-		this.name = name;
-		this.comment = comment;
-		this.available = available;
-		this.originCatalog = originCatalog;
-		this.originScript = originScript;
-		this.originDate = originDate;
-                this.nonAdministerUsing=false;
-                
-	}
-        
-        public Script(String name, String comment, boolean available, String originCatalog, String originScript, String originDate, boolean nonAdministerUsing) {
-		this.name = name;
-		this.comment = comment;
-		this.available = available;
-		this.originCatalog = originCatalog;
-		this.originScript = originScript;
-		this.originDate = originDate;
-                this.nonAdministerUsing=nonAdministerUsing;
-                
-	}
+    public Script(String name, String comment) {
+        this.name = name;
+        this.comment = comment;
+        this.available = true;
+        this.originCatalog = null;
+        this.originScript = null;
+        this.originDate = null;
+        this.nonAdministerUsing = false;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.jvnet.hudson.plugins.scriptler.config.NamedResource#getName()
-	 */
-	public String getName() {
-		return name;
-	}
+    public Script(String name, String comment, boolean available, boolean nonAdministerUsing) {
+        this.name = name;
+        this.comment = comment;
+        this.available = available;
+        this.originCatalog = null;
+        this.originScript = null;
+        this.originDate = null;
+        this.nonAdministerUsing = nonAdministerUsing;
+    }
 
-	public void setScript(String script) {
-		this.script = script;
-	}
-        
-        public void setNonAdministerUsing(boolean nonAdministerUsing) {
-		this.nonAdministerUsing = nonAdministerUsing;
-	}
+    /**
+     * Constructor to create a script imported from a foreign catalog.
+     * 
+     * @param name
+     * @param comment
+     * @param available
+     * @param originCatalog
+     * @param originScript
+     * @param originDate
+     */
+    public Script(String name, String comment, boolean available, String originCatalog, String originScript, String originDate) {
+        this.name = name;
+        this.comment = comment;
+        this.available = available;
+        this.originCatalog = originCatalog;
+        this.originScript = originScript;
+        this.originDate = originDate;
+        this.nonAdministerUsing = false;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
-	 */
-	public int compareTo(Script o) {
-		return name.compareTo(o.name);
-	}
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		return result;
-	}
+    public Script(String name, String comment, boolean available, String originCatalog, String originScript, String originDate, boolean nonAdministerUsing) {
+        this.name = name;
+        this.comment = comment;
+        this.available = available;
+        this.originCatalog = originCatalog;
+        this.originScript = originScript;
+        this.originDate = originDate;
+        this.nonAdministerUsing = nonAdministerUsing;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (!(obj instanceof Script)) {
-			return false;
-		}
-		Script other = (Script) obj;
-		if (name == null) {
-			if (other.name != null) {
-				return false;
-			}
-		} else if (!name.equals(other.name)) {
-			return false;
-		}
-		return true;
-	}
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.jvnet.hudson.plugins.scriptler.config.NamedResource#getName()
+     */
+    public String getName() {
+        return name;
+    }
+
+    public void setScript(String script) {
+        this.script = script;
+    }
+
+    public void setNonAdministerUsing(boolean nonAdministerUsing) {
+        this.nonAdministerUsing = nonAdministerUsing;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Comparable#compareTo(java.lang.Object)
+     */
+    public int compareTo(Script o) {
+        return name.compareTo(o.name);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof Script)) {
+            return false;
+        }
+        Script other = (Script) obj;
+        if (name == null) {
+            if (other.name != null) {
+                return false;
+            }
+        } else if (!name.equals(other.name)) {
+            return false;
+        }
+        return true;
+    }
 
 }
