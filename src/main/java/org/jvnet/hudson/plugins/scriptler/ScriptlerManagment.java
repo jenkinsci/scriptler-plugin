@@ -24,8 +24,8 @@
 package org.jvnet.hudson.plugins.scriptler;
 
 import hudson.Extension;
-import hudson.PluginWrapper;
 import hudson.Util;
+import hudson.PluginWrapper;
 import hudson.model.ManagementLink;
 import hudson.model.RootAction;
 import hudson.model.ComputerSet;
@@ -72,6 +72,14 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
 
     private final static Logger LOGGER = Logger.getLogger(ScriptlerManagment.class.getName());
 
+    private boolean isRunScriptPermissionEnabled() {
+        return getConfiguration().isAllowRunScriptPermission();
+    }
+
+    private Permission getRequiredPermissionForRunScript() {
+        return isRunScriptPermissionEnabled() ? Jenkins.RUN_SCRIPTS : Jenkins.ADMINISTER;
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -79,7 +87,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      */
     @Override
     public String getIconFileName() {
-        return Jenkins.getInstance().hasPermission(Jenkins.RUN_SCRIPTS) ? "notepad.gif" : null;
+        return Jenkins.getInstance().hasPermission(getRequiredPermissionForRunScript()) ? "notepad.gif" : null;
     }
 
     /*
@@ -89,7 +97,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      */
     @Override
     public String getUrlName() {
-        return Jenkins.getInstance().hasPermission(Jenkins.RUN_SCRIPTS) ? "scriptler" : null;
+        return Jenkins.getInstance().hasPermission(getRequiredPermissionForRunScript()) ? "scriptler" : null;
     }
 
     public boolean disableRemoteCatalog() {
@@ -310,13 +318,13 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      */
     public void doRunScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("name") String scriptName) throws IOException, ServletException {
         Script script = ScriptHelper.getScript(scriptName, true);
-        if (script.nonAdministerUsing) {
-            checkPermission(Jenkins.RUN_SCRIPTS);
-        } else {
-            checkPermission(Jenkins.ADMINISTER);
-        }
+        checkPermission(getRequiredPermissionForRunScript());
+
+        final boolean isAdmin = Jenkins.getInstance().getACL().hasPermission(Jenkins.ADMINISTER);
+        final boolean isChangeScriptAllowed = isAdmin || allowRunScriptEdit();
 
         req.setAttribute("script", script);
+        req.setAttribute("readOnly", !isChangeScriptAllowed);
         // set default selection
         req.setAttribute("currentNode", "(master)");
         req.getView(this, "runscript.jelly").forward(req, rsp);
@@ -343,10 +351,13 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
     public void doTriggerScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("scriptName") String scriptName,
             @QueryParameter("script") String script, @QueryParameter("node") String node) throws IOException, ServletException {
 
+        checkPermission(getRequiredPermissionForRunScript());
+
         Script tempScript = null;
         final boolean isAdmin = Jenkins.getInstance().getACL().hasPermission(Jenkins.ADMINISTER);
-        if (!isAdmin || !allowRunScriptEdit()) {
-            checkPermission(Jenkins.RUN_SCRIPTS);
+        final boolean isChangeScriptAllowed = isAdmin || allowRunScriptEdit();
+
+        if (!isChangeScriptAllowed) {
             tempScript = ScriptHelper.getScript(scriptName, true);
             req.setAttribute("script", tempScript);
             // use original script, user has no permission to change it!s

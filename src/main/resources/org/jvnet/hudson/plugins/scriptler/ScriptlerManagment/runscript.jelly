@@ -103,7 +103,7 @@
         lineNumbers: true,
         matchBrackets: true,
         mode: "text/x-groovy",
-        readOnly: true
+        readOnly: ${readOnly}
       });
     </script>
 </j:jelly>
