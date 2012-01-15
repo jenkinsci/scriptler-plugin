@@ -40,7 +40,7 @@
 					</j:choose>
 					<j:forEach var="t" items="${items}">
 						<tr valign="center" style="border-top: 0px;">
-							<td class="pane" width="70">
+							<td class="pane" width="86">
 								<j:choose>
 									<j:when test="${t.available == false}">
 										<img width="16" height="16" title="${%fileNotAvailable}" src="${imagesURL}/16x16/red.gif" />
@@ -63,6 +63,10 @@
 								<a href="runScript?name=${t.name}">
 									<img width="16" height="16" title="${%run script} ${t.name}" src="${imagesURL}/16x16/terminal.gif" />
 								</a>
+                                <j:if test="${t.nonAdministerUsing}">
+                                   <j:out value=" " />
+                                   <img width="16" height="16" title="${%freeForRunSciptPermission}" src="${imagesURL}/16x16/user.png" />
+                                </j:if>								
 							</td>
 							<td class="pane-header">
 								<j:out value="${t.name}" />
