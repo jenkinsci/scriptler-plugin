@@ -67,9 +67,10 @@ public class ScriptHelper {
 			try {
 
 				Computer comp = Hudson.getInstance().getComputer(node);
-				if (comp == null && "(master)".equals(node))
+				if ((comp == null && "(master)".equals(node)) || node.equals("(all)") || node.equals("(all slaves)"))
                 {
 					output = RemotingDiagnostics.executeGroovy(scriptTxt, MasterComputer.localChannel);
+                    System.out.println("Either the comp is null and the master equals " + node.toString() +" or the node equals all");
 				}
                 else if (comp == null)
                 {
@@ -80,10 +81,12 @@ public class ScriptHelper {
 					if (comp.getChannel() == null)
                     {
 						output = Messages.node_not_online(node);
+                        System.out.println("About to return the output from the if - " + output.toString());
 					}
 					else
                     {
 						output = RemotingDiagnostics.executeGroovy(scriptTxt, comp.getChannel());
+                        System.out.println("About to return the output from the else - " + output.toString());
 					}
 				}
 

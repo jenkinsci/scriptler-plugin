@@ -71,7 +71,9 @@ import org.kohsuke.stapler.StaplerResponse;
 public class ScriptlerManagment extends ManagementLink {
 
 	private final static Logger LOGGER = Logger.getLogger(ScriptlerManagment.class.getName());
-
+    private final static String master = "(master)";
+    private final static String all = "(all)";
+    private final static String allslaves = "(all slaves)";
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -310,7 +312,7 @@ public class ScriptlerManagment extends ManagementLink {
 		Script script = ScriptHelper.getScript(scriptName, true);
 		req.setAttribute("script", script);
 		// set default selection
-		req.setAttribute("currentNode", "(master)");
+		req.setAttribute("currentNode", master);
 		req.getView(this, "runscript.jelly").forward(req, rsp);
 	}
 
@@ -354,13 +356,13 @@ public class ScriptlerManagment extends ManagementLink {
         
 		String output = null;
         System.out.println("here is the node -> " + node);
-		if(node.equalsIgnoreCase("all") || node.equalsIgnoreCase("all slaves"))
+		if(node.equalsIgnoreCase(all) || node.equalsIgnoreCase(allslaves))
 		{
             System.out.println("in the all if statement");
 			List<String> slaves = this.getSlaveNames();
-            if(node.equalsIgnoreCase("all"))
+            if(node.equalsIgnoreCase(all))
             {
-			    slaves.add("(master)");
+			    slaves.add(master);
             }
 			for (int x = 0; x < slaves.size(); x++)
 			{ 
@@ -413,19 +415,19 @@ public class ScriptlerManagment extends ManagementLink {
 		test.addAll(slaveNames);
 
 		// add 'magic' name for master, so all nodes can be handled the same way
-		if (!test.contains("(master)")) {
-			test.add("(master)");
+		if (!test.contains(master)) {
+			test.add(master);
 		}
 
 		if(slaveNames.size() > 0)
 		{
-			if (!test.contains("all"))
+			if (!test.contains(all))
 			{
-				test.add("all");
+				test.add(all);
 			}
-			if (!test.contains("all slaves"))
+			if (!test.contains(allslaves))
 			{
-				test.add("all slaves");
+				test.add(allslaves);
 			}
 		}
 		return test;
