@@ -63,7 +63,6 @@ public class ScriptHelper {
 
 		String output = "[no output]";
 		if (node != null && scriptTxt != null) {
-                System.out.println("now in doScript");
 			try {
 
 				Computer comp = Hudson.getInstance().getComputer(node);
@@ -71,6 +70,7 @@ public class ScriptHelper {
                 {
 					output = RemotingDiagnostics.executeGroovy(scriptTxt, MasterComputer.localChannel);
                     System.out.println("Either the comp is null and the master equals " + node.toString() +" or the node equals all");
+
 				}
                 else if (comp == null)
                 {

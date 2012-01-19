@@ -355,6 +355,7 @@ public class ScriptlerManagment extends ManagementLink {
         //System.getProperties().list(System.out);
         
 		String output = null;
+        System.out.println("------------------------------------------------");
         System.out.println("here is the node -> " + node);
 		if(node.equalsIgnoreCase(all) || node.equalsIgnoreCase(allslaves))
 		{
@@ -362,8 +363,20 @@ public class ScriptlerManagment extends ManagementLink {
 			List<String> slaves = this.getSlaveNames();
             if(node.equalsIgnoreCase(all))
             {
-			    slaves.add(master);
+                if(!slaves.contains(master))
+                {
+			        slaves.add(master);
+                }
             }
+            if(node.equalsIgnoreCase(allslaves))
+            {
+                //take the master node out of the loop if we said all slaves
+                slaves.remove(master);
+            }
+            for(int asdf = 0; asdf < slaves.size(); asdf++)
+            {
+                System.out.println(slaves.get(asdf));
+            }            
 			for (int x = 0; x < slaves.size(); x++)
 			{ 
                 System.out.println("about to execute on " + slaves.get(x));
@@ -377,6 +390,7 @@ public class ScriptlerManagment extends ManagementLink {
 		}
 		req.setAttribute("output", output);
 		req.getView(this, "runscript.jelly").forward(req, rsp);
+        System.out.println("------------------------------------------------");
 	}
 
 	/**
