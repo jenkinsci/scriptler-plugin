@@ -38,7 +38,6 @@ import java.util.logging.Logger;
 
 import org.jenkinsci.plugins.scriptler.config.Script;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
-import org.jvnet.hudson.plugins.scriptler.Messages;
 
 /**
  * @author domi

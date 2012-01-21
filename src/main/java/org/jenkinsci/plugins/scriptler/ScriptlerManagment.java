@@ -54,7 +54,6 @@ import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfoCatalog;
 import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
-import org.jvnet.hudson.plugins.scriptler.Messages;
 import org.kohsuke.stapler.HttpRedirect;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.QueryParameter;
