@@ -1,6 +1,6 @@
 package org.jenkinsci.plugins.scriptler.share;
 
-import org.jvnet.hudson.plugins.scriptler.config.NamedResource;
+import org.jenkinsci.plugins.scriptler.config.NamedResource;
 
 public class ScriptInfo implements NamedResource {
     public String script;

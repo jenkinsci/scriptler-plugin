@@ -1,10 +1,11 @@
-package org.jvnet.hudson.plugins.scriptler.share;
+package org.jenkinsci.plugins.scriptler.share.scriptlerweb;
 
 import java.io.File;
 
+import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
+import org.jenkinsci.plugins.scriptler.share.scriptlerweb.ScritplerWebCatalog.CatalogContent;
 import org.junit.Assert;
 import org.junit.Test;
-import org.jvnet.hudson.plugins.scriptler.share.ScritplerWebCatalog.CatalogContent;
 
 public class ScriptShareManagerTest {
 

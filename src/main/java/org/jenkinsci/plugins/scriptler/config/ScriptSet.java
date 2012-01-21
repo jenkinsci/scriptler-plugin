@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jvnet.hudson.plugins.scriptler.config;
+package org.jenkinsci.plugins.scriptler.config;
 
 import java.util.Collections;
 import java.util.Set;

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jvnet.hudson.plugins.scriptler;
+package org.jenkinsci.plugins.scriptler;
 
 import hudson.Plugin;
 
@@ -36,8 +36,9 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.jvnet.hudson.plugins.scriptler.config.Script;
-import org.jvnet.hudson.plugins.scriptler.config.ScriptlerConfiguration;
+import org.jenkinsci.plugins.scriptler.config.Script;
+import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
+import org.jvnet.hudson.plugins.scriptler.Messages;
 
 /**
  * @author domi

@@ -7,7 +7,6 @@ import java.util.List;
 import jenkins.model.Jenkins;
 
 import org.apache.tools.ant.ExtensionPoint;
-import org.jvnet.hudson.plugins.scriptler.share.CatalogInfo;
 
 public abstract class ScriptInfoCatalog<T extends ScriptInfo> extends ExtensionPoint {
 

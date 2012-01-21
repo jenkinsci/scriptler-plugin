@@ -13,9 +13,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfoCatalog;
-import org.jvnet.hudson.plugins.scriptler.share.CatalogInfo;
 
 /**
  * Provides access to the scriptler scripts shared at https://github.com/jenkinsci/jenkins-scripts

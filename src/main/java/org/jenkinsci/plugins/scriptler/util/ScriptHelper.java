@@ -1,4 +1,4 @@
-package org.jvnet.hudson.plugins.scriptler.util;
+package org.jenkinsci.plugins.scriptler.util;
 
 import hudson.model.Computer;
 import hudson.model.Hudson;
@@ -15,10 +15,10 @@ import java.util.logging.Logger;
 import javax.servlet.ServletException;
 
 import org.apache.commons.io.IOUtils;
+import org.jenkinsci.plugins.scriptler.ScriptlerManagment;
+import org.jenkinsci.plugins.scriptler.config.Script;
+import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
 import org.jvnet.hudson.plugins.scriptler.Messages;
-import org.jvnet.hudson.plugins.scriptler.ScriptlerManagment;
-import org.jvnet.hudson.plugins.scriptler.config.Script;
-import org.jvnet.hudson.plugins.scriptler.config.ScriptlerConfiguration;
 
 public class ScriptHelper {
 

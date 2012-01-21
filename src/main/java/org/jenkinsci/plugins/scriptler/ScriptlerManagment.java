@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jvnet.hudson.plugins.scriptler;
+package org.jenkinsci.plugins.scriptler;
 
 import hudson.Extension;
 import hudson.Util;
@@ -48,12 +48,13 @@ import jenkins.model.Jenkins;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.scriptler.config.Script;
+import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
+import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfoCatalog;
-import org.jvnet.hudson.plugins.scriptler.config.Script;
-import org.jvnet.hudson.plugins.scriptler.config.ScriptlerConfiguration;
-import org.jvnet.hudson.plugins.scriptler.share.CatalogInfo;
-import org.jvnet.hudson.plugins.scriptler.util.ScriptHelper;
+import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
+import org.jvnet.hudson.plugins.scriptler.Messages;
 import org.kohsuke.stapler.HttpRedirect;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.QueryParameter;

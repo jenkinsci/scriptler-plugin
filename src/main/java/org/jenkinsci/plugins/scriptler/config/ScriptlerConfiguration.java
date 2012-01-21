@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jvnet.hudson.plugins.scriptler.config;
+package org.jenkinsci.plugins.scriptler.config;
 
 import hudson.BulkChange;
 import hudson.XmlFile;
@@ -38,10 +38,10 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.jenkinsci.plugins.scriptler.ScriptlerManagment;
+import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfoCatalog;
-import org.jvnet.hudson.plugins.scriptler.ScriptlerManagment;
-import org.jvnet.hudson.plugins.scriptler.share.CatalogInfo;
-import org.jvnet.hudson.plugins.scriptler.util.ByNameSorter;
+import org.jenkinsci.plugins.scriptler.util.ByNameSorter;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -137,6 +137,7 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
         XSTREAM.alias("scriptler", ScriptlerConfiguration.class);
         XSTREAM.alias("script", Script.class);
         XSTREAM.alias("catalog", CatalogInfo.class);
+        XSTREAM.alias("org.jvnet.hudson.plugins.scriptler.util.ByNameSorter", ByNameSorter.class);
     }
 
     public boolean isDisbableRemoteCatalog() {

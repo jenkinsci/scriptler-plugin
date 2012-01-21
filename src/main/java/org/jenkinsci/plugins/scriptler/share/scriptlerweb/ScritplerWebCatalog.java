@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jvnet.hudson.plugins.scriptler.share;
+package org.jenkinsci.plugins.scriptler.share.scriptlerweb;
 
 import hudson.Extension;
 import hudson.XmlFile;
@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfoCatalog;
 
 import com.thoughtworks.xstream.XStream;

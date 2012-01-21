@@ -21,11 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jvnet.hudson.plugins.scriptler.util;
+package org.jenkinsci.plugins.scriptler.util;
 
 import java.util.Comparator;
 
-import org.jvnet.hudson.plugins.scriptler.config.NamedResource;
+import org.jenkinsci.plugins.scriptler.config.NamedResource;
 
 /**
  * @author domi

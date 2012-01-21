@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jvnet.hudson.plugins.scriptler.share;
+package org.jenkinsci.plugins.scriptler.share.scriptlerweb;
 
 import hudson.ProxyConfiguration;
 import hudson.Util;
@@ -35,8 +35,9 @@ import java.net.URL;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.jvnet.hudson.plugins.scriptler.ScriptlerManagment;
-import org.jvnet.hudson.plugins.scriptler.share.ScritplerWebCatalog.CatalogContent;
+import org.jenkinsci.plugins.scriptler.ScriptlerManagment;
+import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
+import org.jenkinsci.plugins.scriptler.share.scriptlerweb.ScritplerWebCatalog.CatalogContent;
 
 /**
  * Manages the access to a catalogs information, and is able to download the scripts from it.

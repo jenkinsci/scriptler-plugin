@@ -1,4 +1,4 @@
-package org.jvnet.hudson.plugins.scriptler.share;
+package org.jenkinsci.plugins.scriptler.share.scriptlerweb;
 
 import org.jenkinsci.plugins.scriptler.share.ScriptInfo;
 
