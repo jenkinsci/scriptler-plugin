@@ -38,6 +38,7 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.jenkinsci.plugins.scriptler.share.ScriptInfoCatalog;
 import org.jvnet.hudson.plugins.scriptler.ScriptlerManagment;
 import org.jvnet.hudson.plugins.scriptler.share.CatalogInfo;
 import org.jvnet.hudson.plugins.scriptler.util.ByNameSorter;
@@ -50,7 +51,9 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
 
     private final static Logger LOGGER = Logger.getLogger(ScriptlerConfiguration.class.getName());
 
-    private List<CatalogInfo> catalogInfos = new ArrayList<CatalogInfo>();
+    // keep to avoid loading issues with older version
+    @Deprecated
+    private transient List<CatalogInfo> catalogInfos = new ArrayList<CatalogInfo>();
 
     private boolean disbableRemoteCatalog = false;
 
@@ -65,11 +68,11 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
     }
 
     public List<CatalogInfo> getCatalogInfos() {
-        return catalogInfos;
-    }
-
-    public void setCatalogInfos(List<CatalogInfo> catalogInfos) {
-        this.catalogInfos = catalogInfos;
+        List<CatalogInfo> infos = new ArrayList<CatalogInfo>();
+        for (ScriptInfoCatalog cat : ScriptInfoCatalog.all()) {
+            infos.add(cat.getInfo());
+        }
+        return infos;
     }
 
     /**

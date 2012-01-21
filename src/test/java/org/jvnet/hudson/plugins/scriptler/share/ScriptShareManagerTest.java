@@ -3,38 +3,34 @@ package org.jvnet.hudson.plugins.scriptler.share;
 import java.io.File;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.jvnet.hudson.plugins.scriptler.share.ScritplerWebCatalog.CatalogContent;
 
 public class ScriptShareManagerTest {
 
-	/**
-	 * Tests if the default catalog file can be downloaded.
-	 * 
-	 * @throws Exception
-	 */
-	@Test
-	@Ignore
-	public void testGetScriptCatalog() throws Exception {
-		File catalog = File.createTempFile("scriptler", ".xml");
-		if (catalog.exists()) {
-			catalog.delete();
-		}
-		Assert.assertTrue(catalog + " must be deleted befor test", !catalog.exists());
-		CatalogManager shareManager = new CatalogManager(new CatalogInfo("name", "catLocation", null, "scriptDownloadUrl"));
-		shareManager.downloadDefaultScriptCatalog(catalog);
+    private static String DEFAULT_LOCATION = "http://hudson.fortysix.ch/scriptler";
 
-		Assert.assertTrue(catalog + " not downloaded", catalog.exists());
+    public static String DEFAULT_CATALOG = DEFAULT_LOCATION + "/scriptler-catalog.xml";
 
-		Catalog loadedCatalog = Catalog.load(catalog);
+    /**
+     * Tests if the default catalog file can be downloaded. Event though we don't use the catalog from fortysix anymore, the format is the same as from scriptler web, therefore we can use it for the
+     * test.
+     */
+    @Test
+    public void testGetScriptCatalog() throws Exception {
+        File catalog = File.createTempFile("scriptler", ".xml");
+        catalog.deleteOnExit();
+        CatalogManager shareManager = new CatalogManager(new CatalogInfo("name", DEFAULT_CATALOG, null, "scriptDownloadUrl"));
+        shareManager.downloadDefaultScriptCatalog(catalog);
 
-		Assert.assertNotNull("catalog not loaded", loadedCatalog);
-	}
+        Assert.assertTrue(catalog + " not downloaded", catalog.exists());
 
-	@Test
-	public void testSaveCatalog() throws Exception {
-		Catalog cat = new Catalog(new CatalogInfo("name", "local", null, "local/dir"));
-		cat.addOrReplace(new CatalogEntry("id","name.groovy", "comment", "N/A", null));
-		cat.save(File.createTempFile("scriptler-catalog", ".xml"));
-	}
+        CatalogContent loadedCatalog = CatalogContent.load(catalog);
+
+        Assert.assertNotNull("catalog not loaded", loadedCatalog);
+        Assert.assertNotNull("catalog entries is null", loadedCatalog.entrySet);
+        Assert.assertTrue("no catalog entries", loadedCatalog.entrySet.size() > 0);
+
+    }
+
 }

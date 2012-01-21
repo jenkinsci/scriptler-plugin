@@ -48,12 +48,11 @@ import jenkins.model.Jenkins;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.scriptler.share.ScriptInfo;
+import org.jenkinsci.plugins.scriptler.share.ScriptInfoCatalog;
 import org.jvnet.hudson.plugins.scriptler.config.Script;
 import org.jvnet.hudson.plugins.scriptler.config.ScriptlerConfiguration;
-import org.jvnet.hudson.plugins.scriptler.share.Catalog;
-import org.jvnet.hudson.plugins.scriptler.share.CatalogEntry;
 import org.jvnet.hudson.plugins.scriptler.share.CatalogInfo;
-import org.jvnet.hudson.plugins.scriptler.share.CatalogManager;
 import org.jvnet.hudson.plugins.scriptler.util.ScriptHelper;
 import org.kohsuke.stapler.HttpRedirect;
 import org.kohsuke.stapler.HttpResponse;
@@ -62,10 +61,9 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 /**
- * Creates the link on the "manage hudson" page and handles all the web requests.
+ * Creates the link on the "manage Jenkins" page and handles all the web requests.
  * 
- * @author domi
- * 
+ * @author Dominik Bartholdi (imod)
  */
 @Extension
 public class ScriptlerManagment extends ManagementLink implements RootAction {
@@ -160,8 +158,8 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      *            request
      * @param rsp
      *            response
-     * @param name
-     *            the name of the file to be downloaded
+     * @param id
+     *            the id of the file to be downloaded
      * @param catalogName
      *            the catalog to download the file from
      * @return same forward as from <code>doScriptAdd</code>
@@ -176,14 +174,17 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
             return new HttpRedirect("index");
         }
 
-        CatalogInfo catInfo = c.getCatalogInfo(catalogName);
-        CatalogManager catalogManager = new CatalogManager(catInfo);
-        Catalog catalog = catalogManager.loadCatalog();
-        CatalogEntry entry = catalog.getEntryById(id);
-        String name = entry.name;
-        String source = catalogManager.downloadScript(name, id);
+        ScriptInfo info = null;
+        String source = null;
+        for (ScriptInfoCatalog scriptInfoCatalog : ScriptInfoCatalog.all()) {
+            if (catalogName.equals(scriptInfoCatalog.getInfo().name)) {
+                info = scriptInfoCatalog.getEntryById(id);
+                source = scriptInfoCatalog.getScriptSource(info);
+                break;
+            }
+        }
 
-        return doScriptAdd(res, rsp, name, entry.comment, source, false, catalogName, id);
+        return doScriptAdd(res, rsp, info.name, info.comment, source, false, catalogName, id);
     }
 
     /**
@@ -423,19 +424,8 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      * 
      * @return the catalog
      */
-    public List<Catalog> getCatalogs() {
-        List<Catalog> catalogs = new ArrayList<Catalog>();
-        List<CatalogInfo> catalogInfos = getConfiguration().getCatalogInfos();
-        for (CatalogInfo catalogInfo : catalogInfos) {
-            CatalogManager mgr = new CatalogManager(catalogInfo);
-            Catalog catalog = mgr.loadCatalog();
-            // as catalogInfo is marked as transient, we have to set it
-            catalog.setInfo(catalogInfo);
-            if (catalog != null) {
-                catalogs.add(catalog);
-            }
-        }
-        return catalogs;
+    public List<ScriptInfoCatalog> getCatalogs() {
+        return ScriptInfoCatalog.all();
     }
 
     public CatalogInfo getCatalogInfoByName(String catalogName) {

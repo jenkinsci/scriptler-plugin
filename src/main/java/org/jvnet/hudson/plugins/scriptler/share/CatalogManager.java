@@ -32,101 +32,98 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.MessageFormat;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.jvnet.hudson.plugins.scriptler.ScriptlerManagment;
+import org.jvnet.hudson.plugins.scriptler.share.ScritplerWebCatalog.CatalogContent;
 
 /**
- * Manages the access to a catalogs information, and is able to download the
- * scripts from it.
+ * Manages the access to a catalogs information, and is able to download the scripts from it.
  * 
  * @see CatalogInfo
  * @author domi
  * 
  */
-public class CatalogManager {
+class CatalogManager {
 
-	private final static Logger LOGGER = Logger.getLogger(CatalogManager.class.getName());
+    private final static Logger LOGGER = Logger.getLogger(CatalogManager.class.getName());
 
-	private final CatalogInfo catalogInfo;
+    private final CatalogInfo catalogInfo;
 
-	public CatalogManager(CatalogInfo info) {
-		this.catalogInfo = info;
-	}
+    public CatalogManager(CatalogInfo info) {
+        this.catalogInfo = info;
+    }
 
-	/**
-	 * Downloads the catalog from the remote location. Package private for ease
-	 * testing...
-	 * 
-	 * @param catalogFileTarget
-	 *            the file to be retrieved.
-	 */
-	void downloadDefaultScriptCatalog(File catalogFileTarget) {
+    /**
+     * Downloads the catalog from the remote location. Package private for ease testing...
+     * 
+     * @param catalogFileTarget
+     *            the file to be retrieved.
+     */
+    void downloadDefaultScriptCatalog(File catalogFileTarget) {
 
-		try {
-			FileOutputStream out = new FileOutputStream(catalogFileTarget);
-			Util.copyStreamAndClose(ProxyConfiguration.open(new URL(catalogInfo.catalogLocation)).getInputStream(), out);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+        try {
+            FileOutputStream out = new FileOutputStream(catalogFileTarget);
+            Util.copyStreamAndClose(ProxyConfiguration.open(new URL(catalogInfo.catalogLocation)).getInputStream(), out);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-	}
+    }
 
-	/**
-	 * Get the requested script from the catalog location.
-	 * 
-	 * @param scriptName
-	 *            the name of the script. Will be used in the url.
-	 * @see CatalogInfo#catalogLocation
-	 * @return
-	 */
-	public String downloadScript(String scriptName, String id) {
-		String source = null;
-		try {
-			String fileUrl = catalogInfo.getReplacedDownloadUrl(scriptName, id);
-			LOGGER.info("download script from: " + fileUrl);
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			Util.copyStreamAndClose(ProxyConfiguration.open(new URL(fileUrl)).getInputStream(), out);
-			source = out.toString("UTF-8");
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return source;
-	}
+    /**
+     * Get the requested script from the catalog location.
+     * 
+     * @param scriptName
+     *            the name of the script. Will be used in the url.
+     * @see CatalogInfo#catalogLocation
+     * @return
+     */
+    public String downloadScript(String scriptName, String id) {
+        String source = null;
+        try {
+            String fileUrl = catalogInfo.getReplacedDownloadUrl(scriptName, id);
+            LOGGER.info("download script from: " + fileUrl);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            Util.copyStreamAndClose(ProxyConfiguration.open(new URL(fileUrl)).getInputStream(), out);
+            source = out.toString("UTF-8");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return source;
+    }
 
-	/**
-	 * Returns the newest catalog.
-	 * 
-	 * @return the catalog - never <code>null</code>, even if download failed.
-	 */
-	public Catalog loadCatalog() {
-		File catFile = new File(ScriptlerManagment.getScriptlerHomeDirectory(), catalogInfo.name.trim() + "-catalog.xml");
+    /**
+     * Returns the newest catalog.
+     * 
+     * @return the catalog - never <code>null</code>, even if download failed.
+     */
+    public CatalogContent loadCatalog() {
+        File catFile = new File(ScriptlerManagment.getScriptlerHomeDirectory(), catalogInfo.name.trim() + "-catalog.xml");
 
-		// right now we always download the file - this should be optimized
-		// (maybe only once every hour?)
-		downloadDefaultScriptCatalog(catFile);
-		Catalog catalog = null;
-		if (catFile.exists()) {
-			try {
-				catalog = Catalog.load(catFile);
-				catalog.setInfo(catalogInfo);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		if (catalog == null) {
-			catalog = new Catalog(catalogInfo);
-		}
-		return catalog;
-	}
+        // right now we always download the file - this should be optimized
+        // (maybe only once every hour?)
+        downloadDefaultScriptCatalog(catFile);
+        CatalogContent catalog = null;
+        if (catFile.exists()) {
+            try {
+                catalog = CatalogContent.load(catFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if (catalog == null) {
+            catalog = new CatalogContent();
+        }
+        return catalog;
+    }
 }
