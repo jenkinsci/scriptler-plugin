@@ -21,4 +21,6 @@ public abstract class ScriptInfoCatalog<T extends ScriptInfo> extends ExtensionP
     public abstract List<T> getEntries();
 
     public abstract String getScriptSource(T scriptInfo);
+
+    public abstract String getDisplayName();
 }

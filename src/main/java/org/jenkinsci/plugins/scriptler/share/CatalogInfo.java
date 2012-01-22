@@ -5,6 +5,7 @@ import java.text.MessageFormat;
 import org.apache.commons.lang.StringUtils;
 
 public class CatalogInfo {
+    
     public final String name;
     public final String catalogLocation;
     public final String scriptDownloadUrl;
@@ -40,5 +41,7 @@ public class CatalogInfo {
         }
         return MessageFormat.format(scriptDetailUrl.trim(), scriptName, id);
     }
+    
+    
 
 }

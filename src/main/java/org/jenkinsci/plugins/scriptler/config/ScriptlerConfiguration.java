@@ -40,7 +40,6 @@ import java.util.logging.Logger;
 
 import org.jenkinsci.plugins.scriptler.ScriptlerManagment;
 import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
-import org.jenkinsci.plugins.scriptler.share.ScriptInfoCatalog;
 import org.jenkinsci.plugins.scriptler.util.ByNameSorter;
 
 import com.thoughtworks.xstream.XStream;
@@ -65,30 +64,6 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
         if (scripts != null) {
             this.scriptSet = scripts;
         }
-    }
-
-    public List<CatalogInfo> getCatalogInfos() {
-        List<CatalogInfo> infos = new ArrayList<CatalogInfo>();
-        for (ScriptInfoCatalog cat : ScriptInfoCatalog.all()) {
-            infos.add(cat.getInfo());
-        }
-        return infos;
-    }
-
-    /**
-     * Gets the catalog info by its name.
-     * 
-     * @param name
-     *            the name of the catalog to search for
-     * @return <code>null</code> if no info with the given name can be found.
-     */
-    public CatalogInfo getCatalogInfo(String name) {
-        for (CatalogInfo catInfo : getCatalogInfos()) {
-            if (catInfo.name.equals(name)) {
-                return catInfo;
-            }
-        }
-        return null;
     }
 
     public synchronized void save() throws IOException {

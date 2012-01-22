@@ -42,7 +42,7 @@ import com.thoughtworks.xstream.XStream;
 /**
  * Represents a catalog with available scripts to download.
  */
-@Extension
+@Extension(ordinal = 5)
 public class ScritplerWebCatalog extends ScriptInfoCatalog<CatalogEntry> {
 
     public static final CatalogInfo CATALOG_INFO = new CatalogInfo("scriptlerweb", "http://scriptlerweb.appspot.com/catalog/xml",
@@ -53,6 +53,11 @@ public class ScritplerWebCatalog extends ScriptInfoCatalog<CatalogEntry> {
     @Override
     public CatalogInfo getInfo() {
         return CATALOG_INFO;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return "ScriptlerWeb";
     }
 
     @Override

@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.jenkinsci.plugins.scriptler.Messages;
 import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfoCatalog;
@@ -23,7 +24,7 @@ import org.jenkinsci.plugins.scriptler.share.ScriptInfoCatalog;
  * @author Dominik Bartholdi (imod)
  * 
  */
-@Extension
+@Extension(ordinal = 10)
 public class GHCatalog extends ScriptInfoCatalog<ScriptInfo> {
 
     public static final String REPO_BASE = "https://github.com/jenkinsci/jenkins-scripts/tree/master/scriptler";
@@ -31,6 +32,7 @@ public class GHCatalog extends ScriptInfoCatalog<ScriptInfo> {
 
     public static final CatalogInfo CATALOG_INFO = new CatalogInfo("gh", null, REPO_BASE, DOWNLOAD_URL);
 
+    @Override
     public List<ScriptInfo> getEntries() {
         try {
             return Arrays.asList(CentralScriptJsonCatalog.all().get(CentralScriptJsonCatalog.class).toList().list);
@@ -41,6 +43,12 @@ public class GHCatalog extends ScriptInfoCatalog<ScriptInfo> {
         return Collections.emptyList();
     }
 
+    @Override
+    public String getDisplayName() {
+        return "GitHub";
+    }
+
+    @Override
     public ScriptInfo getEntryById(String id) {
         for (ScriptInfo info : getEntries()) {
             if (id.equals(info.script)) {
@@ -50,6 +58,7 @@ public class GHCatalog extends ScriptInfoCatalog<ScriptInfo> {
         return null;
     }
 
+    @Override
     public CatalogInfo getInfo() {
         return CATALOG_INFO;
     }

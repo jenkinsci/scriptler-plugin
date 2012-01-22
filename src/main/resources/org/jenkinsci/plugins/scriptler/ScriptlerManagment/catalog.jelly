@@ -33,10 +33,16 @@
 
 			<j:out value="${%intro}" />
 			<br />
+            <p />
+            <j:set var="catalogName" value="${request.getParameter('name') ?: 'gh'}" />			
+			<l:tabBar>
+			     <j:forEach var="c" items="${it.catalogs}">
+                    <l:tab name="${c.displayName}" active="${c.info.name == catalogName}" href="./catalog?name=${c.info.name}" />
+                 </j:forEach>
+            </l:tabBar>
 			<div class="excerpt">
 				<table class="pane">
-					<j:forEach var="c" items="${it.catalogs}">
-						<j:forEach var="t" items="${c.entries}">
+						<j:forEach var="t" items="${it.getCatalogByName(catalogName).entries}">
 							<tr valign="center" style="border-top: 0px;">
 								<td class="pane" width="20">
 									<a href="downloadScript?id=${t.id}&#38;name=${t.name}&#38;catalog=${c.info.name}">
@@ -73,7 +79,6 @@
 								</td>
 							</tr>
 						</j:forEach>
-					</j:forEach>
 				</table>
 			</div>
 

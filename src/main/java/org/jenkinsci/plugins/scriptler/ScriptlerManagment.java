@@ -405,7 +405,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      */
     @SuppressWarnings("deprecation")
     public List<String> getSlaveNames() {
-        ComputerSet computers = Hudson.getInstance().getComputer();
+        ComputerSet computers = Jenkins.getInstance().getComputer();
         List<String> slaveNames = computers.get_slaveNames();
 
         // slaveNames is unmodifiable, therefore create a new list
@@ -428,11 +428,25 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
         return ScriptInfoCatalog.all();
     }
 
+    public ScriptInfoCatalog<? extends ScriptInfo> getCatalogByName(String catalogName) {
+        if (StringUtils.isNotBlank(catalogName)) {
+            for (ScriptInfoCatalog<? extends ScriptInfo> sic : getCatalogs()) {
+                final CatalogInfo info = sic.getInfo();
+                if (catalogName.equals(info.name)) {
+                    return sic;
+                }
+            }
+        }
+        return null;
+    }
+
     public CatalogInfo getCatalogInfoByName(String catalogName) {
-        List<CatalogInfo> catalogInfos = getConfiguration().getCatalogInfos();
-        for (CatalogInfo catalogInfo : catalogInfos) {
-            if (catalogInfo.name.equals(catalogName)) {
-                return catalogInfo;
+        if (StringUtils.isNotBlank(catalogName)) {
+            for (ScriptInfoCatalog<? extends ScriptInfo> sic : getCatalogs()) {
+                final CatalogInfo info = sic.getInfo();
+                if (catalogName.equals(info.name)) {
+                    return info;
+                }
             }
         }
         return null;
