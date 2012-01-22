@@ -1,6 +1,6 @@
 package org.jenkinsci.plugins.scriptler.share;
 
-public class DefaultScriptInfoList {
+public class ScriptInfoList {
     public int version;
     public ScriptInfo[] list = new ScriptInfo[0];
 

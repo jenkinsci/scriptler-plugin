@@ -184,7 +184,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
             }
         }
 
-        return doScriptAdd(res, rsp, info.name, info.comment, source, false, catalogName, id);
+        return doScriptAdd(res, rsp, info.getName(), info.getComment(), source, false, catalogName, id);
     }
 
     /**

@@ -63,7 +63,7 @@ public class ScritplerWebCatalog extends ScriptInfoCatalog<CatalogEntry> {
     @Override
     public CatalogEntry getEntryById(String id) {
         for (CatalogEntry scr : getEntries()) {
-            if (scr.id != null && scr.id.equals(id)) {
+            if (scr.getId() != null && scr.getId().equals(id)) {
                 return scr;
             }
         }
@@ -77,7 +77,7 @@ public class ScritplerWebCatalog extends ScriptInfoCatalog<CatalogEntry> {
 
     @Override
     public String getScriptSource(CatalogEntry scriptInfo) {
-        return CATALOG_MANAGER.downloadScript(scriptInfo.name, scriptInfo.id);
+        return CATALOG_MANAGER.downloadScript(scriptInfo.getName(), scriptInfo.getId());
     }
 
     public static class CatalogContent {

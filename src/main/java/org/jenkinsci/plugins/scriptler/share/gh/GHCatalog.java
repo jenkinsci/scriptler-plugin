@@ -5,15 +5,14 @@ import hudson.ProxyConfiguration;
 import hudson.Util;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import org.jenkinsci.plugins.scriptler.Messages;
 import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfoCatalog;
@@ -27,18 +26,19 @@ import org.jenkinsci.plugins.scriptler.share.ScriptInfoCatalog;
 @Extension(ordinal = 10)
 public class GHCatalog extends ScriptInfoCatalog<ScriptInfo> {
 
+    private final static Logger LOGGER = Logger.getLogger(GHCatalog.class.getName());
+
     public static final String REPO_BASE = "https://github.com/jenkinsci/jenkins-scripts/tree/master/scriptler";
     public static final String DOWNLOAD_URL = "https://raw.github.com/jenkinsci/jenkins-scripts/master/scriptler/{1}";
 
-    public static final CatalogInfo CATALOG_INFO = new CatalogInfo("gh", null, REPO_BASE, DOWNLOAD_URL);
+    public static final CatalogInfo CATALOG_INFO = new CatalogInfo("gh", REPO_BASE, REPO_BASE, DOWNLOAD_URL);
 
     @Override
     public List<ScriptInfo> getEntries() {
         try {
             return Arrays.asList(CentralScriptJsonCatalog.all().get(CentralScriptJsonCatalog.class).toList().list);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "not abe to load script infos from GH", e);
         }
         return Collections.emptyList();
     }
@@ -51,7 +51,7 @@ public class GHCatalog extends ScriptInfoCatalog<ScriptInfo> {
     @Override
     public ScriptInfo getEntryById(String id) {
         for (ScriptInfo info : getEntries()) {
-            if (id.equals(info.script)) {
+            if (id.equals(info.getId())) {
                 return info;
             }
         }
@@ -69,17 +69,12 @@ public class GHCatalog extends ScriptInfoCatalog<ScriptInfo> {
         try {
 
             final String scriptUrl = CATALOG_INFO.getReplacedDownloadUrl(scriptInfo.getName(), scriptInfo.getId());
-            System.out.println("-->" + scriptUrl);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             Util.copyStreamAndClose(ProxyConfiguration.open(new URL(scriptUrl)).getInputStream(), out);
             return out.toString("UTF-8");
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "not abe to load script sources from GH for: " + scriptInfo, e);
         }
 
         return null;

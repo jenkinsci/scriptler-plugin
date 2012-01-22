@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import net.sf.json.JSONObject;
 
-import org.jenkinsci.plugins.scriptler.share.DefaultScriptInfoList;
+import org.jenkinsci.plugins.scriptler.share.ScriptInfoList;
 
 /**
  * Gets the GitHub catalog from http://mirrors.jenkins-ci.org/updates/updates/org.jenkins-ci.plugins.scriptler.CentralScriptJsonCatalog.json. This catalog is updated by a background crawler on the
@@ -24,12 +24,12 @@ public class CentralScriptJsonCatalog extends Downloadable {
         super(ID);
     }
 
-    public DefaultScriptInfoList toList() throws IOException {
+    public ScriptInfoList toList() throws IOException {
         JSONObject d = getData();
         if (d == null) {
-            return new DefaultScriptInfoList();
+            return new ScriptInfoList();
         }
-        return (DefaultScriptInfoList) JSONObject.toBean(d, DefaultScriptInfoList.class);
+        return (ScriptInfoList) JSONObject.toBean(d, ScriptInfoList.class);
     }
 
 }

@@ -54,20 +54,25 @@
 									<j:out value="${t.name}" /> <j:if test="${!empty(c.info.scriptDetailUrl)}"> (<a target="_blank" href="${c.info.getReplacedDetailUrl(t.name, t.id)}">details</a>)</j:if>
 								</td>
 								<td class="pane-header">
-									<j:out value="${%provided by}" />
-									:
-									<j:out value="${t.provider}" />
+									<j:out value="${%by}" />: 
+									<j:forEach var="a" items="${t.authors}">
+									   <j:out value="${a.name} " />
+									</j:forEach>
 								</td>
 							</tr>
 							<tr>
-								<td colspan="3">
-									<a href="${t.url}">
-										<j:out value="${t.url}" />
-									</a>
+								<td colspan="2">
+								    <j:out value="${%required core}" />: <j:out value="${t.core}" />
 								</td>
+								<td rowspan="2" valign="top">
+                                    <b><j:out value="${%Parameters}" />:</b><br /> 
+                                    <j:forEach var="p" items="${t.parameters}">
+                                       <j:out value="${p} " /><br />
+                                    </j:forEach>
+                                </td>
 							</tr>
 							<tr>
-								<td colspan="3" style="white-space: normal;">
+								<td colspan="2" style="white-space: normal;">
 									<j:out value="${t.comment}" />
 								</td>
 							</tr>
