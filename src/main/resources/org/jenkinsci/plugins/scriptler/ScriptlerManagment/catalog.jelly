@@ -54,27 +54,20 @@
 									<j:out value="${t.name}" /> <j:if test="${!empty(c.info.scriptDetailUrl)}"> (<a target="_blank" href="${c.info.getReplacedDetailUrl(t.name, t.id)}">details</a>)</j:if>
 								</td>
 								<td class="pane-header">
-									<j:out value="${%Provider}" />
+									<j:out value="${%provided by}" />
 									:
 									<j:out value="${t.provider}" />
 								</td>
-								<td class="pane-header">
-									<j:out value="${%Catalog}" />
-									:
-									<a href="settings">
-										<j:out value="${c.info.name}" />
-									</a>
-								</td>
 							</tr>
 							<tr>
-								<td colspan="4">
+								<td colspan="3">
 									<a href="${t.url}">
 										<j:out value="${t.url}" />
 									</a>
 								</td>
 							</tr>
 							<tr>
-								<td colspan="4" style="white-space: normal;">
+								<td colspan="3" style="white-space: normal;">
 									<j:out value="${t.comment}" />
 								</td>
 							</tr>
