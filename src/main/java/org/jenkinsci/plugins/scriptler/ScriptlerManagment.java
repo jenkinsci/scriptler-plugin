@@ -45,9 +45,12 @@ import java.util.logging.Logger;
 import javax.servlet.ServletException;
 
 import jenkins.model.Jenkins;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.jenkinsci.plugins.scriptler.config.Script;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
 import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
@@ -137,6 +140,17 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
         return Hudson.getInstance().getRootUrl() + "plugin/" + wrapper.getShortName() + "/";
     }
 
+    /**
+     * save the scriptler 'global' settings (on settings screen, not global Jenkins config)
+     * 
+     * @param res
+     * @param rsp
+     * @param disableRemoteCatalog
+     * @param allowRunScriptPermission
+     * @param allowRunScriptEdit
+     * @return
+     * @throws IOException
+     */
     public HttpResponse doScriptlerSettings(StaplerRequest res, StaplerResponse rsp, @QueryParameter("disableRemoteCatalog") boolean disableRemoteCatalog,
             @QueryParameter("allowRunScriptPermission") boolean allowRunScriptPermission, @QueryParameter("allowRunScriptEdit") boolean allowRunScriptEdit)
             throws IOException {
@@ -174,23 +188,28 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
             return new HttpRedirect("index");
         }
 
-        ScriptInfo info = null;
-        String source = null;
         for (ScriptInfoCatalog scriptInfoCatalog : ScriptInfoCatalog.all()) {
             if (catalogName.equals(scriptInfoCatalog.getInfo().name)) {
-                info = scriptInfoCatalog.getEntryById(id);
-                source = scriptInfoCatalog.getScriptSource(info);
-                break;
+                final ScriptInfo info = scriptInfoCatalog.getEntryById(id);
+                final String source = scriptInfoCatalog.getScriptSource(info);
+                final List<Parameter> paramList = new ArrayList<Parameter>();
+                for (String paramName : info.getParameters()) {
+                    paramList.add(new Parameter(paramName, null));
+                }
+
+                Parameter[] parameters = paramList.toArray(new Parameter[paramList.size()]);
+
+                return saveScriptAndForward(info.getName(), info.getComment(), source, false, catalogName, id, parameters);
             }
         }
-
-        return doScriptAdd(res, rsp, info.getName(), info.getComment(), source, false, catalogName, id);
+        // TODO add error handling, inform the user about the failed import
+        return new HttpRedirect("catalog");
     }
 
     /**
      * Saves a script snipplet as file to the system.
      * 
-     * @param res
+     * @param req
      *            response
      * @param rsp
      *            request
@@ -206,15 +225,57 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      *            (optional) the original id the script had at the catalog
      * @return forward to 'index'
      * @throws IOException
+     * @throws ServletException
      */
-    public HttpResponse doScriptAdd(StaplerRequest res, StaplerResponse rsp, @QueryParameter("name") String name, @QueryParameter("comment") String comment,
+    public HttpResponse doScriptAdd(StaplerRequest req, StaplerResponse rsp, @QueryParameter("name") String name, @QueryParameter("comment") String comment,
             @QueryParameter("script") String script, @QueryParameter("nonAdministerUsing") boolean nonAdministerUsing, String originCatalogName, String originId)
-            throws IOException {
+            throws IOException, ServletException {
+
         checkPermission(Hudson.ADMINISTER);
 
+        Parameter[] parameters = extractParameters(req);
+
+        return saveScriptAndForward(name, comment, script, nonAdministerUsing, originCatalogName, originId, parameters);
+    }
+
+    /**
+     * Extracts the parameters from the given request
+     * 
+     * @param req
+     *            the request potentially containing parameters
+     * @return parameters - might be an empty array, but never <code>null</code>.
+     * @throws ServletException
+     */
+    private Parameter[] extractParameters(StaplerRequest req) throws ServletException {
+        Parameter[] parameters = new Parameter[0];
+        final JSONObject json = req.getSubmittedForm();
+        final JSONObject defineParams = json.getJSONObject("defineParams");
+        if (!defineParams.isNullObject()) {
+            JSONObject argsObj = defineParams.optJSONObject("parameters");
+            if (argsObj == null) {
+                JSONArray argsArrayObj = defineParams.optJSONArray("parameters");
+                if (argsArrayObj != null) {
+                    parameters = (Parameter[]) JSONArray.toArray(argsArrayObj, Parameter.class);
+                }
+            } else {
+                Parameter param = (Parameter) JSONObject.toBean(argsObj, Parameter.class);
+                parameters = new Parameter[] { param };
+            }
+        }
+        return parameters;
+    }
+
+    /**
+     * Save the script details and return the forward to index
+     * 
+     * @throws IOException
+     */
+    private HttpResponse saveScriptAndForward(String name, String comment, String script, boolean nonAdministerUsing, String originCatalogName,
+            String originId, Parameter[] parameters) throws IOException {
         if (StringUtils.isEmpty(script) || StringUtils.isEmpty(name)) {
             throw new IllegalArgumentException("'name' and 'script' must not be empty!");
         }
+
         name = fixFileName(originCatalogName, name);
 
         // save (overwrite) the file/script
@@ -225,10 +286,11 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
 
         Script newScript = null;
         if (!StringUtils.isEmpty(originId)) {
-            newScript = new Script(name, comment, true, originCatalogName, originId, new SimpleDateFormat("dd MMM yyyy HH:mm:ss a").format(new Date()));
+            newScript = new Script(name, comment, true, originCatalogName, originId, new SimpleDateFormat("dd MMM yyyy HH:mm:ss a").format(new Date()),
+                    parameters);
         } else {
             // save (overwrite) the meta information
-            newScript = new Script(name, comment, nonAdministerUsing);
+            newScript = new Script(name, comment, nonAdministerUsing, parameters);
         }
         ScriptlerConfiguration cfg = getConfiguration();
         cfg.addOrReplace(newScript);
@@ -342,7 +404,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      *            response
      * @param scriptName
      *            the name of the script
-     * @param script
+     * @param scriptSrc
      *            the script code (groovy)
      * @param node
      *            the node, to execute the code on.
@@ -350,9 +412,11 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      * @throws ServletException
      */
     public void doTriggerScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("scriptName") String scriptName,
-            @QueryParameter("script") String script, @QueryParameter("node") String node) throws IOException, ServletException {
+            @QueryParameter("script") String scriptSrc, @QueryParameter("node") String node) throws IOException, ServletException {
 
         checkPermission(getRequiredPermissionForRunScript());
+
+        final Parameter[] parameters = extractParameters(req);
 
         Script tempScript = null;
         final boolean isAdmin = Jenkins.getInstance().getACL().hasPermission(Jenkins.ADMINISTER);
@@ -360,20 +424,20 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
 
         if (!isChangeScriptAllowed) {
             tempScript = ScriptHelper.getScript(scriptName, true);
-            req.setAttribute("script", tempScript);
             // use original script, user has no permission to change it!s
-            script = tempScript.script;
+            scriptSrc = tempScript.script;
         } else {
             // set the script info back to the request, to display it together with
             // the output.
             tempScript = ScriptHelper.getScript(scriptName, false);
-            tempScript.setScript(script);
-            req.setAttribute("script", tempScript);
+            tempScript.setScript(scriptSrc);
         }
 
-        req.setAttribute("currentNode", node);
+        String output = ScriptHelper.doScript(node, scriptSrc, parameters);
 
-        String output = ScriptHelper.doScript(node, script);
+        tempScript.setParameters(parameters);// show the same parameters to the user
+        req.setAttribute("script", tempScript);
+        req.setAttribute("currentNode", node);
         req.setAttribute("output", output);
         req.getView(this, "runscript.jelly").forward(req, rsp);
     }

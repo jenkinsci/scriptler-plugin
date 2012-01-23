@@ -33,6 +33,7 @@ public class Script implements Comparable<Script>, NamedResource {
     public final String originCatalog;
     public final String originScript;
     public final String originDate;
+    private Parameter[] parameters;
 
     /**
      * script is only transient, because it will not be saved in the xml but on the file system. Therefore it has to be materialized before usage!
@@ -42,8 +43,11 @@ public class Script implements Comparable<Script>, NamedResource {
     // for user with RUN_SCRIPT permission
     public boolean nonAdministerUsing;
 
+    /**
+     * used to create/update a new script in the UI
+     */
     @DataBoundConstructor
-    public Script(String name, String comment, boolean nonAdministerUsing) {
+    public Script(String name, String comment, boolean nonAdministerUsing, Parameter[] parameters) {
         this.name = name;
         this.comment = comment;
         this.available = true;
@@ -51,8 +55,12 @@ public class Script implements Comparable<Script>, NamedResource {
         this.originScript = null;
         this.originDate = null;
         this.nonAdministerUsing = nonAdministerUsing;
+        this.parameters = parameters;
     }
 
+    /**
+     * used during upload of a new script
+     */
     public Script(String name, String comment) {
         this.name = name;
         this.comment = comment;
@@ -61,8 +69,12 @@ public class Script implements Comparable<Script>, NamedResource {
         this.originScript = null;
         this.originDate = null;
         this.nonAdministerUsing = false;
+        this.parameters = null;
     }
 
+    /**
+     * used during plugin start to synchronize available scripts
+     */
     public Script(String name, String comment, boolean available, boolean nonAdministerUsing) {
         this.name = name;
         this.comment = comment;
@@ -71,19 +83,13 @@ public class Script implements Comparable<Script>, NamedResource {
         this.originScript = null;
         this.originDate = null;
         this.nonAdministerUsing = nonAdministerUsing;
+        this.parameters = null;
     }
 
     /**
      * Constructor to create a script imported from a foreign catalog.
-     * 
-     * @param name
-     * @param comment
-     * @param available
-     * @param originCatalog
-     * @param originScript
-     * @param originDate
      */
-    public Script(String name, String comment, boolean available, String originCatalog, String originScript, String originDate) {
+    public Script(String name, String comment, boolean available, String originCatalog, String originScript, String originDate, Parameter[] parameters) {
         this.name = name;
         this.comment = comment;
         this.available = available;
@@ -91,10 +97,15 @@ public class Script implements Comparable<Script>, NamedResource {
         this.originScript = originScript;
         this.originDate = originDate;
         this.nonAdministerUsing = false;
+        this.parameters = parameters;
 
     }
 
-    public Script(String name, String comment, boolean available, String originCatalog, String originScript, String originDate, boolean nonAdministerUsing) {
+    /**
+     * used to merge scripts
+     */
+    public Script(String name, String comment, boolean available, String originCatalog, String originScript, String originDate, boolean nonAdministerUsing,
+            Parameter[] parameters) {
         this.name = name;
         this.comment = comment;
         this.available = available;
@@ -102,7 +113,7 @@ public class Script implements Comparable<Script>, NamedResource {
         this.originScript = originScript;
         this.originDate = originDate;
         this.nonAdministerUsing = nonAdministerUsing;
-
+        this.parameters = parameters;
     }
 
     /*
@@ -116,6 +127,14 @@ public class Script implements Comparable<Script>, NamedResource {
 
     public void setScript(String script) {
         this.script = script;
+    }
+
+    public void setParameters(Parameter[] parameters) {
+        this.parameters = parameters;
+    }
+
+    public Parameter[] getParameters() {
+        return parameters;
     }
 
     public void setNonAdministerUsing(boolean nonAdministerUsing) {

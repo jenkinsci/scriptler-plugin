@@ -81,7 +81,7 @@ public class ScritplerPluginImpl extends Plugin {
         // if not, add it to the configuration
         for (File file : availablePhysicalScripts) {
             if (cfg.getScriptByName(file.getName()) == null) {
-                cfg.addOrReplace(new Script(file.getName(), Messages.script_loaded_from_directory(), false));
+                cfg.addOrReplace(new Script(file.getName(), Messages.script_loaded_from_directory(), false, null));
             }
         }
 

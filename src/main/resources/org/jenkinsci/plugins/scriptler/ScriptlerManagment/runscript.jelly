@@ -1,31 +1,33 @@
+<!--
+The MIT License
 
-	<!--
-		The MIT License Copyright (c) 2010, Dominik Bartholdi Permission is
-		hereby granted, free of charge, to any person obtaining a copy of this
-		software and associated documentation files (the "Software"), to deal
-		in the Software without restriction, including without limitation the
-		rights to use, copy, modify, merge, publish, distribute, sublicense,
-		and/or sell copies of the Software, and to permit persons to whom the
-		Software is furnished to do so, subject to the following conditions:
+Copyright (c) 2010, Dominik Bartholdi
 
-		The above copyright notice and this permission notice shall be
-		included in all copies or substantial portions of the Software. THE
-		SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-		IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-		MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-		IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-		CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-		TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-		SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-	-->
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
-	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+-->
+
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
 	xmlns:p="/lib/hudson/scriptler">
 	<script src="${it.pluginResourcePath}lib/codemirror.js"></script>
-	<link rel="stylesheet" href="${it.pluginResourcePath}lib/codemirror.css" ></link>
+	<link rel="stylesheet" href="${it.pluginResourcePath}lib/codemirror.css"></link>
 	<script src="${it.pluginResourcePath}mode/clike/clike.js"></script>
-	<link rel="stylesheet" href="${it.pluginResourcePath}mode/clike/clike.css" ></link>
+	<link rel="stylesheet" href="${it.pluginResourcePath}mode/clike/clike.css"></link>
 	<style>.CodeMirror {border: 2px inset #dee;}</style>
 
 	<l:layout norefresh="true">
@@ -64,8 +66,7 @@
 							<j:set var="currentNode" value="${currentNode}" />
 							<f:entry name="node" title="Select a node">
 								<select name="node">
-									<j:forEach var="aNode" items="${it.slaveNames}"
-										varStatus="loop">
+									<j:forEach var="aNode" items="${it.slaveNames}" varStatus="loop">
 										<j:choose>
 											<j:when test="${currentNode==aNode}">
 												<option value="${aNode}" selected="selected">${aNode}</option>
@@ -79,8 +80,25 @@
 							</f:entry>
 						</td>
 					</tr>
+					<tr>
+						<td>
+							<f:optionalBlock name="defineParams" title="Define script parameters" checked="${!empty(script.parameters)}">
+								<f:entry title="${%Parameters}" field="parameters">
+									<f:repeatable var="param" items="${script.parameters}" name="parameters" noAddButton="true" minimum="1">
+										<table width="100%">
+											<f:entry>
+												Name: 
+												<input type="text" name="name" value="${param.name}" size="50" />
+												Default: 
+												<input type="text" name="value" value="${param.value}" size="80" />
+											</f:entry>
+										</table>
+									</f:repeatable>
+								</f:entry>
+							</f:optionalBlock>
+						</td>
+					</tr>
 				</table>
-
 
 				<textarea id="script" name="script" style="width:100%; height:20em">
 					<j:out value="${script.script}" />
@@ -99,11 +117,12 @@
 		</l:main-panel>
 	</l:layout>
 	<script>
-      var editor = CodeMirror.fromTextArea(document.getElementById("script"), {
-        lineNumbers: true,
-        matchBrackets: true,
-        mode: "text/x-groovy",
-        readOnly: ${readOnly}
-      });
-    </script>
+		var editor = CodeMirror.fromTextArea(document.getElementById("script"), {
+		lineNumbers: true,
+		matchBrackets: true,
+		mode: "text/x-groovy",
+		readOnly:
+		${readOnly}
+		});
+	</script>
 </j:jelly>

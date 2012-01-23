@@ -70,7 +70,8 @@ public class ScriptSet {
         String originCatalog = StringUtils.isEmpty(newScript.originCatalog) ? origin.originCatalog : newScript.originCatalog;
         String originScript = StringUtils.isEmpty(newScript.originScript) ? origin.originScript : newScript.originScript;
         String originDate = StringUtils.isEmpty(newScript.originDate) ? origin.originDate : newScript.originDate;
-        return new Script(origin.getName(), comment, newScript.available, originCatalog, originScript, originDate, newScript.nonAdministerUsing);
+        return new Script(origin.getName(), comment, newScript.available, originCatalog, originScript, originDate, newScript.nonAdministerUsing,
+                newScript.getParameters());
     }
 
     public final Set<Script> getScripts() {
