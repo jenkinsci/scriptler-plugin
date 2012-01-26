@@ -66,7 +66,8 @@ public class ScriptHelper {
 			try {
 
 				Computer comp = Hudson.getInstance().getComputer(node);
-				if ((comp == null && "(master)".equals(node)) || node.equals("(all)") || node.equals("(all slaves)"))
+				//if ((comp == null && "(master)".equals(node)) || node.equals("(all)") || node.equals("(all slaves)"))
+                if ((comp == null && "(master)".equals(node)))
                 {
 					output = RemotingDiagnostics.executeGroovy(scriptTxt, MasterComputer.localChannel);
                     System.out.println("Either the comp is null and the master equals " + node.toString() +" or the node equals all");
@@ -74,7 +75,7 @@ public class ScriptHelper {
 				}
                 else if (comp == null)
                 {
-					output = Messages.node_not_found(node);
+                    output = Messages.node_not_found(node);
 				}
                 else
                 {

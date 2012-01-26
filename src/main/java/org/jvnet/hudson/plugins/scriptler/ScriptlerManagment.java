@@ -354,12 +354,11 @@ public class ScriptlerManagment extends ManagementLink {
 
         //System.getProperties().list(System.out);
         
-		String output = null;
+		StringBuffer output = new StringBuffer();
         System.out.println("------------------------------------------------");
         System.out.println("here is the node -> " + node);
 		if(node.equalsIgnoreCase(all) || node.equalsIgnoreCase(allslaves))
 		{
-            System.out.println("in the all if statement");
 			List<String> slaves = this.getSlaveNames();
             if(node.equalsIgnoreCase(all))
             {
@@ -373,22 +372,31 @@ public class ScriptlerManagment extends ManagementLink {
                 //take the master node out of the loop if we said all slaves
                 slaves.remove(master);
             }
-            for(int asdf = 0; asdf < slaves.size(); asdf++)
+            //we should only print this out if we are debugging
+            for(int x = 0; x < slaves.size(); x++)
             {
-                System.out.println(slaves.get(asdf));
+                System.out.println(slaves.get(x));
             }            
 			for (int x = 0; x < slaves.size(); x++)
-			{ 
-                System.out.println("about to execute on " + slaves.get(x));
-				output = ScriptHelper.doScript(slaves.get(x), script);
+			{
+                if(!slaves.get(x).toString().equals(all) && !slaves.get(x).toString().equals(allslaves))
+                {
+                    System.out.println("about to execute on " + slaves.get(x));
+                    output.append("___________________________________________"+ '\n');
+                    output.append(slaves.get(x).toString() + ": " + '\n');
+				    output.append(ScriptHelper.doScript(slaves.get(x), script));
+                    output.append("___________________________________________"+ '\n');
+                }    
 			}
 		}
 		else
 		{
-            System.out.println("now in the else");
-			output = ScriptHelper.doScript(node, script);
+            output.append("___________________________________________" + '\n');
+            output.append(node + ": " + '\n');
+			output.append(ScriptHelper.doScript(node, script));
+            output.append("___________________________________________" + '\n');
 		}
-		req.setAttribute("output", output);
+		req.setAttribute("output", output.toString());
 		req.getView(this, "runscript.jelly").forward(req, rsp);
         System.out.println("------------------------------------------------");
 	}
