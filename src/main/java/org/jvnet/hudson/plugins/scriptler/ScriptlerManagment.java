@@ -39,6 +39,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -355,8 +356,9 @@ public class ScriptlerManagment extends ManagementLink {
         //System.getProperties().list(System.out);
         
 		StringBuffer output = new StringBuffer();
-        System.out.println("------------------------------------------------");
-        System.out.println("here is the node -> " + node);
+        //LOGGER.getLevel() returns null even if  LOGGER.getParent().getLevel()) works...
+        LOGGER.log(Level.FINE, "------------------------------------------------");
+        LOGGER.log(Level.FINE, "here is the node -> " + node);
 		if(node.equalsIgnoreCase(all) || node.equalsIgnoreCase(allslaves))
 		{
 			List<String> slaves = this.getSlaveNames();
@@ -375,13 +377,13 @@ public class ScriptlerManagment extends ManagementLink {
             //we should only print this out if we are debugging
             for(int x = 0; x < slaves.size(); x++)
             {
-                System.out.println(slaves.get(x));
-            }            
+                LOGGER.log(Level.FINE, slaves.get(x));
+            }
 			for (int x = 0; x < slaves.size(); x++)
 			{
                 if(!slaves.get(x).toString().equals(all) && !slaves.get(x).toString().equals(allslaves))
                 {
-                    System.out.println("about to execute on " + slaves.get(x));
+                    LOGGER.log(Level.FINE, "about to execute on " + slaves.get(x));
                     output.append("___________________________________________"+ '\n');
                     output.append(slaves.get(x).toString() + ": " + '\n');
 				    output.append(ScriptHelper.doScript(slaves.get(x), script));
@@ -398,7 +400,7 @@ public class ScriptlerManagment extends ManagementLink {
 		}
 		req.setAttribute("output", output.toString());
 		req.getView(this, "runscript.jelly").forward(req, rsp);
-        System.out.println("------------------------------------------------");
+        LOGGER.log(Level.FINE, "------------------------------------------------");
 	}
 
 	/**
