@@ -353,12 +353,11 @@ public class ScriptlerManagment extends ManagementLink {
 		req.setAttribute("script", tempScript);
 		req.setAttribute("currentNode", node);
 
-        //System.getProperties().list(System.out);
         
 		StringBuffer output = new StringBuffer();
-        //LOGGER.getLevel() returns null even if  LOGGER.getParent().getLevel()) works...
-        LOGGER.log(Level.FINE, "------------------------------------------------");
-        LOGGER.log(Level.FINE, "here is the node -> " + node);
+       	        //LOGGER.getLevel() returns null even if  LOGGER.getParent().getLevel()) works...
+                LOGGER.log(Level.FINE, "------------------------------------------------");
+                LOGGER.log(Level.FINE, "here is the node -> " + node);
 		if(node.equalsIgnoreCase(all) || node.equalsIgnoreCase(allslaves))
 		{
 			List<String> slaves = this.getSlaveNames();
@@ -386,17 +385,17 @@ public class ScriptlerManagment extends ManagementLink {
                     LOGGER.log(Level.FINE, "about to execute on " + slaves.get(x));
                     output.append("___________________________________________"+ '\n');
                     output.append(slaves.get(x).toString() + ": " + '\n');
-				    output.append(ScriptHelper.doScript(slaves.get(x), script));
+		    output.append(ScriptHelper.doScript(slaves.get(x), script));
                     output.append("___________________________________________"+ '\n');
                 }    
 			}
 		}
 		else
 		{
-            output.append("___________________________________________" + '\n');
-            output.append(node + ": " + '\n');
-			output.append(ScriptHelper.doScript(node, script));
-            output.append("___________________________________________" + '\n');
+                    output.append("___________________________________________" + '\n');
+                    output.append(node + ": " + '\n');
+	            output.append(ScriptHelper.doScript(node, script));
+                    output.append("___________________________________________" + '\n');
 		}
 		req.setAttribute("output", output.toString());
 		req.getView(this, "runscript.jelly").forward(req, rsp);

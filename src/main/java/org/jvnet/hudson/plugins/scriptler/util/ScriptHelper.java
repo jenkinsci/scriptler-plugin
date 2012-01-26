@@ -66,7 +66,6 @@ public class ScriptHelper {
 			try {
 
 				Computer comp = Hudson.getInstance().getComputer(node);
-				//if ((comp == null && "(master)".equals(node)) || node.equals("(all)") || node.equals("(all slaves)"))
                 if ((comp == null && "(master)".equals(node)))
                 {
 					output = RemotingDiagnostics.executeGroovy(scriptTxt, MasterComputer.localChannel);
