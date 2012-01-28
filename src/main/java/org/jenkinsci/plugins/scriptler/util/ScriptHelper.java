@@ -64,11 +64,11 @@ public class ScriptHelper {
         StringBuffer output = new StringBuffer();
         for (String slave : slaves) {
             LOGGER.log(Level.FINE, "here is the node -> " + slave);
-            output.append("___________________________________________" + '\n');
-            output.append(slave + ": " + '\n');
+            output.append("___________________________________________\n");
+            output.append(slave + ":\n");
             output.append(ScriptHelper.runScript(slave, scriptTxt, parameters));
-            output.append("___________________________________________" + '\n');
         }
+        output.append("___________________________________________\n");
         return output.toString();
     }
 
@@ -134,8 +134,9 @@ public class ScriptHelper {
 
         public String call() throws RuntimeException {
             // if we run locally, cl!=null. Otherwise the delegating classloader will be available as context classloader.
-            if (cl == null)
+            if (cl == null) {
                 cl = Thread.currentThread().getContextClassLoader();
+            }
             GroovyShell shell = new GroovyShell(cl);
 
             StringWriter out = new StringWriter();
