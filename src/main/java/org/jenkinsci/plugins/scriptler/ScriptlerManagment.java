@@ -41,7 +41,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -59,6 +58,7 @@ import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfoCatalog;
 import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
+import org.kohsuke.stapler.ForwardToView;
 import org.kohsuke.stapler.HttpRedirect;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.QueryParameter;
@@ -183,9 +183,10 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      *            the catalog to download the file from
      * @return same forward as from <code>doScriptAdd</code>
      * @throws IOException
+     * @throws ServletException
      */
-    public HttpResponse doDownloadScript(StaplerRequest res, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("catalog") String catalogName)
-            throws IOException {
+    public HttpResponse doDownloadScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("catalog") String catalogName)
+            throws IOException, ServletException {
         checkPermission(Hudson.ADMINISTER);
 
         ScriptlerConfiguration c = getConfiguration();
@@ -207,8 +208,10 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
                 return saveScriptAndForward(info.getName(), info.getComment(), source, false, catalogName, id, parameters);
             }
         }
-        // TODO add error handling, inform the user about the failed import
-        return new HttpRedirect("catalog");
+        final ForwardToView view = new ForwardToView(this, "catalog.jelly");
+        view.with("message", Messages.download_failed(id, catalogName));
+        view.with("catName", catalogName);
+        return view;
     }
 
     /**

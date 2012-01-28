@@ -34,10 +34,13 @@
 			<j:out value="${%intro}" />
 			<br />
             <p />
-            <j:set var="catalogName" value="${request.getParameter('name') ?: 'gh'}" />			
+            <j:if test="${message != null}">
+            <div class="warning"><j:out value="${message}" /></div>
+            </j:if> 
+            <j:set var="catalogName" value="${request.getParameter('catName') ?: 'gh'}" />			
 			<l:tabBar>
 			     <j:forEach var="c" items="${it.catalogs}">
-                    <l:tab name="${c.displayName}" active="${c.info.name == catalogName}" href="./catalog?name=${c.info.name}" />
+                    <l:tab name="${c.displayName}" active="${c.info.name == catalogName}" href="./catalog?catName=${c.info.name}" />
                  </j:forEach>
             </l:tabBar>
 			<div class="excerpt">
@@ -45,7 +48,7 @@
 						<j:forEach var="t" items="${it.getCatalogByName(catalogName).entries}">
 							<tr valign="center" style="border-top: 0px;">
 								<td class="pane" width="20">
-									<a href="downloadScript?id=${t.id}&#38;name=${t.name}&#38;catalog=${c.info.name}">
+									<a href="downloadScript?id=${t.id}&#38;name=${t.name}&#38;catalog=${catalogName}">
 										<img width="16" height="16" title="${%import script} '${t.name}'"
 											src="${imagesURL}/16x16/save.gif" />
 									</a>
@@ -79,7 +82,6 @@
 						</j:forEach>
 				</table>
 			</div>
-
 		</l:main-panel>
 	</l:layout>
 </j:jelly>

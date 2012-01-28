@@ -55,7 +55,7 @@
 										<img width="16" height="16" title="${%edit script} ${t.name}" src="${imagesURL }/16x16/document_edit.gif" />
 									</a>
 									<j:out value=" " />
-									<a href="removeScript?name=${t.name}">
+									<a href="removeScript?name=${t.name}" onclick="return confirmDelete('${t.name}')">
 										<img width="16" height="16" title="${%remove script} ${t.name}" src="${imagesURL}/16x16/edit-delete.gif" />
 									</a>
 								</l:hasPermission>
@@ -87,13 +87,21 @@
 								<j:out value=" " />
 							</td>
 							<td colspan="5" style="white-space: normal;">
-								<j:out value="${t.comment}" />
+								<j:out value="${empty(t.comment) ? '-' : t.comment}" />
 							</td>
 						</tr>
 					</j:forEach>
 				</table>
 			</div>
-
+    <script>
+    function confirmDelete(name) {
+      if (confirm("Sure you want to delete ["+name+"]?")) {
+        return true;
+      }else{
+        return false;
+      }
+    }
+   </script>
 		</l:main-panel>
 	</l:layout>
 </j:jelly>
