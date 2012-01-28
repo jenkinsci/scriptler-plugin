@@ -60,6 +60,18 @@ public class ScriptHelper {
         return s;
     }
 
+    public static String runScript(String[] slaves, String scriptTxt, Parameter[] parameters) throws IOException, ServletException {
+        StringBuffer output = new StringBuffer();
+        for (String slave : slaves) {
+            LOGGER.log(Level.FINE, "here is the node -> " + slave);
+            output.append("___________________________________________" + '\n');
+            output.append(slave + ": " + '\n');
+            output.append(ScriptHelper.runScript(slave, scriptTxt, parameters));
+            output.append("___________________________________________" + '\n');
+        }
+        return output.toString();
+    }
+
     /**
      * Runs the execution on a given slave.
      * 
@@ -71,7 +83,7 @@ public class ScriptHelper {
      * @throws IOException
      * @throws ServletException
      */
-    public static String doScript(String node, String scriptTxt, Parameter[] parameters) throws IOException, ServletException {
+    public static String runScript(String node, String scriptTxt, Parameter[] parameters) throws IOException, ServletException {
 
         String output = "[no output]";
         if (node != null && scriptTxt != null) {

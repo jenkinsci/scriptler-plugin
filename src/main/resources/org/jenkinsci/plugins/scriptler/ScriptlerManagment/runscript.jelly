@@ -66,7 +66,7 @@ THE SOFTWARE.
 							<j:set var="currentNode" value="${currentNode}" />
 							<f:entry name="node" title="Select a node">
 								<select name="node">
-									<j:forEach var="aNode" items="${it.slaveNames}" varStatus="loop">
+									<j:forEach var="aNode" items="${it.slaveAlias}" varStatus="loop">
 										<j:choose>
 											<j:when test="${currentNode==aNode}">
 												<option value="${aNode}" selected="selected">${aNode}</option>

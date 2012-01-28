@@ -38,8 +38,10 @@ import java.io.IOException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -72,6 +74,9 @@ import org.kohsuke.stapler.StaplerResponse;
 public class ScriptlerManagment extends ManagementLink implements RootAction {
 
     private final static Logger LOGGER = Logger.getLogger(ScriptlerManagment.class.getName());
+    private final static String MASTER = "(master)";
+    private final static String ALL = "(all)";
+    private final static String ALL_SLAVES = "(all slaves)";
 
     private boolean isRunScriptPermissionEnabled() {
         return getConfiguration().isAllowRunScriptPermission();
@@ -389,7 +394,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
         req.setAttribute("script", script);
         req.setAttribute("readOnly", !isChangeScriptAllowed);
         // set default selection
-        req.setAttribute("currentNode", "(master)");
+        req.setAttribute("currentNode", MASTER);
         req.getView(this, "runscript.jelly").forward(req, rsp);
     }
 
@@ -433,13 +438,33 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
             tempScript.setScript(scriptSrc);
         }
 
-        String output = ScriptHelper.doScript(node, scriptSrc, parameters);
+        final String[] slaves = resolveSlaveNames(node);
+        String output = ScriptHelper.runScript(slaves, scriptSrc, parameters);
 
         tempScript.setParameters(parameters);// show the same parameters to the user
         req.setAttribute("script", tempScript);
         req.setAttribute("currentNode", node);
         req.setAttribute("output", output);
         req.getView(this, "runscript.jelly").forward(req, rsp);
+    }
+
+    private String[] resolveSlaveNames(String nameAlias) {
+        List<String> slaves = null;
+        if (nameAlias.equalsIgnoreCase(ALL) || nameAlias.equalsIgnoreCase(ALL_SLAVES)) {
+            slaves = this.getSlaveNames();
+            if (nameAlias.equalsIgnoreCase(ALL)) {
+                if (!slaves.contains(MASTER)) {
+                    slaves.add(MASTER);
+                }
+            }
+            if (nameAlias.equalsIgnoreCase(ALL_SLAVES)) {
+                // take the master node out of the loop if we said all slaves
+                slaves.remove(MASTER);
+            }
+        } else {
+            slaves = Arrays.asList(nameAlias);
+        }
+        return slaves.toArray(new String[slaves.size()]);
     }
 
     /**
@@ -463,24 +488,36 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
     }
 
     /**
-     * Gets the names of all configured slaves, regardless whether they are online.
+     * Gets the names of all configured slaves, regardless whether they are online, including alias of ALL and ALL_SLAVES
      * 
      * @return list with all slave names
      */
-    @SuppressWarnings("deprecation")
-    public List<String> getSlaveNames() {
+    public List<String> getSlaveAlias() {
+
+        final List<String> slaveNames = getSlaveNames();
+        // add 'magic' name for master, so all nodes can be handled the same way
+        if (!slaveNames.contains(MASTER)) {
+            slaveNames.add(0, MASTER);
+        }
+        if (slaveNames.size() > 0) {
+            if (!slaveNames.contains(ALL)) {
+                slaveNames.add(1, ALL);
+            }
+            if (!slaveNames.contains(ALL_SLAVES)) {
+                slaveNames.add(2, ALL_SLAVES);
+            }
+        }
+        return slaveNames;
+    }
+
+    private List<String> getSlaveNames() {
         ComputerSet computers = Jenkins.getInstance().getComputer();
         List<String> slaveNames = computers.get_slaveNames();
 
         // slaveNames is unmodifiable, therefore create a new list
-        List<String> test = new ArrayList<String>();
-        test.addAll(slaveNames);
-
-        // add 'magic' name for master, so all nodes can be handled the same way
-        if (!test.contains("(master)")) {
-            test.add("(master)");
-        }
-        return test;
+        List<String> slaves = new ArrayList<String>();
+        slaves.addAll(slaveNames);
+        return slaves;
     }
 
     /**
