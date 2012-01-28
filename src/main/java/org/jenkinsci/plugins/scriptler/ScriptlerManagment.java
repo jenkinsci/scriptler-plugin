@@ -448,6 +448,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
         req.setAttribute("script", tempScript);
         req.setAttribute("currentNode", node);
         req.setAttribute("output", output);
+        req.setAttribute("readOnly", !isChangeScriptAllowed);
         req.getView(this, "runscript.jelly").forward(req, rsp);
     }
 
