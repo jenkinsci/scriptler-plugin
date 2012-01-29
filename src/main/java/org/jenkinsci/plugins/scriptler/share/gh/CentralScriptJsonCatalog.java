@@ -10,7 +10,7 @@ import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfoList;
 
 /**
- * Gets the GitHub catalog from http://mirrors.jenkins-ci.org/updates/updates/org.jenkins-ci.plugins.scriptler.CentralScriptJsonCatalog.json. This catalog is updated by a background crawler on the
+ * Gets the GitHub catalog from <a href="http://mirrors.jenkins-ci.org/updates/updates/org.jenkinsci.plugins.scriptler.CentralScriptJsonCatalog.json">jenkins-ci/org.jenkinsci.plugins.scriptler.CentralScriptJsonCatalog.json</a>. This catalog is updated by a background crawler on the
  * Jenkins infrastructure site.
  * 
  * @author Dominik Bartholdi (imod)
@@ -18,7 +18,7 @@ import org.jenkinsci.plugins.scriptler.share.ScriptInfoList;
 @Extension
 public class CentralScriptJsonCatalog extends Downloadable {
 
-    public static final String ID = "org.jenkins-ci.plugins.scriptler.CentralScriptJsonCatalog";
+    public static final String ID = "org.jenkinsci.plugins.scriptler.CentralScriptJsonCatalog";
 
     public CentralScriptJsonCatalog() {
         super(ID);
