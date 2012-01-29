@@ -205,7 +205,8 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
 
                 Parameter[] parameters = paramList.toArray(new Parameter[paramList.size()]);
 
-                return saveScriptAndForward(info.getName(), info.getComment(), source, false, catalogName, id, parameters);
+                final String finalName = saveScriptAndForward(info.getName(), info.getComment(), source, false, catalogName, id, parameters);
+                return new HttpRedirect("editScript?name=" + finalName);
             }
         }
         final ForwardToView view = new ForwardToView(this, "catalog.jelly");
@@ -243,7 +244,8 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
 
         Parameter[] parameters = extractParameters(req);
 
-        return saveScriptAndForward(name, comment, script, nonAdministerUsing, originCatalogName, originId, parameters);
+        saveScriptAndForward(name, comment, script, nonAdministerUsing, originCatalogName, originId, parameters);
+        return new HttpRedirect("index");
     }
 
     /**
@@ -276,35 +278,35 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
     /**
      * Save the script details and return the forward to index
      * 
+     * @return the final name of the saved script
      * @throws IOException
      */
-    private HttpResponse saveScriptAndForward(String name, String comment, String script, boolean nonAdministerUsing, String originCatalogName,
-            String originId, Parameter[] parameters) throws IOException {
+    private String saveScriptAndForward(String name, String comment, String script, boolean nonAdministerUsing, String originCatalogName, String originId,
+            Parameter[] parameters) throws IOException {
         if (StringUtils.isEmpty(script) || StringUtils.isEmpty(name)) {
             throw new IllegalArgumentException("'name' and 'script' must not be empty!");
         }
 
-        name = fixFileName(originCatalogName, name);
+        final String finalName = fixFileName(originCatalogName, name);
 
         // save (overwrite) the file/script
-        File newScriptFile = new File(getScriptDirectory(), name);
+        File newScriptFile = new File(getScriptDirectory(), finalName);
         Writer writer = new FileWriter(newScriptFile);
         writer.write(script);
         writer.close();
 
         Script newScript = null;
         if (!StringUtils.isEmpty(originId)) {
-            newScript = new Script(name, comment, true, originCatalogName, originId, new SimpleDateFormat("dd MMM yyyy HH:mm:ss a").format(new Date()),
+            newScript = new Script(finalName, comment, true, originCatalogName, originId, new SimpleDateFormat("dd MMM yyyy HH:mm:ss a").format(new Date()),
                     parameters);
         } else {
             // save (overwrite) the meta information
-            newScript = new Script(name, comment, nonAdministerUsing, parameters);
+            newScript = new Script(finalName, comment, nonAdministerUsing, parameters);
         }
         ScriptlerConfiguration cfg = getConfiguration();
         cfg.addOrReplace(newScript);
         cfg.save();
-
-        return new HttpRedirect("index");
+        return finalName;
     }
 
     /**

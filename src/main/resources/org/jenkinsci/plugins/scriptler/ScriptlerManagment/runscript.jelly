@@ -89,7 +89,7 @@ THE SOFTWARE.
 											<f:entry>
 												Name: 
 												<input type="text" name="name" value="${param.name}" size="50" />
-												Default: 
+												Value: 
 												<input type="text" name="value" value="${param.value}" size="80" />
 											</f:entry>
 										</table>

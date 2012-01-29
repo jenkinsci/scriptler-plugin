@@ -112,6 +112,7 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
         XSTREAM.alias("scriptler", ScriptlerConfiguration.class);
         XSTREAM.alias("script", Script.class);
         XSTREAM.alias("catalog", CatalogInfo.class);
+        XSTREAM.alias("parameter", Parameter.class);
         XSTREAM.alias("org.jvnet.hudson.plugins.scriptler.util.ByNameSorter", ByNameSorter.class);
     }
 
