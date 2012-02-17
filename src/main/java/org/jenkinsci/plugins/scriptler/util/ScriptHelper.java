@@ -39,22 +39,22 @@ public class ScriptHelper {
     /**
      * Loads the script information.
      * 
-     * @param scriptName
-     *            the name of the script
+     * @param id
+     *            the id of the script
      * @param withSrc
      *            should the script sources be loaded too?
      * @return the script
      */
-    public static Script getScript(String scriptName, boolean withSrc) {
-        Script s = ScriptlerConfiguration.getConfiguration().getScriptByName(scriptName);
-        File scriptSrc = new File(ScriptlerManagment.getScriptDirectory(), scriptName);
+    public static Script getScript(String id, boolean withSrc) {
+        Script s = ScriptlerConfiguration.getConfiguration().getScriptById(id);
+        File scriptSrc = new File(ScriptlerManagment.getScriptDirectory(), id);
         if (withSrc) {
             try {
                 Reader reader = new FileReader(scriptSrc);
                 String src = IOUtils.toString(reader);
                 s.setScript(src);
             } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "not able to load sources for script [" + scriptName + "]", e);
+                LOGGER.log(Level.SEVERE, "not able to load sources for script [" + id + "]", e);
             }
         }
         return s;
@@ -65,7 +65,7 @@ public class ScriptHelper {
         for (String slave : slaves) {
             LOGGER.log(Level.FINE, "here is the node -> " + slave);
             output.append("___________________________________________\n");
-            output.append(slave + ":\n");
+            output.append("[" + slave + "]:\n");
             output.append(ScriptHelper.runScript(slave, scriptTxt, parameters));
         }
         output.append("___________________________________________\n");
@@ -94,10 +94,10 @@ public class ScriptHelper {
                 if (comp == null && "(master)".equals(node)) {
                     output = RemotingDiagnostics.executeGroovy(scriptTxt, MasterComputer.localChannel);
                 } else if (comp == null) {
-                    output = Messages.node_not_found(node);
+                    output = Messages.node_not_found(node) + "\n";
                 } else {
                     if (comp.getChannel() == null) {
-                        output = Messages.node_not_online(node);
+                        output = Messages.node_not_online(node) + "\n";
                     }
 
                     else {

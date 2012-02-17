@@ -205,8 +205,8 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
 
                 Parameter[] parameters = paramList.toArray(new Parameter[paramList.size()]);
 
-                final String finalName = saveScriptAndForward(info.getName(), info.getComment(), source, false, catalogName, id, parameters);
-                return new HttpRedirect("editScript?name=" + finalName);
+                final String finalName = saveScriptAndForward(id, info.getName(), info.getComment(), source, false, catalogName, id, parameters);
+                return new HttpRedirect("editScript?id=" + finalName);
             }
         }
         final ForwardToView view = new ForwardToView(this, "catalog.jelly");
@@ -222,8 +222,10 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      *            response
      * @param rsp
      *            request
+     * @param id
+     *            the script id (fileName)
      * @param name
-     *            the name for the file
+     *            the name of the script
      * @param comment
      *            a comment
      * @param script
@@ -236,15 +238,15 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      * @throws IOException
      * @throws ServletException
      */
-    public HttpResponse doScriptAdd(StaplerRequest req, StaplerResponse rsp, @QueryParameter("name") String name, @QueryParameter("comment") String comment,
-            @QueryParameter("script") String script, @QueryParameter("nonAdministerUsing") boolean nonAdministerUsing, String originCatalogName, String originId)
-            throws IOException, ServletException {
+    public HttpResponse doScriptAdd(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("name") String name,
+            @QueryParameter("comment") String comment, @QueryParameter("script") String script,
+            @QueryParameter("nonAdministerUsing") boolean nonAdministerUsing, String originCatalogName, String originId) throws IOException, ServletException {
 
         checkPermission(Hudson.ADMINISTER);
 
         Parameter[] parameters = extractParameters(req);
 
-        saveScriptAndForward(name, comment, script, nonAdministerUsing, originCatalogName, originId, parameters);
+        saveScriptAndForward(id, name, comment, script, nonAdministerUsing, originCatalogName, originId, parameters);
         return new HttpRedirect("index");
     }
 
@@ -278,35 +280,37 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
     /**
      * Save the script details and return the forward to index
      * 
-     * @return the final name of the saved script
+     * @return the final name of the saved script - which is also the id of the script!
      * @throws IOException
      */
-    private String saveScriptAndForward(String name, String comment, String script, boolean nonAdministerUsing, String originCatalogName, String originId,
-            Parameter[] parameters) throws IOException {
-        if (StringUtils.isEmpty(script) || StringUtils.isEmpty(name)) {
-            throw new IllegalArgumentException("'name' and 'script' must not be empty!");
+    private String saveScriptAndForward(String id, String name, String comment, String script, boolean nonAdministerUsing, String originCatalogName,
+            String originId, Parameter[] parameters) throws IOException {
+        script = script == null ? "TODO" : script;
+        if (StringUtils.isEmpty(id)) {
+            throw new IllegalArgumentException("'id' must not be empty!");
         }
 
-        final String finalName = fixFileName(originCatalogName, name);
+        final String displayName = name == null ? id : name;
+        final String finalFileName = fixFileName(originCatalogName, id);
 
         // save (overwrite) the file/script
-        File newScriptFile = new File(getScriptDirectory(), finalName);
+        File newScriptFile = new File(getScriptDirectory(), finalFileName);
         Writer writer = new FileWriter(newScriptFile);
         writer.write(script);
         writer.close();
 
         Script newScript = null;
         if (!StringUtils.isEmpty(originId)) {
-            newScript = new Script(finalName, comment, true, originCatalogName, originId, new SimpleDateFormat("dd MMM yyyy HH:mm:ss a").format(new Date()),
-                    parameters);
+            newScript = new Script(finalFileName, displayName, comment, true, originCatalogName, originId,
+                    new SimpleDateFormat("dd MMM yyyy HH:mm:ss a").format(new Date()), parameters);
         } else {
             // save (overwrite) the meta information
-            newScript = new Script(finalName, comment, nonAdministerUsing, parameters);
+            newScript = new Script(finalFileName, displayName, comment, nonAdministerUsing, parameters);
         }
         ScriptlerConfiguration cfg = getConfiguration();
         cfg.addOrReplace(newScript);
         cfg.save();
-        return finalName;
+        return finalFileName;
     }
 
     /**
@@ -321,16 +325,16 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      * @return forward to 'index'
      * @throws IOException
      */
-    public HttpResponse doRemoveScript(StaplerRequest res, StaplerResponse rsp, @QueryParameter("name") String name) throws IOException {
+    public HttpResponse doRemoveScript(StaplerRequest res, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException {
         checkPermission(Hudson.ADMINISTER);
 
         // remove the file
-        File oldScript = new File(getScriptDirectory(), name);
+        File oldScript = new File(getScriptDirectory(), id);
         oldScript.delete();
 
         // remove the meta information
         ScriptlerConfiguration cfg = getConfiguration();
-        cfg.removeScript(name);
+        cfg.removeScript(id);
         cfg.save();
 
         return new HttpRedirect("index");
@@ -389,8 +393,8 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      * @throws IOException
      * @throws ServletException
      */
-    public void doRunScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("name") String scriptName) throws IOException, ServletException {
-        Script script = ScriptHelper.getScript(scriptName, true);
+    public void doRunScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException, ServletException {
+        Script script = ScriptHelper.getScript(id, true);
         checkPermission(getRequiredPermissionForRunScript());
 
         final boolean isAdmin = Jenkins.getInstance().getACL().hasPermission(Jenkins.ADMINISTER);
@@ -421,8 +425,8 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      * @throws IOException
      * @throws ServletException
      */
-    public void doTriggerScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("scriptName") String scriptName,
-            @QueryParameter("script") String scriptSrc, @QueryParameter("node") String node) throws IOException, ServletException {
+    public void doTriggerScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("script") String scriptSrc,
+            @QueryParameter("node") String node) throws IOException, ServletException {
 
         checkPermission(getRequiredPermissionForRunScript());
 
@@ -433,13 +437,13 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
         final boolean isChangeScriptAllowed = isAdmin || allowRunScriptEdit();
 
         if (!isChangeScriptAllowed) {
-            tempScript = ScriptHelper.getScript(scriptName, true);
+            tempScript = ScriptHelper.getScript(id, true);
             // use original script, user has no permission to change it!s
             scriptSrc = tempScript.script;
         } else {
             // set the script info back to the request, to display it together with
             // the output.
-            tempScript = ScriptHelper.getScript(scriptName, false);
+            tempScript = ScriptHelper.getScript(id, false);
             tempScript.setScript(scriptSrc);
         }
 
@@ -485,10 +489,10 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      * @throws IOException
      * @throws ServletException
      */
-    public void doEditScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("name") String scriptName) throws IOException, ServletException {
+    public void doEditScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException, ServletException {
         checkPermission(Hudson.ADMINISTER);
 
-        Script script = ScriptHelper.getScript(scriptName, true);
+        Script script = ScriptHelper.getScript(id, true);
         req.setAttribute("script", script);
         req.getView(this, "edit.jelly").forward(req, rsp);
     }

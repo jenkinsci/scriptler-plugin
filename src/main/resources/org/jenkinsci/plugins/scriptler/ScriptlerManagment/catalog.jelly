@@ -48,7 +48,7 @@
 						<j:forEach var="t" items="${it.getCatalogByName(catalogName).entries}">
 							<tr valign="center" style="border-top: 0px;">
 								<td class="pane" width="20">
-									<a href="downloadScript?id=${t.id}&#38;name=${t.name}&#38;catalog=${catalogName}">
+									<a href="downloadScript?id=${t.id}&#38;&#38;catalog=${catalogName}">
 										<img width="16" height="16" title="${%import script} '${t.name}'"
 											src="${imagesURL}/16x16/save.gif" />
 									</a>

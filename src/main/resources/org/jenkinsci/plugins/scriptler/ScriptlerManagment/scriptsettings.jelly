@@ -43,13 +43,16 @@
 				<pre>println System.getenv("PATH")</pre>
 			</p>
 			<f:form method="post" action="scriptAdd">
+			    <f:entry title="${%Id}">
+                    <f:textbox name="id" />
+                </f:entry>
 				<f:entry title="${%Name}">
 					<f:textbox name="name" />
 				</f:entry>
 				<f:entry title="${%Comment}">
 					<f:textbox name="comment" />
 				</f:entry>
-                                <f:entry title="${%Permission}">
+                <f:entry title="${%Permission}">
 					<f:checkbox name="nonAdministerUsing" />
 				</f:entry>
 				<f:entry title="${%Script}">

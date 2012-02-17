@@ -40,7 +40,7 @@ import java.util.logging.Logger;
 
 import org.jenkinsci.plugins.scriptler.ScriptlerManagment;
 import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
-import org.jenkinsci.plugins.scriptler.util.ByNameSorter;
+import org.jenkinsci.plugins.scriptler.util.ByIdSorter;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -83,7 +83,7 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
             // As it might be that we have an unsorted set, we ensure the
             // sorting at load time.
             ScriptlerConfiguration sc = (ScriptlerConfiguration) f.read();
-            SortedSet<Script> sorted = new TreeSet<Script>(new ByNameSorter());
+            SortedSet<Script> sorted = new TreeSet<Script>(new ByIdSorter());
             sorted.addAll(sc.getScripts());
             sc.setScripts(sorted);
             return sc;
@@ -113,7 +113,7 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
         XSTREAM.alias("script", Script.class);
         XSTREAM.alias("catalog", CatalogInfo.class);
         XSTREAM.alias("parameter", Parameter.class);
-        XSTREAM.alias("org.jvnet.hudson.plugins.scriptler.util.ByNameSorter", ByNameSorter.class);
+        XSTREAM.alias("org.jvnet.hudson.plugins.scriptler.util.ByNameSorter", ByIdSorter.class);
     }
 
     public boolean isDisbableRemoteCatalog() {

@@ -52,7 +52,7 @@ THE SOFTWARE.
 			</p>
 
 			<form action="triggerScript" method="post">
-				<input type="hidden" value="${script.name}" name="scriptName" />
+				<input type="hidden" value="${script.id}" name="id" />
 				<table class="pane">
 					<tr>
 						<td colspan="3">

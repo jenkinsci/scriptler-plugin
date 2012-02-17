@@ -42,13 +42,16 @@ THE SOFTWARE.
 			</h1>
 			<f:form method="post" action="scriptAdd">
 				<j:jelly xmlns:j="jelly:core">
+				    <f:entry title="${%Id}" description="${%IdDescription}">
+                        <f:textbox name="id" value="${script.id}" />
+                    </f:entry>
 					<f:entry title="${%Name}">
 						<f:textbox name="name" value="${script.name}" />
 					</f:entry>
 					<f:entry title="${%Comment}">
 						<f:textbox name="comment" value="${script.comment}" />
 					</f:entry>
-                                        <f:entry title="${%Permission}">
+                    <f:entry title="${%Permission}" description="${%PermissionDescription}">
 						<f:checkbox name="nonAdministerUsing" checked="${script.nonAdministerUsing}" />
 					</f:entry>
                     <f:block>

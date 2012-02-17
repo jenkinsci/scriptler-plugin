@@ -30,7 +30,7 @@ import java.util.TreeSet;
 import org.apache.commons.lang.StringUtils;
 
 /**
- * @author domi
+ * @author imod
  * 
  */
 public class ScriptSet {
@@ -38,24 +38,24 @@ public class ScriptSet {
     // have it sorted
     protected Set<Script> scriptSet = new TreeSet<Script>();
 
-    public Script getScriptByName(String name) {
+    public Script getScriptById(String id) {
         for (Script scr : scriptSet) {
-            if (scr.name.equals(name)) {
+            if (scr.getId().equals(id)) {
                 return scr;
             }
         }
         return null;
     }
 
-    public void removeScript(String name) {
-        Script s = getScriptByName(name);
+    public void removeScript(String id) {
+        Script s = getScriptById(id);
         scriptSet.remove(s);
     }
 
     public void addOrReplace(Script script) {
         if (script != null) {
-            if (scriptSet.contains(script)) {
-                Script oldScript = this.getScriptByName(script.name);
+            Script oldScript = this.getScriptById(script.getId());
+            if (oldScript != null) {
                 Script mergedScript = merge(oldScript, script);
                 scriptSet.remove(script);
                 scriptSet.add(mergedScript);
@@ -66,11 +66,12 @@ public class ScriptSet {
     }
 
     private Script merge(Script origin, Script newScript) {
+        String name = StringUtils.isEmpty(newScript.name) ? origin.name : newScript.name;
         String comment = StringUtils.isEmpty(newScript.comment) ? origin.comment : newScript.comment;
         String originCatalog = StringUtils.isEmpty(newScript.originCatalog) ? origin.originCatalog : newScript.originCatalog;
         String originScript = StringUtils.isEmpty(newScript.originScript) ? origin.originScript : newScript.originScript;
         String originDate = StringUtils.isEmpty(newScript.originDate) ? origin.originDate : newScript.originDate;
-        return new Script(origin.getName(), comment, newScript.available, originCatalog, originScript, originDate, newScript.nonAdministerUsing,
+        return new Script(newScript.getId(), name, comment, newScript.available, originCatalog, originScript, originDate, newScript.nonAdministerUsing,
                 newScript.getParameters());
     }
 

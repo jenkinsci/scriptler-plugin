@@ -51,16 +51,16 @@
 								</j:choose>
 								<j:out value=" " />
 								<l:hasPermission permission="${app.ADMINISTER}">
-									<a href="editScript?name=${t.name}">
+									<a href="editScript?id=${t.id}">
 										<img width="16" height="16" title="${%edit script} ${t.name}" src="${imagesURL }/16x16/document_edit.gif" />
 									</a>
 									<j:out value=" " />
-									<a href="removeScript?name=${t.name}" onclick="return confirmDelete('${t.name}')">
+									<a href="removeScript?id=${t.id}" onclick="return confirmDelete('${t.name}')">
 										<img width="16" height="16" title="${%remove script} ${t.name}" src="${imagesURL}/16x16/edit-delete.gif" />
 									</a>
 								</l:hasPermission>
 								<j:out value=" " />
-								<a href="runScript?name=${t.name}">
+								<a href="runScript?id=${t.id}">
 									<img width="16" height="16" title="${%run script} ${t.name}" src="${imagesURL}/16x16/terminal.gif" />
 								</a>
                                 <j:if test="${t.nonAdministerUsing}">
@@ -74,7 +74,7 @@
 							<td class="pane-header">
 								<j:if test="${!empty(t.originScript)}">
 									Origin info:
-									<a target="_blank" href="${it.getCatalogInfoByName(t.originCatalog).getReplacedDetailUrl(t.name, t.originScript)}">
+									<a target="_blank" href="${it.getCatalogInfoByName(t.originCatalog).getReplacedDetailUrl(t.id, t.originScript)}">
 										<j:out value="${t.originScript}" />
 									</a>
 									, import date:

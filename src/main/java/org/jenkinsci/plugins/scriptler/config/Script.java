@@ -27,6 +27,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 public class Script implements Comparable<Script>, NamedResource {
 
+    private String id;
     public final String name;
     public final String comment;
     public final boolean available;
@@ -47,7 +48,8 @@ public class Script implements Comparable<Script>, NamedResource {
      * used to create/update a new script in the UI
      */
     @DataBoundConstructor
-    public Script(String name, String comment, boolean nonAdministerUsing, Parameter[] parameters) {
+    public Script(String id, String name, String comment, boolean nonAdministerUsing, Parameter[] parameters) {
+        this.id = id;
         this.name = name;
         this.comment = comment;
         this.available = true;
@@ -61,8 +63,9 @@ public class Script implements Comparable<Script>, NamedResource {
     /**
      * used during upload of a new script
      */
-    public Script(String name, String comment) {
-        this.name = name;
+    public Script(String id, String comment) {
+        this.id = id;
+        this.name = id;
         this.comment = comment;
         this.available = true;
         this.originCatalog = null;
@@ -75,8 +78,9 @@ public class Script implements Comparable<Script>, NamedResource {
     /**
      * used during plugin start to synchronize available scripts
      */
-    public Script(String name, String comment, boolean available, boolean nonAdministerUsing) {
-        this.name = name;
+    public Script(String id, String comment, boolean available, boolean nonAdministerUsing) {
+        this.id = id;
+        this.name = id;
         this.comment = comment;
         this.available = available;
         this.originCatalog = null;
@@ -89,7 +93,9 @@ public class Script implements Comparable<Script>, NamedResource {
     /**
      * Constructor to create a script imported from a foreign catalog.
      */
-    public Script(String name, String comment, boolean available, String originCatalog, String originScript, String originDate, Parameter[] parameters) {
+    public Script(String id, String name, String comment, boolean available, String originCatalog, String originScript, String originDate,
+            Parameter[] parameters) {
+        this.id = id;
         this.name = name;
         this.comment = comment;
         this.available = available;
@@ -104,8 +110,9 @@ public class Script implements Comparable<Script>, NamedResource {
     /**
      * used to merge scripts
      */
-    public Script(String name, String comment, boolean available, String originCatalog, String originScript, String originDate, boolean nonAdministerUsing,
-            Parameter[] parameters) {
+    public Script(String id, String name, String comment, boolean available, String originCatalog, String originScript, String originDate,
+            boolean nonAdministerUsing, Parameter[] parameters) {
+        this.id = id;
         this.name = name;
         this.comment = comment;
         this.available = available;
@@ -147,25 +154,42 @@ public class Script implements Comparable<Script>, NamedResource {
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
     public int compareTo(Script o) {
-        return name.compareTo(o.name);
+        return id.compareTo(o.id);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
+     * Previously we used not to have an id, but only a name.
+     */
+    public Object readResolve() {
+        if (id == null) {
+            id = name;
+        }
+        return this;
+    }
+
+    /**
+     * @return the id
+     */
+    public String getId() {
+        return id;
+    }
+
+    public String toString() {
+        return "[Script: " + id + ":" + name + "]";
+    }
+
+    /**
      * @see java.lang.Object#hashCode()
      */
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
@@ -176,15 +200,15 @@ public class Script implements Comparable<Script>, NamedResource {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof Script)) {
+        if (getClass() != obj.getClass()) {
             return false;
         }
         Script other = (Script) obj;
-        if (name == null) {
-            if (other.name != null) {
+        if (id == null) {
+            if (other.id != null) {
                 return false;
             }
-        } else if (!name.equals(other.name)) {
+        } else if (!id.equals(other.id)) {
             return false;
         }
         return true;

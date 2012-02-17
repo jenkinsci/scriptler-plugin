@@ -28,12 +28,11 @@ import java.util.Comparator;
 import org.jenkinsci.plugins.scriptler.config.NamedResource;
 
 /**
- * @author domi
+ * @author imod
  * 
  */
-public class ByNameSorter implements Comparator<NamedResource> {
-	public int compare(NamedResource o1, NamedResource o2) {
-		return o1.getName().compareTo(o2.getName());
-	};
-
+public class ByIdSorter implements Comparator<NamedResource> {
+    public int compare(NamedResource o1, NamedResource o2) {
+        return o1.getId().compareTo(o2.getId());
+    };
 }
