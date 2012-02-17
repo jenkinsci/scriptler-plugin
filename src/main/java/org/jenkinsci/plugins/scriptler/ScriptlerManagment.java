@@ -103,7 +103,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      */
     @Override
     public String getUrlName() {
-        return Jenkins.getInstance().hasPermission(getRequiredPermissionForRunScript()) ? "scriptler" : null;
+        return "scriptler";
     }
 
     public boolean disableRemoteCatalog() {
