@@ -259,21 +259,22 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      * @throws ServletException
      */
     private Parameter[] extractParameters(StaplerRequest req) throws ServletException {
-        Parameter[] parameters = new Parameter[0];
-        final JSONObject json = req.getSubmittedForm();
-        final JSONObject defineParams = json.getJSONObject("defineParams");
-        if (!defineParams.isNullObject()) {
-            JSONObject argsObj = defineParams.optJSONObject("parameters");
-            if (argsObj == null) {
-                JSONArray argsArrayObj = defineParams.optJSONArray("parameters");
-                if (argsArrayObj != null) {
-                    parameters = (Parameter[]) JSONArray.toArray(argsArrayObj, Parameter.class);
-                }
-            } else {
-                Parameter param = (Parameter) JSONObject.toBean(argsObj, Parameter.class);
-                parameters = new Parameter[] { param };
-            }
+        if (!"on".equals(req.getParameter("defineParams"))) {
+            return new Parameter[0];
         }
+
+        String[] names = req.getParameterValues("name");
+        String[] values = req.getParameterValues("value");
+        // if there is a script name, it should be excluded from parameter values 'names'.
+        if (names.length == values.length + 1) {
+            names = Arrays.copyOfRange(names, 1, names.length);
+        }
+
+        Parameter[] parameters = new Parameter[names.length];
+        for (int i = 0; i < names.length; i++) {
+            parameters[i] = new Parameter(names[i], values[i]);
+        }
+
         return parameters;
     }
 
