@@ -57,9 +57,9 @@
 	</build>
 	<scm>
 		<connection>scm:git:git://github.com/jenkinsci/scriptler-plugin.git</connection>
-<!--		<developerConnection>scm:git:https://github.com/jenkinsci/scriptler-plugin.git</developerConnection>-->
+		<!-- <developerConnection>scm:git:https://github.com/jenkinsci/scriptler-plugin.git</developerConnection> -->
 		<developerConnection>scm:git:ssh://git@github.com/jenkinsci/scriptler-plugin.git</developerConnection>
-<!--		<developerConnection>scm:git:git@github.com:jenkinsci/scriptler-plugin.git</developerConnection>-->
+		<!-- <developerConnection>scm:git:git@github.com:jenkinsci/scriptler-plugin.git</developerConnection> -->
 		<url>https://github.com/jenkinsci/scriptler-plugin</url>
 	</scm>
 	<distributionManagement>
@@ -73,4 +73,11 @@
 			<url>file:/tmp/dummy-repo</url>
 		</snapshotRepository>
 	</distributionManagement>
+	<dependencies>
+		<dependency>
+			<groupId>org.jenkins-ci.plugins</groupId>
+			<artifactId>token-macro</artifactId>
+			<version>1.5.1</version>
+		</dependency>
+	</dependencies>
 </project>

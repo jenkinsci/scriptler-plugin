@@ -58,6 +58,7 @@ import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfoCatalog;
 import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
+import org.jenkinsci.plugins.scriptler.util.UIHelper;
 import org.kohsuke.stapler.ForwardToView;
 import org.kohsuke.stapler.HttpRedirect;
 import org.kohsuke.stapler.HttpResponse;
@@ -82,7 +83,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
         return getConfiguration().isAllowRunScriptPermission();
     }
 
-    private Permission getRequiredPermissionForRunScript() {
+    public Permission getRequiredPermissionForRunScript() {
         return isRunScriptPermissionEnabled() ? Jenkins.RUN_SCRIPTS : Jenkins.ADMINISTER;
     }
 
@@ -244,37 +245,10 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
 
         checkPermission(Hudson.ADMINISTER);
 
-        Parameter[] parameters = extractParameters(req);
+        Parameter[] parameters = UIHelper.extractParameters(req.getSubmittedForm());
 
         saveScriptAndForward(id, name, comment, script, nonAdministerUsing, originCatalogName, originId, parameters);
         return new HttpRedirect("index");
-    }
-
-    /**
-     * Extracts the parameters from the given request
-     * 
-     * @param req
-     *            the request potentially containing parameters
-     * @return parameters - might be an empty array, but never <code>null</code>.
-     * @throws ServletException
-     */
-    private Parameter[] extractParameters(StaplerRequest req) throws ServletException {
-        Parameter[] parameters = new Parameter[0];
-        final JSONObject json = req.getSubmittedForm();
-        final JSONObject defineParams = json.getJSONObject("defineParams");
-        if (!defineParams.isNullObject()) {
-            JSONObject argsObj = defineParams.optJSONObject("parameters");
-            if (argsObj == null) {
-                JSONArray argsArrayObj = defineParams.optJSONArray("parameters");
-                if (argsArrayObj != null) {
-                    parameters = (Parameter[]) JSONArray.toArray(argsArrayObj, Parameter.class);
-                }
-            } else {
-                Parameter param = (Parameter) JSONObject.toBean(argsObj, Parameter.class);
-                parameters = new Parameter[] { param };
-            }
-        }
-        return parameters;
     }
 
     /**
@@ -430,7 +404,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
 
         checkPermission(getRequiredPermissionForRunScript());
 
-        final Parameter[] parameters = extractParameters(req);
+        final Parameter[] parameters = UIHelper.extractParameters(req.getSubmittedForm());
 
         Script tempScript = null;
         final boolean isAdmin = Jenkins.getInstance().getACL().hasPermission(Jenkins.ADMINISTER);
