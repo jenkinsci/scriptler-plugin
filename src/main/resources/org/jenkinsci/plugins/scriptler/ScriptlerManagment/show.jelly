@@ -1,0 +1,86 @@
+<!--
+The MIT License
+
+Copyright (c) 2012, Dominik Bartholdi
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+-->
+
+
+
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+	<script src="${it.pluginResourcePath}lib/codemirror.js"></script>
+	<link rel="stylesheet" href="${it.pluginResourcePath}lib/codemirror.css" ></link>
+	<script src="${it.pluginResourcePath}mode/clike/clike.js"></script>
+	<link rel="stylesheet" href="${it.pluginResourcePath}mode/clike/clike.css" ></link>
+	<style>.CodeMirror {border: 2px inset #dee;}</style>
+	
+	<l:layout norefresh="true">
+		<l:main-panel>
+			<h1>
+				<img width="48" height="48" src="${imagesURL}/16x16/document_edit.gif" />
+				<img width="16" height="16" src="${imagesURL}/16x16/empty.gif" />
+				<j:out value="${%title}" />
+			</h1>
+			<f:form>
+				<j:jelly xmlns:j="jelly:core">
+				    <f:entry title="${%Id}" description="${%IdDescription}">
+                        <f:textbox name="id" value="${script.id}" disabled="true"/>
+                    </f:entry>
+					<f:entry title="${%Name}">
+						<f:textbox name="name" value="${script.name}" disabled="true"/>
+					</f:entry>
+					<f:entry title="${%Comment}">
+						<f:textbox name="comment" value="${script.comment}" disabled="true"/>
+					</f:entry>
+                    <f:block>
+	                    <table>
+	                        <f:optionalBlock name="defineParams" title="${%ParamDefinition}" checked="${!empty(script.parameters)}" >
+	                            <f:entry title="${%Parameters}" field="parameters" disabled="true">
+	                                <f:repeatable var="param" items="${script.parameters}" name="parameters" noAddButton="true" minimum="1">
+	                                    <table width="100%">
+	                                        <f:entry>
+	                                            Name: <input type="text" name="name" value="${param.name}" size="50" disabled="true"/>
+	                                            Default: <input type="text" name="value" value="${param.value}" size="80" disabled="true"/>
+	                                        </f:entry>
+	                                    </table>
+	                                </f:repeatable>
+	                            </f:entry>
+	                        </f:optionalBlock>
+	                    </table>
+	                </f:block>					
+					<f:entry title="${%Script}">
+						<textarea id="script" name="script" style="width:100%; height:20em">
+							<j:out value="${script.script}" />
+						</textarea>
+					</f:entry>
+				</j:jelly>
+			</f:form>
+		</l:main-panel>
+	</l:layout>
+	<script>
+      var editor = CodeMirror.fromTextArea(document.getElementById("script"), {
+        lineNumbers: true,
+        matchBrackets: true,
+        mode: "text/x-groovy",
+        readOnly: true
+      });
+    </script>
+</j:jelly>

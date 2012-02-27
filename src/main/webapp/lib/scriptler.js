@@ -7,7 +7,7 @@ function scriptler_initDetailLink(referenceTag){
 	   if(referenceTag == all.item(i)){
 		   var detailsLinkTag = document.getElementsByName('showScriptlerDetailLink').item(i);
 		   if(selId.length != 0){
-			   detailsLinkTag .href="/scriptler/show?id=".concat(selId);
+			   detailsLinkTag .href="/scriptler/showScript?id=".concat(selId);
 			   detailsLinkTag .style.display = 'block';
 			}else{
 			   detailsLinkTag .style.display = 'none';
@@ -33,7 +33,7 @@ function scriptler_descArguments(referenceTag, params){
 }
 
 function scriptler_showParams(referenceTag, scriptId){
-	scriptlerBuilderDesc.getArgsDescription(scriptId, function(t) {
+	scriptlerBuilderDesc.getParameters(scriptId, function(t) {
 		var params = t.responseObject();
 		if(params != null){
 			scriptler_descArguments(referenceTag, params);

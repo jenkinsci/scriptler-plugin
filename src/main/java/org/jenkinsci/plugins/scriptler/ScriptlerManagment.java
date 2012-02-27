@@ -452,6 +452,26 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
     }
 
     /**
+     * Loads the script by its name and forwards the request to "show.jelly".
+     * 
+     * @param req
+     *            request
+     * @param rsp
+     *            response
+     * @param scriptName
+     *            the name of the script to be loaded in to the show view.
+     * @throws IOException
+     * @throws ServletException
+     */
+    public void doShowScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException, ServletException {
+        checkPermission(Hudson.RUN_SCRIPTS);
+
+        Script script = ScriptHelper.getScript(id, true);
+        req.setAttribute("script", script);
+        req.getView(this, "show.jelly").forward(req, rsp);
+    }
+
+    /**
      * Loads the script by its name and forwards the request to "edit.jelly".
      * 
      * @param req

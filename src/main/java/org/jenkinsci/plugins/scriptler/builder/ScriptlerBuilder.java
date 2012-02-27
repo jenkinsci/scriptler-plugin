@@ -125,6 +125,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         }
 
         public Set<Script> getScripts() {
+            // TODO currently only script for RUN_SCRIPT permissions are returned?
             final Set<Script> scripts = getConfig().getScripts();
             final Set<Script> scriptsForBuilder = new HashSet<Script>();
             for (Script script : scripts) {
@@ -151,7 +152,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
          * @return the description
          */
         @JavaScriptMethod
-        public JSONArray getArgsDescription(String scriptlerScriptId) {
+        public JSONArray getParameters(String scriptlerScriptId) {
             final Script script = getConfig().getScriptById(scriptlerScriptId);
             if (script != null && script.getParameters() != null) {
                 return JSONArray.fromObject(script.getParameters());
