@@ -111,7 +111,7 @@ THE SOFTWARE.
 			<j:if test="${output!=null}">
 				<h2>${%Result}</h2>
 				<pre>
-					<st:out value="${output}" />
+					${output}
 				</pre>
 			</j:if>
 		</l:main-panel>
