@@ -64,7 +64,7 @@ THE SOFTWARE.
 					<tr>
 						<td>
 							<j:set var="currentNode" value="${currentNode}" />
-							<f:entry name="node" title="Select a node">
+							<f:entry name="node" title="${%SelectionNode}">
 								<select name="node">
 									<j:forEach var="aNode" items="${it.slaveAlias}" varStatus="loop">
 										<j:choose>
@@ -82,14 +82,14 @@ THE SOFTWARE.
 					</tr>
 					<tr>
 						<td>
-							<f:optionalBlock name="defineParams" title="Define script parameters" checked="${!empty(script.parameters)}">
+							<f:optionalBlock name="defineParams" title="${%ParametersDescription}" checked="${!empty(script.parameters)}">
 								<f:entry title="${%Parameters}" field="parameters">
 									<f:repeatable var="param" items="${script.parameters}" name="parameters" noAddButton="true" minimum="1">
 										<table width="100%">
 											<f:entry>
-												Name: 
+												${%ParameterName} 
 												<input type="text" name="name" value="${param.name}" size="50" />
-												Value: 
+												${%ParameterValue} 
 												<input type="text" name="value" value="${param.value}" size="80" />
 											</f:entry>
 										</table>

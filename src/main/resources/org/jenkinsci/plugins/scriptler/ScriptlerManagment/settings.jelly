@@ -32,7 +32,7 @@
 			</h1>
 
 			<j:out value="${%intro}" />
-			<h4>Directories:</h4>
+			<h4>${%Directories}</h4>
 			<j:out value="${%scriptlerdirectorytext}" /> <j:out value="${it.scriptlerHomeDirectory}" /><br />
 			<j:out value="${%scriptdirectorytext}" /> <j:out value="${it.scriptDirectory}" />
 			<p />
