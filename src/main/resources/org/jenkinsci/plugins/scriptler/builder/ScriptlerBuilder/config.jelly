@@ -32,19 +32,19 @@
 						</j:choose>
 					</j:forEach>
 				</select>
-				<a target="_blank" name="showScriptlerDetailLink" href="" style="display:none;" onclick="window.open(this.href,'window','width=900,height=640,resizable,scrollbars,toolbar,menubar') ;return false;"> view selected script</a>
+				<a target="_blank" name="showScriptlerDetailLink" href="" style="display:none;" onclick="window.open(this.href,'window','width=900,height=640,resizable,scrollbars,toolbar,menubar') ;return false;"> ${%ViewScript}</a>
 				<div id="scriptlerDescription">${%RequiredParameters} <div name="scriptlerParameters" /></div>
 				<f:block>
 					<table>
-                        <f:optionalBlock name="defineParams" title="Define script parameters" checked="${!empty(instance.parameters)}">
+                        <f:optionalBlock name="defineParams" title="${%ParametersDescription}" checked="${!empty(instance.parameters)}">
                             <f:entry title="${%Parameters}" field="parameters">
                                 <f:repeatable var="param" items="${instance.parameters}" name="parameters" noAddButton="true" minimum="1">
                                     <table width="100%">
                                         <f:entry>
-                                            Name: <input type="text" name="name" value="${param.name}" size="50"/>
-                                            Value: <input type="text" name="value" value="${param.value}" size="80"/>
-                                            <input type="button" name="delete_button" value="${%Delete}" class="repeatable-delete show-if-not-only" style="margin-left: 1em;" />
-                                            <input type="button" name="add_button" value="${%Add parameter}" class="repeatable-add show-if-last" />
+                                            ${%ParameterName} <input type="text" name="name" value="${param.name}" size="50"/>
+                                            ${%ParameterValue} <input type="text" name="value" value="${param.value}" size="80"/>
+                                            <input type="button" name="delete_button" value="${%DeleteParameter}" class="repeatable-delete show-if-not-only" style="margin-left: 1em;" />
+                                            <input type="button" name="add_button" value="${%AddParameter}" class="repeatable-add show-if-last" />
                                         </f:entry>
                                     </table>
                                 </f:repeatable>
