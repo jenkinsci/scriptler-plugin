@@ -8,13 +8,18 @@ import hudson.Launcher;
 import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Project;
 import hudson.security.Permission;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
@@ -41,10 +46,16 @@ import org.kohsuke.stapler.bind.JavaScriptMethod;
  */
 public class ScriptlerBuilder extends Builder implements Serializable {
     private static final long serialVersionUID = 1L;
+
+    private final static Logger LOGGER = Logger.getLogger(ScriptlerBuilder.class.getName());
+
+    // this is only used to identify the builder if a user without privileges modifies the job.
+    private String builderId;
     private String scriptId;
     private Parameter[] parameters;
 
-    public ScriptlerBuilder(String scriptId, Parameter[] parameters) {
+    public ScriptlerBuilder(String builderId, String scriptId, Parameter[] parameters) {
+        this.builderId = builderId;
         this.scriptId = scriptId;
         this.parameters = parameters;
     }
@@ -55,6 +66,10 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
     public Parameter[] getParameters() {
         return parameters;
+    }
+
+    public String getBuilderId() {
+        return builderId;
     }
 
     @Override
@@ -94,6 +109,8 @@ public class ScriptlerBuilder extends Builder implements Serializable {
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
+        private static final AtomicInteger CURRENT_ID = new AtomicInteger();
+
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {
             return Jenkins.getInstance().hasPermission(Jenkins.RUN_SCRIPTS);
@@ -110,18 +127,46 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
         @Override
         public ScriptlerBuilder newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            final String id = formData.optString("scriptlerScriptId");
             ScriptlerBuilder builder = null;
-            if (StringUtils.isNotBlank(id)) {
-                Parameter[] params = null;
-                try {
-                    params = UIHelper.extractParameters(formData);
-                } catch (ServletException e) {
-                    throw new FormException(Messages.parameterExtractionFailed(), "parameters");
+            String builderId = formData.optString("builderId");
+
+            if (!Jenkins.getInstance().hasPermission(Jenkins.RUN_SCRIPTS)) {
+                // the user has no permission to change the builders, therefore we reload the builder without his changes!
+                final String backupJobName = formData.optString("backupJobName");
+
+                if (StringUtils.isNotBlank(builderId) && StringUtils.isNotBlank(backupJobName)) {
+                    final Project<?, ?> project = Jenkins.getInstance().getItemByFullName(backupJobName, Project.class);
+                    final List<Builder> builders = project.getBuilders();
+                    for (Builder b : builders) {
+                        if (b instanceof ScriptlerBuilder) {
+                            ScriptlerBuilder sb = (ScriptlerBuilder) b;
+                            if (builderId.equals(sb.getBuilderId())) {
+                                LOGGER.log(Level.FINE, "reloading ScriptlerBuilder [" + builderId + "] on project [" + backupJobName
+                                        + "], as user has no permission to change it!");
+                                return sb;
+                            }
+                        }
+                    }
                 }
-                builder = new ScriptlerBuilder(id, params);
+
             } else {
-                builder = new ScriptlerBuilder(null, null);
+                final String id = formData.optString("scriptlerScriptId");
+                if (StringUtils.isBlank(builderId)) {
+                    // create a unique id - this is only used to identify the builder if a user without privileges modifies the job.
+                    builderId = System.currentTimeMillis() + "_" + CURRENT_ID.addAndGet(1);
+                }
+                if (StringUtils.isNotBlank(id)) {
+                    Parameter[] params = null;
+                    try {
+                        params = UIHelper.extractParameters(formData);
+                    } catch (ServletException e) {
+                        throw new FormException(Messages.parameterExtractionFailed(), "parameters");
+                    }
+                    builder = new ScriptlerBuilder(builderId, id, params);
+                }
+            }
+            if (builder == null) {
+                builder = new ScriptlerBuilder(builderId, null, null);
             }
             return builder;
         }

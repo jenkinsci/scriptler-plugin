@@ -13,7 +13,12 @@
 			</f:entry>
 		</j:when>
 		<j:otherwise>
+		    <j:if test="${!h.hasPermission(it.build,descriptor.requiredPermission)}">
+                <div class="warning">${%NoPermission}</div>
+            </j:if>
 			<f:entry title="${%Script}" field="buildStepContent">
+			    <input type="hidden" name="backupJobName" />
+			    <input type="hidden" name="builderId" value="${instance.builderId}" />
 				<select name="scriptlerScriptId" onChange="scriptler_initDetailLink(this);scriptler_showParams(this, this.value);" >
 					<option value="">(Default)</option>
 					<j:forEach var="inst" items="${descriptor.scripts}" varStatus="loop">
@@ -57,10 +62,18 @@
 				var all = new Array();
 	   			all = document.getElementsByName('scriptlerScriptId');
 				for(var i = 0; i &lt; all.length; i++) {
-				    //all.item(i).disabled=<j:out value="${!h.hasPermission(it.build,descriptor.requiredPermission)}" />;
+				    all.item(i).disabled=<j:out value="${!h.hasPermission(it.build,descriptor.requiredPermission)}" />;
 					scriptler_initDetailLink(all.item(i));
 				    scriptler_showParams(all.item(i), all.item(i).value);
 				}
+				
+				// remember the job name to send it along with the form
+				var jobName = document.getElementsByName('name').item(0).value;
+				var allBackupJobNames = document.getElementsByName('backupJobName');
+				for(var i = 0; i &lt; allBackupJobNames.length; i++) {
+				    allBackupJobNames.item(i).value = jobName; 
+				} 
+				
 			});
 		</script>
 	</st:once>
