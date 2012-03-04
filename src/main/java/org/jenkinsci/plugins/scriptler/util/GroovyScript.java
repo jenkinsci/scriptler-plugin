@@ -8,8 +8,8 @@ import java.io.StringWriter;
 
 import jenkins.model.Jenkins;
 
+import org.jenkinsci.plugins.scriptler.Messages;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
-import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 
 /**
  * Inspired by hudson.util.RemotingDiagnostics.Script, but adding parameters.
@@ -20,6 +20,8 @@ public final class GroovyScript implements DelegatingCallable<String, RuntimeExc
     private final Parameter[] parameters;
     private final boolean failWithException;
     private transient ClassLoader cl;
+
+    private static final String PW_PARAM_VARIABLE = "out";
 
     public GroovyScript(String script, Parameter[] parameters, boolean failWithException) {
         this.script = script;
@@ -41,19 +43,20 @@ public final class GroovyScript implements DelegatingCallable<String, RuntimeExc
 
         StringWriter out = new StringWriter();
         PrintWriter pw = new PrintWriter(out);
+
         for (Parameter param : parameters) {
             final String paramName = param.getName();
-            if ("out".equals(paramName)) {
-                pw.write("skipping parameter 'out' this name is used inernal, please rename!");
+            if (PW_PARAM_VARIABLE.equals(paramName)) {
+                pw.write(Messages.skipParamter(PW_PARAM_VARIABLE));
             } else {
                 shell.setVariable(paramName, param.getValue());
             }
         }
-        shell.setVariable("out", pw);
+        shell.setVariable(PW_PARAM_VARIABLE, pw);
         try {
             Object output = shell.evaluate(script);
             if (output != null) {
-                pw.println("Result: " + output);
+                pw.println(Messages.resultPrefix() + " " + output);
             }
         } catch (Throwable t) {
             if (failWithException) {
@@ -65,6 +68,8 @@ public final class GroovyScript implements DelegatingCallable<String, RuntimeExc
     }
 
     private static final class ScriptlerExecutionException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
         public ScriptlerExecutionException(Throwable cause) {
             super(cause);
         }

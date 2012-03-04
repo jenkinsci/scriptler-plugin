@@ -8,13 +8,10 @@ import hudson.Launcher;
 import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Hudson;
 import hudson.security.Permission;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
-import hudson.util.FormValidation;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -35,7 +32,6 @@ import org.jenkinsci.plugins.scriptler.util.GroovyScript;
 import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
 import org.jenkinsci.plugins.scriptler.util.UIHelper;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
-import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 
@@ -44,7 +40,7 @@ import org.kohsuke.stapler.bind.JavaScriptMethod;
  * 
  */
 public class ScriptlerBuilder extends Builder implements Serializable {
-
+    private static final long serialVersionUID = 1L;
     private String scriptId;
     private Parameter[] parameters;
 
@@ -77,10 +73,14 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                 listener.getLogger().print(output);
                 isOk = true;
             } catch (Exception e) {
-                listener.getLogger().print("failed to execute scriptler script [" + scriptId + "] - " + e.getMessage());
+                listener.getLogger().print(Messages.scriptExecutionFailed(scriptId) + " - " + e.getMessage());
             }
         } else {
-            listener.getLogger().print("could not find script with id [" + scriptId + "]");
+            if (StringUtils.isBlank(scriptId)) {
+                listener.getLogger().print(Messages.scriptNotDefined());
+            } else {
+                listener.getLogger().print(Messages.scriptNotFound(scriptId));
+            }
         }
         return isOk;
     }
@@ -110,16 +110,18 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
         @Override
         public ScriptlerBuilder newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            final String id = req.getParameter("scriptlerScriptId");
+            final String id = formData.optString("scriptlerScriptId");
             ScriptlerBuilder builder = null;
-            if (StringUtils.isBlank(id)) {
+            if (StringUtils.isNotBlank(id)) {
                 Parameter[] params = null;
                 try {
                     params = UIHelper.extractParameters(formData);
                 } catch (ServletException e) {
-                    throw new FormException("failed extracting parameters", "parameters");
+                    throw new FormException(Messages.parameterExtractionFailed(), "parameters");
                 }
                 builder = new ScriptlerBuilder(id, params);
+            } else {
+                builder = new ScriptlerBuilder(null, null);
             }
             return builder;
         }

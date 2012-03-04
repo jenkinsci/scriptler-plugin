@@ -1,26 +1,22 @@
 package org.jenkinsci.plugins.scriptler.util;
 
-import groovy.lang.GroovyShell;
 import hudson.model.Computer;
 import hudson.model.Hudson;
-import hudson.remoting.DelegatingCallable;
 import hudson.util.RemotingDiagnostics;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Reader;
-import java.io.StringWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
-import jenkins.model.Jenkins;
 import jenkins.model.Jenkins.MasterComputer;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptler.Messages;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagment;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
@@ -43,9 +39,12 @@ public class ScriptHelper {
      *            the id of the script
      * @param withSrc
      *            should the script sources be loaded too?
-     * @return the script
+     * @return the script - <code>null</code> if the id is not set or the script with the given id can not be resolved
      */
     public static Script getScript(String id, boolean withSrc) {
+        if (StringUtils.isBlank(id)) {
+            return null;
+        }
         Script s = ScriptlerConfiguration.getConfiguration().getScriptById(id);
         File scriptSrc = new File(ScriptlerManagment.getScriptDirectory(), id);
         if (withSrc) {
@@ -54,7 +53,7 @@ public class ScriptHelper {
                 String src = IOUtils.toString(reader);
                 s.setScript(src);
             } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "not able to load sources for script [" + id + "]", e);
+                LOGGER.log(Level.SEVERE, Messages.scriptSourceNotFound(id), e);
             }
         }
         return s;
@@ -92,7 +91,8 @@ public class ScriptHelper {
 
                 Computer comp = Hudson.getInstance().getComputer(node);
                 if (comp == null && "(master)".equals(node)) {
-                    output = RemotingDiagnostics.executeGroovy(scriptTxt, MasterComputer.localChannel);
+                    // output = RemotingDiagnostics.executeGroovy(scriptTxt, MasterComputer.localChannel);
+                    output = MasterComputer.localChannel.call(new GroovyScript(scriptTxt, parameters, false));
                 } else if (comp == null) {
                     output = Messages.node_not_found(node) + "\n";
                 } else {

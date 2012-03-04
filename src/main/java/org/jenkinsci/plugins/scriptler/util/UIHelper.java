@@ -19,6 +19,7 @@ public class UIHelper {
      * @throws ServletException
      */
     public static Parameter[] extractParameters(JSONObject json) throws ServletException {
+        System.out.println("UIHelper.extractParameters()");
         Parameter[] parameters = new Parameter[0];
         final JSONObject defineParams = json.getJSONObject("defineParams");
         if (!defineParams.isNullObject()) {
@@ -33,6 +34,7 @@ public class UIHelper {
                 parameters = new Parameter[] { param };
             }
         }
+        System.out.println("UIHelper.extractParameters()");
         return parameters;
     }
 }
