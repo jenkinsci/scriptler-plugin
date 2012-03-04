@@ -6,7 +6,6 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.jenkinsci.plugins.scriptler.config.Parameter;
-import org.kohsuke.stapler.StaplerRequest;
 
 public class UIHelper {
 
@@ -19,7 +18,6 @@ public class UIHelper {
      * @throws ServletException
      */
     public static Parameter[] extractParameters(JSONObject json) throws ServletException {
-        System.out.println("UIHelper.extractParameters()");
         Parameter[] parameters = new Parameter[0];
         final JSONObject defineParams = json.getJSONObject("defineParams");
         if (!defineParams.isNullObject()) {
@@ -34,7 +32,6 @@ public class UIHelper {
                 parameters = new Parameter[] { param };
             }
         }
-        System.out.println("UIHelper.extractParameters()");
         return parameters;
     }
 }
