@@ -7,8 +7,7 @@
 		<j:when test="${empty(descriptor.scripts)}">
 			<f:entry title="">
 				<div>
-					No scripts are defined. Please define one
-					<a href="/scriptler">in scriptler</a>.
+					${%WarnNoScript}
 				</div>
 			</f:entry>
 		</j:when>
