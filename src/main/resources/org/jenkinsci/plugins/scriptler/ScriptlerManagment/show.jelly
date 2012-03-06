@@ -57,8 +57,8 @@ THE SOFTWARE.
 	                                <f:repeatable var="param" items="${script.parameters}" name="parameters" noAddButton="true" minimum="1">
 	                                    <table width="100%">
 	                                        <f:entry>
-	                                            Name: <input type="text" name="name" value="${param.name}" size="50" disabled="true"/>
-	                                            Default: <input type="text" name="value" value="${param.value}" size="80" disabled="true"/>
+	                                            ${%ParameterName} <input type="text" name="name" value="${param.name}" size="50" disabled="true"/>
+	                                            ${%ParameterDefaultValue} <input type="text" name="value" value="${param.value}" size="80" disabled="true"/>
 	                                        </f:entry>
 	                                    </table>
 	                                </f:repeatable>

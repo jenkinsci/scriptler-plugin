@@ -39,7 +39,7 @@
 			<p>
 				<j:out value="${%intro}" />
 				<br />
-				Example:
+				${%Example}
 				<pre>println System.getenv("PATH")</pre>
 			</p>
 			<f:form method="post" action="scriptAdd">
