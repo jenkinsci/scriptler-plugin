@@ -1,0 +1,1 @@
+{"backupJobName":"new","builderId":"1331321162149_1","defineParams":{"parameters":[{"name":"jobName","value":"${JOB}"},{"name":"buildRange","value":"1-10"}]},"kind":"org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder$DescriptorImpl","scriptlerScriptId":"bulkDeleteBuilds.groovy","stapler-class":"org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder"}

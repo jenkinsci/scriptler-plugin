@@ -4,6 +4,7 @@
 		<groupId>org.jenkins-ci.plugins</groupId>
 		<artifactId>plugin</artifactId>
 		<version>1.430</version>
+		<!-- <version>1.460</version> version caused JENKINS-13518 -->
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -24,15 +25,13 @@
 	<repositories>
 		<repository>
 			<id>m.g.o-public</id>
-<!-- 			<url>http://maven.glassfish.org/content/groups/public/</url> -->
 			<url>http://maven.jenkins-ci.org/content/groups/artifacts/</url>
 		</repository>
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
 			<id>m.g.o-public</id>
-<!-- 			<url>http://maven.glassfish.org/content/groups/public/</url> -->
-            <url>http://maven.jenkins-ci.org/content/groups/artifacts/</url>
+			<url>http://maven.jenkins-ci.org/content/groups/artifacts/</url>
 		</pluginRepository>
 	</pluginRepositories>
 	<properties>

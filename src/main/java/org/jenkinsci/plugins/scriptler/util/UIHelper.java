@@ -19,8 +19,8 @@ public class UIHelper {
      */
     public static Parameter[] extractParameters(JSONObject json) throws ServletException {
         Parameter[] parameters = new Parameter[0];
-        final JSONObject defineParams = json.getJSONObject("defineParams");
-        if (!defineParams.isNullObject()) {
+        final JSONObject defineParams = json.optJSONObject("defineParams");
+        if (defineParams != null && !defineParams.isNullObject()) {
             JSONObject argsObj = defineParams.optJSONObject("parameters");
             if (argsObj == null) {
                 JSONArray argsArrayObj = defineParams.optJSONArray("parameters");
