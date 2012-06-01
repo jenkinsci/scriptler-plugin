@@ -13,6 +13,7 @@ import hudson.security.Permission;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 
+import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -84,9 +85,13 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                 for (Parameter parameter : parameters) {
                     expandedParams.add(new Parameter(parameter.getName(), TokenMacro.expandAll(build, listener, parameter.getValue())));
                 }
-                final String output = launcher.getChannel().call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true));
-                listener.getLogger().print(output);
-                isOk = true;
+                PrintWriter pw = new PrintWriter(listener.getLogger());
+                final Object output = launcher.getChannel().call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, pw));
+                if (output instanceof Boolean && Boolean.FALSE.equals(output)) {
+                    isOk = false;
+                } else {
+                    isOk = true;
+                }
             } catch (Exception e) {
                 listener.getLogger().print(Messages.scriptExecutionFailed(scriptId) + " - " + e.getMessage());
             }
