@@ -81,8 +81,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             try {
                 // expand the parameters before passing these to the execution, this is to allow any token macro to resolve parameter values
                 List<Parameter> expandedParams = new LinkedList<Parameter>();
-                for (int i = 0; i < parameters.length; i++) {
-                    Parameter parameter = parameters[i];
+                for (Parameter parameter : parameters) {
                     expandedParams.add(new Parameter(parameter.getName(), TokenMacro.expandAll(build, listener, parameter.getValue())));
                 }
                 final String output = launcher.getChannel().call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true));
