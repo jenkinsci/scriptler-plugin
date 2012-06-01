@@ -15,6 +15,7 @@ import hudson.tasks.Builder;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -79,12 +80,12 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         if (script != null) {
             try {
                 // expand the parameters before passing these to the execution, this is to allow any token macro to resolve parameter values
-                Parameter[] expandedParams = new Parameter[parameters.length];
+                List<Parameter> expandedParams = new LinkedList<Parameter>();
                 for (int i = 0; i < parameters.length; i++) {
                     Parameter parameter = parameters[i];
-                    expandedParams[i] = new Parameter(parameter.getName(), TokenMacro.expandAll(build, listener, parameter.getValue()));
+                    expandedParams.add(new Parameter(parameter.getName(), TokenMacro.expandAll(build, listener, parameter.getValue())));
                 }
-                final String output = launcher.getChannel().call(new GroovyScript(script.script, expandedParams, true));
+                final String output = launcher.getChannel().call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true));
                 listener.getLogger().print(output);
                 isOk = true;
             } catch (Exception e) {
