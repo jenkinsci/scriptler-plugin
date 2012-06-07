@@ -5,7 +5,6 @@
         <artifactId>plugin</artifactId>
         <version>1.430</version>
         <!-- <version>1.460</version> version caused JENKINS-13518 -->
-        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>scriptler</artifactId>
