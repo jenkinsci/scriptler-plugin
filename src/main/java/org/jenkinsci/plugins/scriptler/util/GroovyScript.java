@@ -1,8 +1,10 @@
 package org.jenkinsci.plugins.scriptler.util;
 
+import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import hudson.remoting.DelegatingCallable;
 
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
@@ -19,16 +21,16 @@ public class GroovyScript implements DelegatingCallable<Object, RuntimeException
     private final String script;
     private final Parameter[] parameters;
     private final boolean failWithException;
-    private final PrintWriter pw;
+    private final PrintStream ps;
     private transient ClassLoader cl;
 
     private static final String PW_PARAM_VARIABLE = "out";
 
-    public GroovyScript(String script, Parameter[] parameters, boolean failWithException, PrintWriter pw) {
+    public GroovyScript(String script, Parameter[] parameters, boolean failWithException, PrintStream ps) {
         this.script = script;
         this.parameters = parameters;
         this.failWithException = failWithException;
-        this.pw = pw;
+        this.ps = ps;
         cl = getClassLoader();
     }
 
@@ -41,6 +43,7 @@ public class GroovyScript implements DelegatingCallable<Object, RuntimeException
         if (cl == null) {
             cl = Thread.currentThread().getContextClassLoader();
         }
+        PrintWriter pw = new PrintWriter(ps);
         GroovyShell shell = new GroovyShell(cl);
 
         for (Parameter param : parameters) {
@@ -51,7 +54,7 @@ public class GroovyScript implements DelegatingCallable<Object, RuntimeException
                 shell.setVariable(paramName, param.getValue());
             }
         }
-        shell.setVariable(PW_PARAM_VARIABLE, pw);
+        shell.setVariable(PW_PARAM_VARIABLE, ps);
         try {
             Object output = shell.evaluate(script);
             if (output != null) {

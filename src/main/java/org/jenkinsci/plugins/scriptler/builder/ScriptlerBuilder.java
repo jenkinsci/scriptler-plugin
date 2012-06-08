@@ -85,8 +85,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                 for (Parameter parameter : parameters) {
                     expandedParams.add(new Parameter(parameter.getName(), TokenMacro.expandAll(build, listener, parameter.getValue())));
                 }
-                PrintWriter pw = new PrintWriter(listener.getLogger());
-                final Object output = launcher.getChannel().call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, pw));
+                final Object output = launcher.getChannel().call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, listener.getLogger()));
                 if (output instanceof Boolean && Boolean.FALSE.equals(output)) {
                     isOk = false;
                 } else {
