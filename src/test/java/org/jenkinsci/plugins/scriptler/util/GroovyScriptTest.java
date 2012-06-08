@@ -29,7 +29,7 @@ public class GroovyScriptTest {
     public void scriptReturnTrue() {
         ByteArrayOutputStream sos = new ByteArrayOutputStream();
         PrintStream ps = new PrintStream(sos);
-        GroovyScript gs = new GroovyScript("return true", new Parameter[0], true, System.out) {
+        GroovyScript gs = new GroovyScript("return true", new Parameter[0], true, ps) {
             @Override
             public ClassLoader getClassLoader() {
                 return Thread.currentThread().getContextClassLoader();
