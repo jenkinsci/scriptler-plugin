@@ -8,6 +8,8 @@ import hudson.Launcher;
 import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.ParameterValue;
+import hudson.model.ParametersAction;
 import hudson.model.Project;
 import hudson.security.Permission;
 import hudson.tasks.BuildStepDescriptor;
@@ -15,6 +17,7 @@ import hudson.tasks.Builder;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -54,12 +57,14 @@ public class ScriptlerBuilder extends Builder implements Serializable {
     // this is only used to identify the builder if a user without privileges modifies the job.
     private String builderId;
     private String scriptId;
+    private boolean propagateParams = false;
     private Parameter[] parameters;
 
-    public ScriptlerBuilder(String builderId, String scriptId, Parameter[] parameters) {
+    public ScriptlerBuilder(String builderId, String scriptId, boolean propagateParams, Parameter[] parameters) {
         this.builderId = builderId;
         this.scriptId = scriptId;
         this.parameters = parameters;
+        this.propagateParams = propagateParams;
     }
 
     public String getScriptId() {
@@ -73,6 +78,10 @@ public class ScriptlerBuilder extends Builder implements Serializable {
     public String getBuilderId() {
         return builderId;
     }
+    
+    public boolean isPropagateParams() {
+        return propagateParams;
+    }
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
@@ -82,6 +91,15 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             try {
                 // expand the parameters before passing these to the execution, this is to allow any token macro to resolve parameter values
                 List<Parameter> expandedParams = new LinkedList<Parameter>();
+
+                final ParametersAction paramsAction = build.getAction(ParametersAction.class);
+                final List<ParameterValue> jobParams = paramsAction.getParameters();
+                if (propagateParams) {
+                    for (ParameterValue parameterValue : jobParams) {
+                        // pass the params to the token expander in a way that these get expanded by environment variables (params are also environment variables)
+                        expandedParams.add(new Parameter(parameterValue.getName(), TokenMacro.expandAll(build, listener, "${" + parameterValue.getName() + "}")));
+                    }
+                }
                 for (Parameter parameter : parameters) {
                     expandedParams.add(new Parameter(parameter.getName(), TokenMacro.expandAll(build, listener, parameter.getValue())));
                 }
@@ -145,8 +163,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                         if (b instanceof ScriptlerBuilder) {
                             ScriptlerBuilder sb = (ScriptlerBuilder) b;
                             if (builderId.equals(sb.getBuilderId())) {
-                                LOGGER.log(Level.FINE, "reloading ScriptlerBuilder [" + builderId + "] on project [" + backupJobName
-                                        + "], as user has no permission to change it!");
+                                LOGGER.log(Level.FINE, "reloading ScriptlerBuilder [" + builderId + "] on project [" + backupJobName + "], as user has no permission to change it!");
                                 return sb;
                             }
                         }
@@ -155,6 +172,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
             } else {
                 final String id = formData.optString("scriptlerScriptId");
+                final boolean inPropagateParams = formData.getBoolean("propagateParams");
                 if (StringUtils.isBlank(builderId)) {
                     // create a unique id - this is only used to identify the builder if a user without privileges modifies the job.
                     builderId = System.currentTimeMillis() + "_" + CURRENT_ID.addAndGet(1);
@@ -166,11 +184,11 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                     } catch (ServletException e) {
                         throw new FormException(Messages.parameterExtractionFailed(), "parameters");
                     }
-                    builder = new ScriptlerBuilder(builderId, id, params);
+                    builder = new ScriptlerBuilder(builderId, id, inPropagateParams, params);
                 }
             }
             if (builder == null) {
-                builder = new ScriptlerBuilder(builderId, null, null);
+                builder = new ScriptlerBuilder(builderId, null, false, null);
             }
             return builder;
         }

@@ -34,9 +34,14 @@
 				</select>
 				<a target="_blank" name="showScriptlerDetailLink" href="" style="display:none;" onclick="window.open(this.href,'window','width=900,height=640,resizable,scrollbars,toolbar,menubar') ;return false;"> ${%ViewScript}</a>
 				<div id="scriptlerDescription">${%RequiredParameters} <div name="scriptlerParameters" /></div>
+                <f:block>
+                   <f:entry title="${%PropagateParams}" field="propagateParams" help="/plugin/scriptler/help-propagateParams.html">
+                       <f:checkbox checked="${instance.isPropagateParams()}" />
+                   </f:entry>
+                </f:block>				
 				<f:block>
 					<table>
-                        <f:optionalBlock name="defineParams" title="${%ParametersDescription}" checked="${!empty(instance.parameters)}">
+                        <f:optionalBlock name="defineParams" title="${%ParametersDescription}" checked="${!empty(instance.parameters)}" help="/plugin/scriptler/help-params.html">
                             <f:entry title="${%Parameters}" field="parameters">
                                 <f:repeatable var="param" items="${instance.parameters}" name="parameters" noAddButton="true" minimum="1">
                                     <table width="100%">
