@@ -2,11 +2,12 @@ package org.jenkinsci.plugins.scriptler.util;
 
 import hudson.model.Computer;
 import hudson.model.Hudson;
-import hudson.util.RemotingDiagnostics;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.Reader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -84,15 +85,16 @@ public class ScriptHelper {
      */
     public static String runScript(String node, String scriptTxt, Parameter[] parameters) throws IOException, ServletException {
 
-        String output = "[no output]";
+        Object output = "[no output]";
+        ByteArrayOutputStream sos = new ByteArrayOutputStream();
         if (node != null && scriptTxt != null) {
 
             try {
-
+                PrintStream ps = new PrintStream(sos);
                 Computer comp = Hudson.getInstance().getComputer(node);
                 if (comp == null && "(master)".equals(node)) {
                     // output = RemotingDiagnostics.executeGroovy(scriptTxt, MasterComputer.localChannel);
-                    output = MasterComputer.localChannel.call(new GroovyScript(scriptTxt, parameters, false));
+                    output = MasterComputer.localChannel.call(new GroovyScript(scriptTxt, parameters, false, ps));
                 } else if (comp == null) {
                     output = Messages.node_not_found(node) + "\n";
                 } else {
@@ -101,7 +103,7 @@ public class ScriptHelper {
                     }
 
                     else {
-                        output = comp.getChannel().call(new GroovyScript(scriptTxt, parameters, false));
+                        output = comp.getChannel().call(new GroovyScript(scriptTxt, parameters, false, ps));
                     }
                 }
 
@@ -109,7 +111,7 @@ public class ScriptHelper {
                 throw new ServletException(e);
             }
         }
-        return output;
+        return sos.toString();
     }
 
 }
