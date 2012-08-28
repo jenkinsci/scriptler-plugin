@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 import javax.servlet.ServletException;
 
 import jenkins.model.Jenkins;
+import jenkins.model.Jenkins.MasterComputer;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -92,18 +93,29 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                 // expand the parameters before passing these to the execution, this is to allow any token macro to resolve parameter values
                 List<Parameter> expandedParams = new LinkedList<Parameter>();
 
-                final ParametersAction paramsAction = build.getAction(ParametersAction.class);
-                final List<ParameterValue> jobParams = paramsAction.getParameters();
                 if (propagateParams) {
-                    for (ParameterValue parameterValue : jobParams) {
-                        // pass the params to the token expander in a way that these get expanded by environment variables (params are also environment variables)
-                        expandedParams.add(new Parameter(parameterValue.getName(), TokenMacro.expandAll(build, listener, "${" + parameterValue.getName() + "}")));
+                    final ParametersAction paramsAction = build.getAction(ParametersAction.class);
+                    if(paramsAction==null){
+                       listener.getLogger().println(Messages.no_parameters_defined());
+                    }
+                    else{
+                        final List<ParameterValue> jobParams = paramsAction.getParameters();
+                        for (ParameterValue parameterValue : jobParams) {
+                            // pass the params to the token expander in a way that these get expanded by environment variables (params are also environment variables)
+                            expandedParams.add(new Parameter(parameterValue.getName(), TokenMacro.expandAll(build, listener, "${" + parameterValue.getName() + "}")));
+                        }
                     }
                 }
                 for (Parameter parameter : parameters) {
                     expandedParams.add(new Parameter(parameter.getName(), TokenMacro.expandAll(build, listener, parameter.getValue())));
                 }
-                final Object output = launcher.getChannel().call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, listener.getLogger()));
+                final Object output;
+                if(script.onlyMaster){
+                    output = MasterComputer.localChannel.call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, listener));
+                }
+                else{
+                    output = launcher.getChannel().call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, listener));
+                }
                 if (output instanceof Boolean && Boolean.FALSE.equals(output)) {
                     isOk = false;
                 } else {
@@ -111,6 +123,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                 }
             } catch (Exception e) {
                 listener.getLogger().print(Messages.scriptExecutionFailed(scriptId) + " - " + e.getMessage());
+                e.printStackTrace(listener.getLogger());
             }
         } else {
             if (StringUtils.isBlank(scriptId)) {

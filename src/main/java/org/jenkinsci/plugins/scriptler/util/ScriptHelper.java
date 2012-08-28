@@ -1,8 +1,12 @@
 package org.jenkinsci.plugins.scriptler.util;
 
+import hudson.model.BuildListener;
 import hudson.model.Computer;
 import hudson.model.Hudson;
 
+import hudson.model.TaskListener;
+import hudson.util.RemotingDiagnostics;
+import hudson.util.StreamTaskListener;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
@@ -90,11 +94,9 @@ public class ScriptHelper {
         if (node != null && scriptTxt != null) {
 
             try {
-                PrintStream ps = new PrintStream(sos);
                 Computer comp = Hudson.getInstance().getComputer(node);
                 if (comp == null && "(master)".equals(node)) {
-                    // output = RemotingDiagnostics.executeGroovy(scriptTxt, MasterComputer.localChannel);
-                    output = MasterComputer.localChannel.call(new GroovyScript(scriptTxt, parameters, false, ps));
+                    output = MasterComputer.localChannel.call(new GroovyScript(scriptTxt, parameters, false, new StreamTaskListener(sos)));
                 } else if (comp == null) {
                     output = Messages.node_not_found(node) + "\n";
                 } else {
@@ -103,7 +105,7 @@ public class ScriptHelper {
                     }
 
                     else {
-                        output = comp.getChannel().call(new GroovyScript(scriptTxt, parameters, false, ps));
+                        output = comp.getChannel().call(new GroovyScript(scriptTxt, parameters, false, new StreamTaskListener(sos)));
                     }
                 }
 

@@ -2,12 +2,14 @@ package org.jenkinsci.plugins.scriptler.util;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
+import hudson.model.TaskListener;
 import hudson.remoting.DelegatingCallable;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
+import java.io.Serializable;
 import jenkins.model.Jenkins;
 
 import org.jenkinsci.plugins.scriptler.Messages;
@@ -16,21 +18,21 @@ import org.jenkinsci.plugins.scriptler.config.Parameter;
 /**
  * Inspired by hudson.util.RemotingDiagnostics.Script, but adding parameters.
  */
-public class GroovyScript implements DelegatingCallable<Object, RuntimeException> {
+public class GroovyScript implements DelegatingCallable<Object, RuntimeException>{
     private static final long serialVersionUID = 1L;
     private final String script;
     private final Parameter[] parameters;
     private final boolean failWithException;
-    private final PrintStream ps;
+    private final TaskListener listener;
     private transient ClassLoader cl;
 
     private static final String PW_PARAM_VARIABLE = "out";
 
-    public GroovyScript(String script, Parameter[] parameters, boolean failWithException, PrintStream ps) {
+    public GroovyScript(String script, Parameter[] parameters, boolean failWithException, TaskListener listener) {
         this.script = script;
         this.parameters = parameters;
         this.failWithException = failWithException;
-        this.ps = ps;
+        this.listener = listener;
         cl = getClassLoader();
     }
 
@@ -43,7 +45,7 @@ public class GroovyScript implements DelegatingCallable<Object, RuntimeException
         if (cl == null) {
             cl = Thread.currentThread().getContextClassLoader();
         }
-        PrintWriter pw = new PrintWriter(ps);
+        PrintWriter pw = new PrintWriter(listener.getLogger());
         GroovyShell shell = new GroovyShell(cl);
 
         for (Parameter param : parameters) {
@@ -54,7 +56,7 @@ public class GroovyScript implements DelegatingCallable<Object, RuntimeException
                 shell.setVariable(paramName, param.getValue());
             }
         }
-        shell.setVariable(PW_PARAM_VARIABLE, ps);
+        shell.setVariable(PW_PARAM_VARIABLE, listener.getLogger());
         try {
             Object output = shell.evaluate(script);
             if (output != null) {
