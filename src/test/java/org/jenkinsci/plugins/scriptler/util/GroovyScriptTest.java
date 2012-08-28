@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.scriptler.util;
 
+import hudson.util.StreamTaskListener;
 import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayOutputStream;
@@ -13,8 +14,7 @@ public class GroovyScriptTest {
     @Test
     public void scriptReturnFalse() {
         ByteArrayOutputStream sos = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(sos);
-        GroovyScript gs = new GroovyScript("return false", new Parameter[0], true, ps) {
+        GroovyScript gs = new GroovyScript("return false", new Parameter[0], true, new StreamTaskListener(sos)) {
             @Override
             public ClassLoader getClassLoader() {
                 return Thread.currentThread().getContextClassLoader();
@@ -28,8 +28,7 @@ public class GroovyScriptTest {
     @Test
     public void scriptReturnTrue() {
         ByteArrayOutputStream sos = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(sos);
-        GroovyScript gs = new GroovyScript("return true", new Parameter[0], true, ps) {
+        GroovyScript gs = new GroovyScript("return true", new Parameter[0], true, new StreamTaskListener(sos)) {
             @Override
             public ClassLoader getClassLoader() {
                 return Thread.currentThread().getContextClassLoader();
@@ -43,8 +42,7 @@ public class GroovyScriptTest {
     @Test
     public void helloWorld() {
         ByteArrayOutputStream sos = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(sos);
-        GroovyScript gs = new GroovyScript("out.print(\"HelloWorld\")", new Parameter[0], true, ps) {
+        GroovyScript gs = new GroovyScript("out.print(\"HelloWorld\")", new Parameter[0], true, new StreamTaskListener(sos)) {
             @Override
             public ClassLoader getClassLoader() {
                 return Thread.currentThread().getContextClassLoader();

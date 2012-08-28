@@ -81,7 +81,7 @@ public class ScritplerPluginImpl extends Plugin {
         // if not, add it to the configuration
         for (File file : availablePhysicalScripts) {
             if (cfg.getScriptById(file.getName()) == null) {
-                cfg.addOrReplace(new Script(file.getName(), file.getName(), Messages.script_loaded_from_directory(), false, null));
+                cfg.addOrReplace(new Script(file.getName(), file.getName(), Messages.script_loaded_from_directory(), false, null,false));
             }
         }
 
@@ -90,7 +90,7 @@ public class ScritplerPluginImpl extends Plugin {
         Set<Script> unavailableScripts = new HashSet<Script>();
         for (Script s : cfg.getScripts()) {
             if (!(new File(scriptDirectory, s.getId()).exists())) {
-                unavailableScripts.add(new Script(s.getId(), s.comment, false, false));
+                unavailableScripts.add(new Script(s.getId(), s.comment, false, false,false));
             }
         }
         for (Script script : unavailableScripts) {

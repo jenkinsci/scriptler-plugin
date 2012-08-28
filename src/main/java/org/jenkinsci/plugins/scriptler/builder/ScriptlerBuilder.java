@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 import javax.servlet.ServletException;
 
 import jenkins.model.Jenkins;
+import jenkins.model.Jenkins.MasterComputer;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -108,7 +109,13 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                 for (Parameter parameter : parameters) {
                     expandedParams.add(new Parameter(parameter.getName(), TokenMacro.expandAll(build, listener, parameter.getValue())));
                 }
-                final Object output = launcher.getChannel().call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, listener.getLogger()));
+                final Object output;
+                if(script.onlyMaster){
+                    output = MasterComputer.localChannel.call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, listener));
+                }
+                else{
+                    output = launcher.getChannel().call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, listener));
+                }
                 if (output instanceof Boolean && Boolean.FALSE.equals(output)) {
                     isOk = false;
                 } else {
