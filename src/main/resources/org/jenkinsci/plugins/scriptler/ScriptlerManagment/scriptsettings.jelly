@@ -55,7 +55,7 @@
                 <f:entry title="${%Permission}">
 					<f:checkbox name="nonAdministerUsing" />
 				</f:entry>
-                <f:entry title="${%Restriction}r" description="${%RestrictionDescription}">
+                <f:entry title="${%Restriction}" description="${%RestrictionDescription}">
                     <f:checkbox name="onlyMaster" checked="${script.onlyMaster}" />
 		</f:entry>
 				<f:entry title="${%Script}">
