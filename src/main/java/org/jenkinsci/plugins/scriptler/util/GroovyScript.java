@@ -1,15 +1,11 @@
 package org.jenkinsci.plugins.scriptler.util;
 
-import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import hudson.model.TaskListener;
 import hudson.remoting.DelegatingCallable;
 
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 
-import java.io.Serializable;
 import jenkins.model.Jenkins;
 
 import org.jenkinsci.plugins.scriptler.Messages;

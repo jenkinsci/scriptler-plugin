@@ -1,17 +1,13 @@
 package org.jenkinsci.plugins.scriptler.util;
 
-import hudson.model.BuildListener;
 import hudson.model.Computer;
 import hudson.model.Hudson;
-
-import hudson.model.TaskListener;
-import hudson.util.RemotingDiagnostics;
 import hudson.util.StreamTaskListener;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.Reader;
 import java.util.logging.Level;
 import java.util.logging.Logger;

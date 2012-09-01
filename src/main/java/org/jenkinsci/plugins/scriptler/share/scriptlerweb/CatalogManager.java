@@ -23,8 +23,8 @@
  */
 package org.jenkinsci.plugins.scriptler.share.scriptlerweb;
 
-import hudson.ProxyConfiguration;
 import hudson.Util;
+import hudson.ProxyConfiguration;
 
 import java.io.File;
 import java.io.FileNotFoundException;

@@ -1,8 +1,8 @@
 package org.jenkinsci.plugins.scriptler.share.gh;
 
 import hudson.Extension;
-import hudson.ProxyConfiguration;
 import hudson.Util;
+import hudson.ProxyConfiguration;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
