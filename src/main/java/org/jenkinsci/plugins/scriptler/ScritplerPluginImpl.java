@@ -29,9 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -60,7 +58,6 @@ public class ScritplerPluginImpl extends Plugin {
      */
     private void synchronizeConfig() throws IOException {
         LOGGER.info("initialize scriptler");
-
         if (!ScriptlerManagment.getScriptlerHomeDirectory().exists()) {
             ScriptlerManagment.getScriptlerHomeDirectory().mkdirs();
         }
@@ -70,34 +67,16 @@ public class ScritplerPluginImpl extends Plugin {
             scriptDirectory.mkdirs();
         }
 
-        List<File> availablePhysicalScripts = getAvailableScripts();
-
         ScriptlerConfiguration cfg = ScriptlerConfiguration.load();
         if (cfg == null) {
             cfg = new ScriptlerConfiguration(new TreeSet<Script>());
         }
 
-        // check if all physical files are available in the configuration
-        // if not, add it to the configuration
-        for (File file : availablePhysicalScripts) {
-            if (cfg.getScriptById(file.getName()) == null) {
-                cfg.addOrReplace(new Script(file.getName(), file.getName(), Messages.script_loaded_from_directory(), false, null,false));
-            }
-        }
-
-        // check if all scripts in the configuration are physically available
-        // if not, mark it as missing
-        Set<Script> unavailableScripts = new HashSet<Script>();
-        for (Script s : cfg.getScripts()) {
-            if (!(new File(scriptDirectory, s.getId()).exists())) {
-                unavailableScripts.add(new Script(s.getId(), s.comment, false, false,false));
-            }
-        }
-        for (Script script : unavailableScripts) {
-            cfg.addOrReplace(script);
-        }
+        SyncUtil.syncDirWithCfg(scriptDirectory.getName(), scriptDirectory, cfg);
+        SyncUtil.syncDirWithCfg(ScriptlerManagment.getGitScriptDirectory().getName(), ScriptlerManagment.getGitScriptDirectory(), cfg);
 
         cfg.save();
+
     }
 
     /**

@@ -155,9 +155,8 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      * @return
      * @throws IOException
      */
-    public HttpResponse doScriptlerSettings(StaplerRequest res, StaplerResponse rsp, @QueryParameter("disableRemoteCatalog") boolean disableRemoteCatalog,
-            @QueryParameter("allowRunScriptPermission") boolean allowRunScriptPermission, @QueryParameter("allowRunScriptEdit") boolean allowRunScriptEdit)
-            throws IOException {
+    public HttpResponse doScriptlerSettings(StaplerRequest res, StaplerResponse rsp, @QueryParameter("disableRemoteCatalog") boolean disableRemoteCatalog, @QueryParameter("allowRunScriptPermission") boolean allowRunScriptPermission,
+            @QueryParameter("allowRunScriptEdit") boolean allowRunScriptEdit) throws IOException {
         checkPermission(Hudson.ADMINISTER);
 
         ScriptlerConfiguration cfg = getConfiguration();
@@ -184,8 +183,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      * @throws IOException
      * @throws ServletException
      */
-    public HttpResponse doDownloadScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("catalog") String catalogName)
-            throws IOException, ServletException {
+    public HttpResponse doDownloadScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("catalog") String catalogName) throws IOException, ServletException {
         checkPermission(Hudson.ADMINISTER);
 
         ScriptlerConfiguration c = getConfiguration();
@@ -237,8 +235,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      * @throws IOException
      * @throws ServletException
      */
-    public HttpResponse doScriptAdd(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("name") String name,
-            @QueryParameter("comment") String comment, @QueryParameter("script") String script,
+    public HttpResponse doScriptAdd(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("name") String name, @QueryParameter("comment") String comment, @QueryParameter("script") String script,
             @QueryParameter("nonAdministerUsing") boolean nonAdministerUsing, @QueryParameter("onlyMaster") boolean onlyMaster, String originCatalogName, String originId) throws IOException, ServletException {
 
         checkPermission(Hudson.ADMINISTER);
@@ -255,8 +252,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      * @return the final name of the saved script - which is also the id of the script!
      * @throws IOException
      */
-    private String saveScriptAndForward(String id, String name, String comment, String script, boolean nonAdministerUsing, boolean onlyMaster, String originCatalogName,
-            String originId, Parameter[] parameters) throws IOException {
+    private String saveScriptAndForward(String id, String name, String comment, String script, boolean nonAdministerUsing, boolean onlyMaster, String originCatalogName, String originId, Parameter[] parameters) throws IOException {
         script = script == null ? "TODO" : script;
         if (StringUtils.isEmpty(id)) {
             throw new IllegalArgumentException("'id' must not be empty!");
@@ -273,11 +269,10 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
 
         Script newScript = null;
         if (!StringUtils.isEmpty(originId)) {
-            newScript = new Script(finalFileName, displayName, comment, true, originCatalogName, originId,
-                    new SimpleDateFormat("dd MMM yyyy HH:mm:ss a").format(new Date()), parameters);
+            newScript = new Script(finalFileName, displayName, comment, true, originCatalogName, originId, new SimpleDateFormat("dd MMM yyyy HH:mm:ss a").format(new Date()), parameters);
         } else {
             // save (overwrite) the meta information
-            newScript = new Script(finalFileName, displayName, comment, nonAdministerUsing, parameters, onlyMaster);
+            newScript = new Script(finalFileName, displayName, comment, nonAdministerUsing, parameters, onlyMaster, null);
         }
         ScriptlerConfiguration cfg = getConfiguration();
         cfg.addOrReplace(newScript);
@@ -397,8 +392,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      * @throws IOException
      * @throws ServletException
      */
-    public void doTriggerScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("script") String scriptSrc,
-            @QueryParameter("node") String node) throws IOException, ServletException {
+    public void doTriggerScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("script") String scriptSrc, @QueryParameter("node") String node) throws IOException, ServletException {
 
         checkPermission(getRequiredPermissionForRunScript());
 
@@ -495,8 +489,8 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      * @return list with all slave names
      */
     public List<String> getSlaveAlias(Script script) {
-        
-        if(script.onlyMaster){
+
+        if (script.onlyMaster) {
             List<String> slaveNames = new ArrayList<String>();
             slaveNames.add(MASTER);
             return slaveNames;
@@ -567,6 +561,10 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      */
     public static File getScriptDirectory() {
         return new File(getScriptlerHomeDirectory(), "scripts");
+    }
+
+    public static File getGitScriptDirectory() {
+        return new File(getScriptlerHomeDirectory(), "gitrepo");
     }
 
     public static File getScriptlerHomeDirectory() {

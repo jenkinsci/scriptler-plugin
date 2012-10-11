@@ -29,6 +29,7 @@ public class Script implements Comparable<Script>, NamedResource {
 
     private String id;
     public final String name;
+    public final String repodir;
     public final String comment;
     public final boolean available;
     public final String originCatalog;
@@ -51,7 +52,7 @@ public class Script implements Comparable<Script>, NamedResource {
      * used to create/update a new script in the UI
      */
     @DataBoundConstructor
-    public Script(String id, String name, String comment, boolean nonAdministerUsing, Parameter[] parameters, boolean onlyMaster) {
+    public Script(String id, String name, String comment, boolean nonAdministerUsing, Parameter[] parameters, boolean onlyMaster, String repodir) {
         this.id = id;
         this.name = name;
         this.comment = comment;
@@ -62,6 +63,7 @@ public class Script implements Comparable<Script>, NamedResource {
         this.nonAdministerUsing = nonAdministerUsing;
         this.parameters = parameters;
         this.onlyMaster=onlyMaster;
+        this.repodir=repodir;
     }
 
     /**
@@ -78,6 +80,7 @@ public class Script implements Comparable<Script>, NamedResource {
         this.nonAdministerUsing = false;
         this.parameters = null;
         this.onlyMaster=false;
+        this.repodir=null;
     }
 
     /**
@@ -94,6 +97,7 @@ public class Script implements Comparable<Script>, NamedResource {
         this.nonAdministerUsing = nonAdministerUsing;
         this.parameters = null;
         this.onlyMaster=onlyMaster;
+        this.repodir=null;
     }
 
     /**
@@ -111,8 +115,7 @@ public class Script implements Comparable<Script>, NamedResource {
         this.nonAdministerUsing = false;
         this.parameters = parameters;
         this.onlyMaster=false;
-
-    }
+        this.repodir=null;    }
 
     /**
      * used to merge scripts
@@ -129,6 +132,7 @@ public class Script implements Comparable<Script>, NamedResource {
         this.nonAdministerUsing = nonAdministerUsing;
         this.parameters = parameters;
         this.onlyMaster=onlyMaster;
+        this.repodir=null;
     }
 
     /*
