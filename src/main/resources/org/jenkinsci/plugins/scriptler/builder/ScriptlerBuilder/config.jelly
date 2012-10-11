@@ -19,7 +19,7 @@
 			<f:entry title="${%Script}" field="buildStepContent">
 			    <input type="hidden" name="backupJobName" />
 			    <input type="hidden" name="builderId" value="${instance.builderId}" />
-				<select name="scriptlerScriptId" onChange="scriptler_initDetailLink(this);scriptler_showParams(this, this.value);" >
+				<select name="scriptlerScriptId" onChange="scriptler_initDetailLink('${rootURL}', this);scriptler_showParams(this, this.value);" >
 					<option value="">(Default)</option>
 					<j:forEach var="inst" items="${descriptor.scripts}" varStatus="loop">
 						<j:choose>
@@ -68,7 +68,7 @@
 	   			all = document.getElementsByName('scriptlerScriptId');
 				for(var i = 0; i &lt; all.length; i++) {
 				    all.item(i).disabled=<j:out value="${!h.hasPermission(it.build,descriptor.requiredPermission)}" />;
-					scriptler_initDetailLink(all.item(i));
+					scriptler_initDetailLink('<j:out value="${rootURL}" />', all.item(i));
 				    scriptler_showParams(all.item(i), all.item(i).value);
 				}
 				
