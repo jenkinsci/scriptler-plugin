@@ -46,12 +46,14 @@ public class Script implements Comparable<Script>, NamedResource {
     
     // script is runnable only na Master
     public boolean onlyMaster;
+    
+    public final String description;
 
     /**
      * used to create/update a new script in the UI
      */
     @DataBoundConstructor
-    public Script(String id, String name, String comment, boolean nonAdministerUsing, Parameter[] parameters, boolean onlyMaster) {
+    public Script(String id, String name, String comment, boolean nonAdministerUsing, Parameter[] parameters, boolean onlyMaster, String description) {
         this.id = id;
         this.name = name;
         this.comment = comment;
@@ -62,12 +64,13 @@ public class Script implements Comparable<Script>, NamedResource {
         this.nonAdministerUsing = nonAdministerUsing;
         this.parameters = parameters;
         this.onlyMaster=onlyMaster;
+        this.description = description;
     }
 
     /**
      * used during upload of a new script
      */
-    public Script(String id, String comment) {
+    public Script(String id, String comment, String description) {
         this.id = id;
         this.name = id;
         this.comment = comment;
@@ -78,12 +81,13 @@ public class Script implements Comparable<Script>, NamedResource {
         this.nonAdministerUsing = false;
         this.parameters = null;
         this.onlyMaster=false;
+        this.description = description;
     }
 
     /**
      * used during plugin start to synchronize available scripts
      */
-    public Script(String id, String comment, boolean available, boolean nonAdministerUsing, boolean onlyMaster) {
+    public Script(String id, String comment, boolean available, boolean nonAdministerUsing, boolean onlyMaster, String description) {
         this.id = id;
         this.name = id;
         this.comment = comment;
@@ -94,6 +98,7 @@ public class Script implements Comparable<Script>, NamedResource {
         this.nonAdministerUsing = nonAdministerUsing;
         this.parameters = null;
         this.onlyMaster=onlyMaster;
+        this.description = description;
     }
 
     /**
@@ -111,6 +116,7 @@ public class Script implements Comparable<Script>, NamedResource {
         this.nonAdministerUsing = false;
         this.parameters = parameters;
         this.onlyMaster=false;
+        this.description = null;
 
     }
 
@@ -118,7 +124,7 @@ public class Script implements Comparable<Script>, NamedResource {
      * used to merge scripts
      */
     public Script(String id, String name, String comment, boolean available, String originCatalog, String originScript, String originDate,
-            boolean nonAdministerUsing, Parameter[] parameters, boolean onlyMaster) {
+            boolean nonAdministerUsing, Parameter[] parameters, boolean onlyMaster, String description) {
         this.id = id;
         this.name = name;
         this.comment = comment;
@@ -129,6 +135,7 @@ public class Script implements Comparable<Script>, NamedResource {
         this.nonAdministerUsing = nonAdministerUsing;
         this.parameters = parameters;
         this.onlyMaster=onlyMaster;
+        this.description = description;
     }
 
     /*

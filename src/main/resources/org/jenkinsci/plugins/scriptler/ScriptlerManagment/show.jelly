@@ -48,7 +48,10 @@ THE SOFTWARE.
 						<f:textbox name="name" value="${script.name}" disabled="true"/>
 					</f:entry>
 					<f:entry title="${%Comment}">
-						<f:textbox name="comment" value="${script.comment}" disabled="true"/>
+						<f:textarea name="comment" value="${script.comment}" disabled="true"/>
+					</f:entry>
+                                        <f:entry title="${%Description}">
+						<f:textbox name="Description" value="${script.Description}" disabled="true"/>
 					</f:entry>
                     <f:block>
 	                    <table>

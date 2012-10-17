@@ -204,7 +204,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
 
                 Parameter[] parameters = paramList.toArray(new Parameter[paramList.size()]);
 
-                final String finalName = saveScriptAndForward(id, info.getName(), info.getComment(), source, false, false, catalogName, id, parameters);
+                final String finalName = saveScriptAndForward(id, info.getName(), info.getComment(), null, source, false, false, catalogName, id, parameters);
                 return new HttpRedirect("editScript?id=" + finalName);
             }
         }
@@ -238,14 +238,14 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      * @throws ServletException
      */
     public HttpResponse doScriptAdd(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("name") String name,
-            @QueryParameter("comment") String comment, @QueryParameter("script") String script,
+            @QueryParameter("comment") String comment, @QueryParameter("description") String description, @QueryParameter("script") String script,
             @QueryParameter("nonAdministerUsing") boolean nonAdministerUsing, @QueryParameter("onlyMaster") boolean onlyMaster, String originCatalogName, String originId) throws IOException, ServletException {
 
         checkPermission(Hudson.ADMINISTER);
 
         Parameter[] parameters = UIHelper.extractParameters(req.getSubmittedForm());
 
-        saveScriptAndForward(id, name, comment, script, nonAdministerUsing, onlyMaster, originCatalogName, originId, parameters);
+        saveScriptAndForward(id, name, comment, description, script, nonAdministerUsing, onlyMaster, originCatalogName, originId, parameters);
         return new HttpRedirect("index");
     }
 
@@ -255,7 +255,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      * @return the final name of the saved script - which is also the id of the script!
      * @throws IOException
      */
-    private String saveScriptAndForward(String id, String name, String comment, String script, boolean nonAdministerUsing, boolean onlyMaster, String originCatalogName,
+    private String saveScriptAndForward(String id, String name, String comment, String description, String script, boolean nonAdministerUsing, boolean onlyMaster, String originCatalogName,
             String originId, Parameter[] parameters) throws IOException {
         script = script == null ? "TODO" : script;
         if (StringUtils.isEmpty(id)) {
@@ -277,7 +277,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
                     new SimpleDateFormat("dd MMM yyyy HH:mm:ss a").format(new Date()), parameters);
         } else {
             // save (overwrite) the meta information
-            newScript = new Script(finalFileName, displayName, comment, nonAdministerUsing, parameters, onlyMaster);
+            newScript = new Script(finalFileName, displayName, comment, nonAdministerUsing, parameters, onlyMaster, description);
         }
         ScriptlerConfiguration cfg = getConfiguration();
         cfg.addOrReplace(newScript);
@@ -339,7 +339,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
 
             Script script = ScriptHelper.getScript(fileName, false);
             if (script == null) {
-                script = new Script(fileName, "uploaded");
+                script = new Script(fileName, "uploaded",null);
             }
             script.setNonAdministerUsing(nonAdministerUsing);
             ScriptlerConfiguration config = getConfiguration();

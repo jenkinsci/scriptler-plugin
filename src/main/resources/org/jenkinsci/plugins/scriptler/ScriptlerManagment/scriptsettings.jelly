@@ -46,6 +46,9 @@
 				<f:entry title="${%Comment}">
 					<f:textbox name="comment" />
 				</f:entry>
+                                <f:entry title="${%Description}">
+					<f:textarea name="description" />
+				</f:entry>
                 <f:entry title="${%Permission}">
 					<f:checkbox name="nonAdministerUsing" />
 				</f:entry>

@@ -45,6 +45,10 @@ THE SOFTWARE.
 				<j:out value="${script.comment}" />
 				<br />
 			</p>
+                        <p>
+				<j:out value="${script.description}" />
+				<br />
+			</p>
 
 			<form action="triggerScript" method="post">
 				<input type="hidden" value="${script.id}" name="id" />
