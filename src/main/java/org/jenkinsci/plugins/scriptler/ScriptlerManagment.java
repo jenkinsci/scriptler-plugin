@@ -76,6 +76,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
     private final static String MASTER = "(master)";
     private final static String ALL = "(all)";
     private final static String ALL_SLAVES = "(all slaves)";
+    public static final String DEFAULT_SCRIPT_DIR = "SCRIPTS";
 
     private boolean isRunScriptPermissionEnabled() {
         return getConfiguration().isAllowRunScriptPermission();
@@ -269,7 +270,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
 
         Script newScript = null;
         if (!StringUtils.isEmpty(originId)) {
-            newScript = new Script(finalFileName, displayName, comment, true, originCatalogName, originId, new SimpleDateFormat("dd MMM yyyy HH:mm:ss a").format(new Date()), parameters);
+            newScript = new Script(finalFileName, displayName, comment, true, originCatalogName, originId, new SimpleDateFormat("dd MMM yyyy HH:mm:ss a").format(new Date()), parameters, DEFAULT_SCRIPT_DIR);
         } else {
             // save (overwrite) the meta information
             newScript = new Script(finalFileName, displayName, comment, nonAdministerUsing, parameters, onlyMaster, null);
@@ -334,9 +335,8 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
 
             Script script = ScriptHelper.getScript(fileName, false);
             if (script == null) {
-                script = new Script(fileName, "uploaded");
+                script = new Script(fileName, fileName, true, nonAdministerUsing, false, DEFAULT_SCRIPT_DIR);
             }
-            script.setNonAdministerUsing(nonAdministerUsing);
             ScriptlerConfiguration config = getConfiguration();
             config.addOrReplace(script);
 

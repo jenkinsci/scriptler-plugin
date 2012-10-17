@@ -102,7 +102,7 @@ public class ScriptInfo implements NamedResource {
         this.name = name;
     }
 
-    public class Author {
+    public static class Author {
         private String name;
 
         public Author() {
@@ -121,7 +121,7 @@ public class ScriptInfo implements NamedResource {
         }
     }
 
-    public class Parameter {
+    public static class Parameter {
         private String name;
 
         public Parameter() {

@@ -29,13 +29,14 @@ public class Script implements Comparable<Script>, NamedResource {
 
     private String id;
     public final String name;
-    public final String repodir;
+    private final String repodir;
     public final String comment;
-    public final boolean available;
     public final String originCatalog;
     public final String originScript;
     public final String originDate;
     private Parameter[] parameters;
+
+    public boolean available = true;
 
     /**
      * script is only transient, because it will not be saved in the xml but on the file system. Therefore it has to be materialized before usage!
@@ -43,96 +44,56 @@ public class Script implements Comparable<Script>, NamedResource {
     public transient String script;
 
     // for user with RUN_SCRIPT permission
-    public boolean nonAdministerUsing;
-    
-    // script is runnable only na Master
-    public boolean onlyMaster;
+    public final boolean nonAdministerUsing;
+
+    // script is runnable only on Master
+    public final boolean onlyMaster;
 
     /**
      * used to create/update a new script in the UI
      */
     @DataBoundConstructor
     public Script(String id, String name, String comment, boolean nonAdministerUsing, Parameter[] parameters, boolean onlyMaster, String repodir) {
-        this.id = id;
-        this.name = name;
-        this.comment = comment;
-        this.available = true;
-        this.originCatalog = null;
-        this.originScript = null;
-        this.originDate = null;
-        this.nonAdministerUsing = nonAdministerUsing;
-        this.parameters = parameters;
-        this.onlyMaster=onlyMaster;
-        this.repodir=repodir;
-    }
-
-    /**
-     * used during upload of a new script
-     */
-    public Script(String id, String comment) {
-        this.id = id;
-        this.name = id;
-        this.comment = comment;
-        this.available = true;
-        this.originCatalog = null;
-        this.originScript = null;
-        this.originDate = null;
-        this.nonAdministerUsing = false;
-        this.parameters = null;
-        this.onlyMaster=false;
-        this.repodir=null;
+        this(id, name, comment, null, null, null, nonAdministerUsing, parameters, onlyMaster, repodir);
     }
 
     /**
      * used during plugin start to synchronize available scripts
      */
-    public Script(String id, String comment, boolean available, boolean nonAdministerUsing, boolean onlyMaster) {
-        this.id = id;
-        this.name = id;
-        this.comment = comment;
-        this.available = available;
-        this.originCatalog = null;
-        this.originScript = null;
-        this.originDate = null;
-        this.nonAdministerUsing = nonAdministerUsing;
-        this.parameters = null;
-        this.onlyMaster=onlyMaster;
-        this.repodir=null;
+    public Script(String id, String comment, boolean available, boolean nonAdministerUsing, boolean onlyMaster, String repodir) {
+        this(id, id, comment, null, null, null, false, null, false, repodir);
     }
 
     /**
      * Constructor to create a script imported from a foreign catalog.
+     * 
      */
-    public Script(String id, String name, String comment, boolean available, String originCatalog, String originScript, String originDate,
-            Parameter[] parameters) {
-        this.id = id;
-        this.name = name;
-        this.comment = comment;
-        this.available = available;
-        this.originCatalog = originCatalog;
-        this.originScript = originScript;
-        this.originDate = originDate;
-        this.nonAdministerUsing = false;
-        this.parameters = parameters;
-        this.onlyMaster=false;
-        this.repodir=null;    }
+    public Script(String id, String name, String comment, boolean available, String originCatalog, String originScript, String originDate, Parameter[] parameters, String repodir) {
+        this(id, name, comment, originCatalog, originScript, originDate, false, parameters, false, repodir);
+    }
 
     /**
      * used to merge scripts
      */
-    public Script(String id, String name, String comment, boolean available, String originCatalog, String originScript, String originDate,
-            boolean nonAdministerUsing, Parameter[] parameters, boolean onlyMaster) {
+    public Script(String id, String name, String comment, boolean available, String originCatalog, String originScript, String originDate, boolean nonAdministerUsing, Parameter[] parameters, boolean onlyMaster, String repodir) {
+        this(id, name, comment, originCatalog, originScript, originDate, nonAdministerUsing, parameters, onlyMaster, repodir);
+    }
+
+    /**
+     * used to merge scripts
+     */
+    public Script(String id, String name, String comment, String originCatalog, String originScript, String originDate, boolean nonAdministerUsing, Parameter[] parameters, boolean onlyMaster, String repodir) {
         this.id = id;
         this.name = name;
         this.comment = comment;
-        this.available = available;
         this.originCatalog = originCatalog;
         this.originScript = originScript;
         this.originDate = originDate;
         this.nonAdministerUsing = nonAdministerUsing;
         this.parameters = parameters;
-        this.onlyMaster=onlyMaster;
-        this.repodir=null;
+        this.onlyMaster = onlyMaster;
+        System.out.println("***>>" + repodir + ">>" + id);
+        this.repodir = repodir == null ? org.jenkinsci.plugins.scriptler.ScriptlerManagment.DEFAULT_SCRIPT_DIR : repodir;
     }
 
     /*
@@ -142,6 +103,23 @@ public class Script implements Comparable<Script>, NamedResource {
      */
     public String getName() {
         return name;
+    }
+
+    public String getScriptPath() {
+        return repodir + "/" + name;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
+    }
+
+    /**
+     * Gets the repodir, if <code>null</code>, then default will be returned; 'scripts'
+     * 
+     * @return never <code>null</code>
+     */
+    public String getRepodir() {
+        return repodir == null ? "scripts" : repodir;
     }
 
     public void setScript(String script) {
@@ -154,10 +132,6 @@ public class Script implements Comparable<Script>, NamedResource {
 
     public Parameter[] getParameters() {
         return parameters;
-    }
-
-    public void setNonAdministerUsing(boolean nonAdministerUsing) {
-        this.nonAdministerUsing = nonAdministerUsing;
     }
 
     /*
@@ -187,7 +161,7 @@ public class Script implements Comparable<Script>, NamedResource {
     }
 
     public String toString() {
-        return "[Script: " + id + ":" + name + "]";
+        return "[Script: " + repodir + "/" + id + ":" + name + "]";
     }
 
     /**
