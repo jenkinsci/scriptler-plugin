@@ -23,21 +23,19 @@
  */
 package org.jenkinsci.plugins.scriptler.config;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringUtils;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 
 /**
  * @author imod
  * 
  */
 public class ScriptSet {
+    private static final Logger LOGGER = Logger.getLogger(ScriptSet.class.getName());
 
     // have it sorted
     protected Set<Script> scriptSet = new TreeSet<Script>();
@@ -75,22 +73,11 @@ public class ScriptSet {
         String originCatalog = StringUtils.isEmpty(newScript.originCatalog) ? origin.originCatalog : newScript.originCatalog;
         String originScript = StringUtils.isEmpty(newScript.originScript) ? origin.originScript : newScript.originScript;
         String originDate = StringUtils.isEmpty(newScript.originDate) ? origin.originDate : newScript.originDate;
-        return new Script(newScript.getId(), name, comment, newScript.available, originCatalog, originScript, originDate, newScript.nonAdministerUsing, newScript.getParameters(), newScript.onlyMaster, newScript.getRepodir());
+        return new Script(newScript.getId(), name, comment, newScript.available, originCatalog, originScript, originDate, newScript.nonAdministerUsing, newScript.getParameters(), newScript.onlyMaster);
     }
 
     public final Set<Script> getScripts() {
         return Collections.unmodifiableSet(scriptSet);
-    }
-
-    public final Collection<Script> getScriptsForRepodir(final String repodir) {
-
-        final Collection<Script> repoScripts = Collections2.filter(scriptSet, new Predicate<Script>() {
-            public boolean apply(Script script) {
-                return script.getRepodir().equals(repodir);
-            }
-        });
-
-        return repoScripts;
     }
 
     public final Set<Script> getUserScripts() {

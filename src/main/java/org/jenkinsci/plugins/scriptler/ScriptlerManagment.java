@@ -52,6 +52,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.jenkinsci.plugins.scriptler.config.Script;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
+import org.jenkinsci.plugins.scriptler.git.GitScriptlerRepository;
 import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfoCatalog;
@@ -76,7 +77,6 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
     private final static String MASTER = "(master)";
     private final static String ALL = "(all)";
     private final static String ALL_SLAVES = "(all slaves)";
-    public static final String DEFAULT_SCRIPT_DIR = "SCRIPTS";
 
     private boolean isRunScriptPermissionEnabled() {
         return getConfiguration().isAllowRunScriptPermission();
@@ -268,12 +268,19 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
         writer.write(script);
         writer.close();
 
+        try {
+            final GitScriptlerRepository gitRepo = Jenkins.getInstance().getExtensionList(GitScriptlerRepository.class).get(GitScriptlerRepository.class);
+            gitRepo.addSingleFileToRepo(finalFileName);
+        } catch (Exception e) {
+            throw new IOException("failed to update git repo", e);
+        }
+
         Script newScript = null;
         if (!StringUtils.isEmpty(originId)) {
-            newScript = new Script(finalFileName, displayName, comment, true, originCatalogName, originId, new SimpleDateFormat("dd MMM yyyy HH:mm:ss a").format(new Date()), parameters, DEFAULT_SCRIPT_DIR);
+            newScript = new Script(finalFileName, displayName, comment, true, originCatalogName, originId, new SimpleDateFormat("dd MMM yyyy HH:mm:ss a").format(new Date()), parameters);
         } else {
             // save (overwrite) the meta information
-            newScript = new Script(finalFileName, displayName, comment, nonAdministerUsing, parameters, onlyMaster, null);
+            newScript = new Script(finalFileName, displayName, comment, nonAdministerUsing, parameters, onlyMaster);
         }
         ScriptlerConfiguration cfg = getConfiguration();
         cfg.addOrReplace(newScript);
@@ -299,6 +306,13 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
         // remove the file
         File oldScript = new File(getScriptDirectory(), id);
         oldScript.delete();
+
+        try {
+            final GitScriptlerRepository gitRepo = Jenkins.getInstance().getExtensionList(GitScriptlerRepository.class).get(GitScriptlerRepository.class);
+            gitRepo.rmSingleFileToRepo(id);
+        } catch (Exception e) {
+            throw new IOException("failed to update git repo", e);
+        }
 
         // remove the meta information
         ScriptlerConfiguration cfg = getConfiguration();
@@ -335,7 +349,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
 
             Script script = ScriptHelper.getScript(fileName, false);
             if (script == null) {
-                script = new Script(fileName, fileName, true, nonAdministerUsing, false, DEFAULT_SCRIPT_DIR);
+                script = new Script(fileName, fileName, true, nonAdministerUsing, false);
             }
             ScriptlerConfiguration config = getConfiguration();
             config.addOrReplace(script);
@@ -561,10 +575,6 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      */
     public static File getScriptDirectory() {
         return new File(getScriptlerHomeDirectory(), "scripts");
-    }
-
-    public static File getGitScriptDirectory() {
-        return new File(getScriptlerHomeDirectory(), "gitrepo");
     }
 
     public static File getScriptlerHomeDirectory() {

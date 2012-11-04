@@ -4,6 +4,7 @@
 package org.jenkinsci.plugins.scriptler.builder;
 
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.BuildListener;
 import hudson.model.ParameterValue;
@@ -15,6 +16,8 @@ import hudson.security.Permission;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -31,6 +34,7 @@ import jenkins.model.Jenkins.MasterComputer;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptler.Messages;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagment;
@@ -77,7 +81,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
     public String getBuilderId() {
         return builderId;
     }
-    
+
     public boolean isPropagateParams() {
         return propagateParams;
     }
@@ -86,17 +90,18 @@ public class ScriptlerBuilder extends Builder implements Serializable {
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
         boolean isOk = false;
         final Script script = ScriptHelper.getScript(scriptId, true);
+
         if (script != null) {
             try {
+
                 // expand the parameters before passing these to the execution, this is to allow any token macro to resolve parameter values
                 List<Parameter> expandedParams = new LinkedList<Parameter>();
 
                 if (propagateParams) {
                     final ParametersAction paramsAction = build.getAction(ParametersAction.class);
-                    if(paramsAction==null){
-                       listener.getLogger().println(Messages.no_parameters_defined());
-                    }
-                    else{
+                    if (paramsAction == null) {
+                        listener.getLogger().println(Messages.no_parameters_defined());
+                    } else {
                         final List<ParameterValue> jobParams = paramsAction.getParameters();
                         for (ParameterValue parameterValue : jobParams) {
                             // pass the params to the token expander in a way that these get expanded by environment variables (params are also environment variables)
@@ -108,10 +113,9 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                     expandedParams.add(new Parameter(parameter.getName(), TokenMacro.expandAll(build, listener, parameter.getValue())));
                 }
                 final Object output;
-                if(script.onlyMaster){
+                if (script.onlyMaster) {
                     output = MasterComputer.localChannel.call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, listener));
-                }
-                else{
+                } else {
                     output = launcher.getChannel().call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, listener));
                 }
                 if (output instanceof Boolean && Boolean.FALSE.equals(output)) {

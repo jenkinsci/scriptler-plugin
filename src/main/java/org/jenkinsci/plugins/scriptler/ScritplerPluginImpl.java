@@ -72,8 +72,7 @@ public class ScritplerPluginImpl extends Plugin {
             cfg = new ScriptlerConfiguration(new TreeSet<Script>());
         }
 
-        SyncUtil.syncDirWithCfg(scriptDirectory.getName(), scriptDirectory, cfg);
-        SyncUtil.syncDirWithCfg(ScriptlerManagment.getGitScriptDirectory().getName(), ScriptlerManagment.getGitScriptDirectory(), cfg);
+        SyncUtil.syncDirWithCfg(scriptDirectory, cfg);
 
         cfg.save();
 

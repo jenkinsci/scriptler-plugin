@@ -27,13 +27,12 @@ public class SyncUtil {
 
     /**
      * 
-     * @param repodir
      * @param scriptDirectory
      * @param cfg
      *            must be saved (by caller) after finishing this all sync
      * @throws IOException
      */
-    public static void syncDirWithCfg(String repodir, File scriptDirectory, ScriptlerConfiguration cfg) throws IOException {
+    public static void syncDirWithCfg(File scriptDirectory, ScriptlerConfiguration cfg) throws IOException {
 
         List<File> availablePhysicalScripts = getAvailableScripts(scriptDirectory);
 
@@ -48,9 +47,9 @@ public class SyncUtil {
                     for (int i = 0; i < parameters.length; i++) {
                         parameters[i] = new Parameter(paramList.get(i), null);
                     }
-                    cfg.addOrReplace(new Script(file.getName(), info.getName(), info.getComment(), false, parameters, false, repodir));
+                    cfg.addOrReplace(new Script(file.getName(), info.getName(), info.getComment(), false, parameters, false));
                 } else {
-                    cfg.addOrReplace(new Script(file.getName(), file.getName(), Messages.script_loaded_from_directory(), false, null, false, repodir));
+                    cfg.addOrReplace(new Script(file.getName(), file.getName(), Messages.script_loaded_from_directory(), false, null, false));
                 }
 
             }
@@ -59,13 +58,13 @@ public class SyncUtil {
         // check if all scripts in the configuration are physically available
         // if not, mark it as missing
         Set<Script> unavailableScripts = new HashSet<Script>();
-        for (Script s : cfg.getScriptsForRepodir(repodir)) {
+        for (Script s : cfg.getScripts()) {
             // only check the scripts belonging to this repodir
-            if ((new File(s.getScriptPath()).exists())) {
+            if ((new File(scriptDirectory, s.getScriptPath()).exists())) {
                 s.setAvailable(true);
             } else {
-                unavailableScripts.add(new Script(s.getId(), s.comment, false, false, false, repodir));
-                LOGGER.info("for repo '" + repodir + "' " + s + " is not available!");
+                unavailableScripts.add(new Script(s.getId(), s.comment, false, false, false));
+                LOGGER.info("for repo '" + scriptDirectory.getAbsolutePath() + "' " + s + " is not available!");
             }
         }
 

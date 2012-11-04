@@ -64,7 +64,7 @@ public class ScriptHelper {
         Script s = ScriptlerConfiguration.getConfiguration().getScriptById(id);
         if (withSrc) {
             try {
-                File scriptSrc = new File(ScriptlerManagment.getScriptlerHomeDirectory(), s.getScriptPath());
+                File scriptSrc = new File(ScriptlerManagment.getScriptDirectory(), s.getScriptPath());
                 Reader reader = new FileReader(scriptSrc);
                 String src = IOUtils.toString(reader);
                 s.setScript(src);
