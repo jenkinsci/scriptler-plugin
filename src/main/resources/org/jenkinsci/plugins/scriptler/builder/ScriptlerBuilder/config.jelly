@@ -5,10 +5,10 @@
 		<script type="text/javascript" src="${rootURL}/plugin/scriptler/lib/scriptler.js" />
 	</st:once>
 	<j:choose>
-		<j:when test="${empty(descriptor.scripts)}">
+		<j:when test="true">
 			<f:entry title="">
 				<div>
-					${%WarnNoScript}
+					${%WarnNoScript} <a href="${rootURL}/scriptler">scriptler</a>
 				</div>
 			</f:entry>
 		</j:when>
