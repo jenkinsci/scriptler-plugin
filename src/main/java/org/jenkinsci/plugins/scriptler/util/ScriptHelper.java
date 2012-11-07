@@ -62,7 +62,7 @@ public class ScriptHelper {
             return null;
         }
         Script s = ScriptlerConfiguration.getConfiguration().getScriptById(id);
-        if (withSrc) {
+        if (withSrc && s != null) {
             try {
                 File scriptSrc = new File(ScriptlerManagment.getScriptDirectory(), s.getScriptPath());
                 Reader reader = new FileReader(scriptSrc);
