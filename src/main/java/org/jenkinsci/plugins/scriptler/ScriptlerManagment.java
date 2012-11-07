@@ -268,12 +268,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
         writer.write(script);
         writer.close();
 
-        try {
-            final GitScriptlerRepository gitRepo = Jenkins.getInstance().getExtensionList(GitScriptlerRepository.class).get(GitScriptlerRepository.class);
-            gitRepo.addSingleFileToRepo(finalFileName);
-        } catch (Exception e) {
-            throw new IOException("failed to update git repo", e);
-        }
+        commitFileToGitRepo(finalFileName);
 
         Script newScript = null;
         if (!StringUtils.isEmpty(originId)) {
@@ -286,6 +281,35 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
         cfg.addOrReplace(newScript);
         cfg.save();
         return finalFileName;
+    }
+
+    /**
+     * adds/commits the given file to the local git repo - file must be written to scripts directory!
+     * 
+     * @param finalFileName
+     * @throws IOException
+     */
+    private void commitFileToGitRepo(final String finalFileName) throws IOException {
+        try {
+            getGitRepo().addSingleFileToRepo(finalFileName);
+        } catch (Exception e) {
+            throw new IOException("failed to update git repo", e);
+        }
+    }
+
+    private GitScriptlerRepository getGitRepo() {
+        return Jenkins.getInstance().getExtensionList(GitScriptlerRepository.class).get(GitScriptlerRepository.class);
+    }
+
+    /**
+     * Triggers a hard reset on the git repo
+     * @return redirects to the repo entry page at <code>http://jenkins.orga.com/scriptler.git</code>
+     * @throws IOException
+     */
+    public HttpResponse doHardResetGit() throws IOException {
+        checkPermission(Hudson.ADMINISTER);
+        getGitRepo().hardReset();
+        return new HttpRedirect("/scriptler.git");
     }
 
     /**
@@ -346,6 +370,8 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
             fileName = fixFileName(null, fileName);
 
             fileItem.write(new File(rootDir, fileName));
+
+            commitFileToGitRepo(fileName);
 
             Script script = ScriptHelper.getScript(fileName, false);
             if (script == null) {
