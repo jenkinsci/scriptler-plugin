@@ -4,7 +4,6 @@
 package org.jenkinsci.plugins.scriptler.builder;
 
 import hudson.Extension;
-import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.BuildListener;
 import hudson.model.ParameterValue;
@@ -16,8 +15,6 @@ import hudson.security.Permission;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -34,7 +31,6 @@ import jenkins.model.Jenkins.MasterComputer;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptler.Messages;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagment;
