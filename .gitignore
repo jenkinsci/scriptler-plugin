@@ -4,3 +4,4 @@
 /.classpath
 /.project
 /bin
+/scriptler (org.jenkins-ci.plugins).iml
