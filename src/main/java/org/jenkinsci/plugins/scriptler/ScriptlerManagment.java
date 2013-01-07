@@ -32,6 +32,7 @@ import hudson.model.ComputerSet;
 import hudson.model.Hudson;
 import hudson.security.Permission;
 
+import hudson.security.PermissionGroup;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -82,7 +83,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
     }
 
     public Permission getRequiredPermissionForRunScript() {
-        return isRunScriptPermissionEnabled() ? Jenkins.RUN_SCRIPTS : Jenkins.ADMINISTER;
+        return isRunScriptPermissionEnabled() ? getConfiguration().getPermissionForUserScripts() : Jenkins.ADMINISTER;
     }
 
     /*
@@ -156,7 +157,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      * @throws IOException
      */
     public HttpResponse doScriptlerSettings(StaplerRequest res, StaplerResponse rsp, @QueryParameter("disableRemoteCatalog") boolean disableRemoteCatalog,
-            @QueryParameter("allowRunScriptPermission") boolean allowRunScriptPermission, @QueryParameter("allowRunScriptEdit") boolean allowRunScriptEdit)
+            @QueryParameter("allowRunScriptPermission") boolean allowRunScriptPermission, @QueryParameter("allowRunScriptEdit") boolean allowRunScriptEdit, @QueryParameter("permissionId") String permissionId)
             throws IOException {
         checkPermission(Hudson.ADMINISTER);
 
@@ -164,8 +165,8 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
         cfg.setDisbableRemoteCatalog(disableRemoteCatalog);
         cfg.setAllowRunScriptEdit(allowRunScriptEdit);
         cfg.setAllowRunScriptPermission(allowRunScriptPermission);
+        cfg.setPermissionForUserScripts(permissionId);
         cfg.save();
-
         return new HttpRedirect("settings");
     }
 
@@ -588,5 +589,13 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
         name = name.replace(" ", "_").trim();
         LOGGER.fine("set file name to: " + name);
         return name;
+    }
+    
+    public List<Permission> getAllPermissions(){
+        List<Permission> permissions = new ArrayList<Permission>();
+        for(PermissionGroup group :PermissionGroup.getAll()){
+            permissions.addAll(group.getPermissions());
+        }
+        return permissions;
     }
 }

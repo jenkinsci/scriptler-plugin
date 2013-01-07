@@ -43,6 +43,8 @@ import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
 import org.jenkinsci.plugins.scriptler.util.ByIdSorter;
 
 import com.thoughtworks.xstream.XStream;
+import hudson.security.Permission;
+import jenkins.model.Jenkins;
 
 /**
  */
@@ -59,6 +61,8 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
     private boolean allowRunScriptPermission = false;
 
     private boolean allowRunScriptEdit = false;
+    
+    private String permissionForUserScripts = Jenkins.RUN_SCRIPTS.getId();
 
     public ScriptlerConfiguration(SortedSet<Script> scripts) {
         if (scripts != null) {
@@ -130,6 +134,14 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
 
     public void setAllowRunScriptPermission(boolean allowRunScriptPermission) {
         this.allowRunScriptPermission = allowRunScriptPermission;
+    }
+    
+    public void setPermissionForUserScripts(String permissionId){
+        permissionForUserScripts = permissionId;
+    }
+    
+    public Permission getPermissionForUserScripts(){
+        return Permission.fromId(permissionForUserScripts);
     }
 
     public boolean isAllowRunScriptEdit() {

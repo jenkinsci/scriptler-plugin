@@ -41,9 +41,16 @@
 					<f:entry title="${%Disable remote catalog}" help="/plugin/scriptler/help-disableRemoterCatalog.html">
 						<f:checkbox name="disableRemoteCatalog" checked="${it.disableRemoteCatalog()}" />
 					</f:entry>
-                    <f:entry title="${%Allow RunScript permission}" help="/plugin/scriptler/help-allowRunScriptPermission.html">
-                        <f:checkbox name="allowRunScriptPermission" checked="${it.allowRunScriptPermission()}" />
-                    </f:entry>
+                    <f:optionalBlock title="${%Allow RunScript permission}" help="/plugin/scriptler/help-allowRunScriptPermission.html" name="allowRunScriptPermission" checked="${it.allowRunScriptPermission()}" >                       
+                         <tr><td></td>
+                         <td>
+                           <select name="permissionId">
+                             <j:forEach var="permission" items="${it.getAllPermissions()}">
+                              <f:option value="${permission.getId()}" selected="${permission.getId().equals(it.getConfiguration().getPermissionForUserScripts().getId())}">${permission.group.title}: ${permission.name}</f:option>
+                             </j:forEach>               
+                           </select> 
+                        </td></tr>
+                    </f:optionalBlock>
                     <f:entry title="${%Allow RunScript editing}" help="/plugin/scriptler/help-allowRunScriptEdit.html">
                         <f:checkbox name="allowRunScriptEdit" checked="${it.allowRunScriptEdit()}" />
                     </f:entry>
