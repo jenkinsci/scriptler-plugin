@@ -4,6 +4,7 @@ import groovy.lang.GroovyShell;
 import hudson.model.TaskListener;
 import hudson.remoting.DelegatingCallable;
 
+import java.io.PrintStream;
 import java.io.PrintWriter;
 
 import jenkins.model.Jenkins;
@@ -41,22 +42,22 @@ public class GroovyScript implements DelegatingCallable<Object, RuntimeException
         if (cl == null) {
             cl = Thread.currentThread().getContextClassLoader();
         }
-        PrintWriter pw = new PrintWriter(listener.getLogger());
+        PrintStream logger = listener.getLogger();
         GroovyShell shell = new GroovyShell(cl);
 
         for (Parameter param : parameters) {
             final String paramName = param.getName();
             if (PW_PARAM_VARIABLE.equals(paramName)) {
-                pw.write(Messages.skipParamter(PW_PARAM_VARIABLE));
+                logger.println(Messages.skipParamter(PW_PARAM_VARIABLE));
             } else {
                 shell.setVariable(paramName, param.getValue());
             }
         }
-        shell.setVariable(PW_PARAM_VARIABLE, listener.getLogger());
+        shell.setVariable(PW_PARAM_VARIABLE, logger);
         try {
             Object output = shell.evaluate(script);
             if (output != null) {
-                pw.println(Messages.resultPrefix() + " " + output);
+                logger.println(Messages.resultPrefix() + " " + output);
                 return output;
             } else {
                 return "";
@@ -65,7 +66,7 @@ public class GroovyScript implements DelegatingCallable<Object, RuntimeException
             if (failWithException) {
                 throw new ScriptlerExecutionException(t);
             }
-            t.printStackTrace(pw);
+            t.printStackTrace(logger);
             return Boolean.FALSE;
         }
     }
