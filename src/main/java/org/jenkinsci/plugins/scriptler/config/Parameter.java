@@ -5,12 +5,12 @@ import java.io.Serializable;
 public class Parameter implements Serializable {
     private static final long serialVersionUID = 1L;
     private String name;
-    private String value;
+    private Object value;
 
     public Parameter() {
     }
 
-    public Parameter(String name, String value) {
+    public Parameter(String name, Object value) {
         this.name = name;
         this.value = value;
     }
@@ -19,7 +19,7 @@ public class Parameter implements Serializable {
         return name;
     }
 
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 
@@ -27,7 +27,7 @@ public class Parameter implements Serializable {
         this.name = name;
     }
 
-    public void setValue(String value) {
+    public void setValue(Object value) {
         this.value = value;
     }
 
