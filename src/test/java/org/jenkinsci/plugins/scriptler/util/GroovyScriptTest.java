@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.scriptler.util;
 
 import hudson.util.StreamTaskListener;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -21,7 +22,7 @@ public class GroovyScriptTest {
             }
         };
         Object result = gs.call();
-        assertEquals("", sos.toString());
+        assertTrue(sos.toString().contains("Result:   false"));
         assertEquals(false, result);
     }
 
@@ -35,7 +36,7 @@ public class GroovyScriptTest {
             }
         };
         Object result = gs.call();
-        assertEquals("", sos.toString());
+        assertTrue(sos.toString().contains("Result:   true"));
         assertEquals(true, result);
     }
 
