@@ -106,16 +106,12 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                     }
                 }
                 for (Parameter parameter : parameters) {
-                    expandedParams.add(new Parameter(parameter.getName(), TokenMacro.expandAll(build, listener, parameter.getValue().toString())));
+                    expandedParams.add(new Parameter(parameter.getName(), TokenMacro.expandAll(build, listener, parameter.getValue())));
                 }
                 final Object output;
                 if (script.onlyMaster) {
                     // When run on master, make build, launcher, listener available to script
-                    expandedParams.add(new Parameter("build", build));
-                    expandedParams.add(new Parameter("launcher", launcher));
-                    expandedParams.add(new Parameter("listener", listener));
-                	
-                    output = MasterComputer.localChannel.call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, listener));
+                    output = MasterComputer.localChannel.call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, listener, launcher, build));
                 } else {
                     output = launcher.getChannel().call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, listener));
                 }
