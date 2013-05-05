@@ -9,7 +9,7 @@ l.layout {
     l.main_panel {
         
         h1 {
-            img (src: "${rootUrl}/plugin/scriptler/images/Git-Icon-1788C.png", width: "48", height: "48"){}
+            img (src: "${app.rootUrl}plugin/scriptler/images/Git-Icon-1788C.png", width: "48", height: "48"){}
             raw " Accessing Scriptler scripts"
         }
 

@@ -36,7 +36,7 @@ THE SOFTWARE.
       		<l:task icon="images/24x24/folder.gif" href="catalog" title="${%Remote Script catalogs}" permission="${app.ADMINISTER}" />
       </j:if>
       <l:task icon="images/24x24/setting.gif" href="settings" title="${%Scriptler settings}" permission="${app.ADMINISTER}" />
-      <l:task icon="${rootURL}plugin/scriptler/images/Git-Icon-1788C.png" href="${rootURL}/scriptler.git" title="${%Git repo}" permission="${app.ADMINISTER}" />
+      <l:task icon="plugin/scriptler/images/Git-Icon-1788C.png" href="${rootURL}/scriptler.git" title="${%Git repo}" permission="${app.ADMINISTER}" />
     </l:tasks>
     <t:executors computers="${h.singletonList(it)}" />
   </l:side-panel>
