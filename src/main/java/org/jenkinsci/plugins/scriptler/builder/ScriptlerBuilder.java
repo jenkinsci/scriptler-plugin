@@ -101,7 +101,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                         final List<ParameterValue> jobParams = paramsAction.getParameters();
                         for (ParameterValue parameterValue : jobParams) {
                             // pass the params to the token expander in a way that these get expanded by environment variables (params are also environment variables)
-                            expandedParams.add(new Parameter(parameterValue.getName(), TokenMacro.expandAll(build, listener, "${" + parameterValue.getName() + "}")));
+                            expandedParams.add(new Parameter(parameterValue.getName(), TokenMacro.expandAll(build, listener, "${" + parameterValue.getName() + "}", false, null)));
                         }
                     }
                 }
