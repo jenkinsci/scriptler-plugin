@@ -60,7 +60,7 @@ public class Script implements Comparable<Script>, NamedResource {
      * used during plugin start to synchronize available scripts
      */
     public Script(String id, String comment, boolean available, boolean nonAdministerUsing, boolean onlyMaster) {
-        this(id, id, comment, null, null, null, false, null, false);
+        this(id, id, comment, null, null, null, nonAdministerUsing, null, false);
     }
 
     /**
