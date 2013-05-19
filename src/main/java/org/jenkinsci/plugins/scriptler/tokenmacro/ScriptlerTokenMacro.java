@@ -29,9 +29,11 @@ public class ScriptlerTokenMacro extends DataBoundTokenMacro {
     public String evaluate(AbstractBuild<?, ?> context, TaskListener listener, String macroName) throws MacroEvaluationException, IOException, InterruptedException {
 
         final Script script = ScriptHelper.getScript(scriptId, true);
-        if (script.nonAdministerUsing) {
-            listener.getLogger().println(Messages.tokenmacro_AdminScriptOnly(scriptId));
+        if (script == null) {
             throw new MacroEvaluationException(Messages.tokenmacro_ScriptDoesNotExist(scriptId));
+        } else if (!script.nonAdministerUsing) {
+            listener.getLogger().println(Messages.tokenmacro_AdminScriptOnly(scriptId));
+            throw new MacroEvaluationException(Messages.tokenmacro_AdminScriptOnly(scriptId));
         }
 
         Object output = context.getWorkspace().getChannel().call(new GroovyScript(script.script, null, true, listener));
