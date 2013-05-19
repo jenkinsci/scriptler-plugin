@@ -78,12 +78,14 @@ public class GroovyScript implements DelegatingCallable<Object, RuntimeException
         PrintStream logger = listener.getLogger();
         GroovyShell shell = new GroovyShell(cl);
 
-        for (Parameter param : parameters) {
-            final String paramName = param.getName();
-            if (DEFAULT_VARIABLES.contains(paramName)) {
-                logger.println(Messages.skipParamter(paramName));
-            } else {
-                shell.setVariable(paramName, param.getValue());
+        if(parameters != null) {
+            for (Parameter param : parameters) {
+                final String paramName = param.getName();
+                if (DEFAULT_VARIABLES.contains(paramName)) {
+                    logger.println(Messages.skipParamter(paramName));
+                } else {
+                    shell.setVariable(paramName, param.getValue());
+                }
             }
         }
         

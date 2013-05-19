@@ -358,7 +358,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
     public HttpResponse doUploadScript(StaplerRequest req) throws IOException, ServletException {
         checkPermission(Hudson.ADMINISTER);
         try {
-            File rootDir = getScriptDirectory();
+            
 
             FileItem fileItem = req.getFileItem("file");
             boolean nonAdministerUsing = req.getSubmittedForm().getBoolean("nonAdministerUsing");
@@ -366,19 +366,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
             if (StringUtils.isEmpty(fileName)) {
                 return new HttpRedirect(".");
             }
-            // upload can only be to/from local catalog
-            fileName = fixFileName(null, fileName);
-
-            fileItem.write(new File(rootDir, fileName));
-
-            commitFileToGitRepo(fileName);
-
-            Script script = ScriptHelper.getScript(fileName, false);
-            if (script == null) {
-                script = new Script(fileName, fileName, true, nonAdministerUsing, false);
-            }
-            ScriptlerConfiguration config = getConfiguration();
-            config.addOrReplace(script);
+            saveScript(fileItem, nonAdministerUsing, fileName);
 
             return new HttpRedirect("index");
         } catch (IOException e) {
@@ -386,6 +374,28 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
         } catch (Exception e) {
             throw new ServletException(e);
         }
+    }
+
+    /**
+     * Protected only for testing
+     */
+    /*private*/ void saveScript(FileItem fileItem, boolean nonAdministerUsing, String fileName) throws Exception, IOException {
+        // upload can only be to/from local catalog
+        fileName = fixFileName(null, fileName);
+
+        File rootDir = getScriptDirectory();
+        final File f = new File(rootDir, fileName);
+        
+        fileItem.write(f);
+
+        commitFileToGitRepo(fileName);
+
+        Script script = ScriptHelper.getScript(fileName, false);
+        if (script == null) {
+            script = new Script(fileName, fileName, true, nonAdministerUsing, false);
+        }
+        ScriptlerConfiguration config = getConfiguration();
+        config.addOrReplace(script);
     }
 
     /**

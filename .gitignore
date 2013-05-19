@@ -5,3 +5,4 @@
 /.project
 /bin
 /scriptler (org.jenkins-ci.plugins).iml
+/dummy.groovy

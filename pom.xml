@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.jenkins-ci.plugins</groupId>
 		<artifactId>plugin</artifactId>
-		<version>1.451</version>
+		<version>1.480</version>
 		<!-- <version>1.460</version> version caused JENKINS-13518 -->
 	</parent>
 
