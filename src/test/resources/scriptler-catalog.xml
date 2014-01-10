@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<catalog>
+  <entrySet>
+    <entry>
+      <id>id</id>
+      <name>name.groovy</name>
+      <comment>comment</comment>
+      <provider>N/A</provider>
+    </entry>
+  </entrySet>
+</catalog>
+

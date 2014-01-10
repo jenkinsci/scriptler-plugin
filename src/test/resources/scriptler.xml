@@ -26,8 +26,8 @@
   <catalogInfos>
     <catalog>
       <name>default</name>
-      <catalogLocation>http://hudson.fortysix.ch/scriptler/scriptler-catalog.xml</catalogLocation>
-      <scriptDownloadUrl>http://hudson.fortysix.ch/scriptler/{0}</scriptDownloadUrl>
+      <catalogLocation>https://raw2.github.com/christ66/scriptler-plugin/master/src/test/resources/scriptler-catalog.xml</catalogLocation>
+      <scriptDownloadUrl>https://raw2.github.com/christ66/scriptler-plugin/master/src/test/resources{0}</scriptDownloadUrl>
     </catalog>
   </catalogInfos>
 </scriptler>
