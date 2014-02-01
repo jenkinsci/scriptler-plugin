@@ -9,7 +9,7 @@ import org.junit.Test;
 
 public class ScriptShareManagerTest {
 
-    private static String DEFAULT_LOCATION = "https://github.com/jenkinsci/scriptler-plugin/tree/master/src/test/resources";
+    private static String DEFAULT_LOCATION = "https://raw.github.com/jenkinsci/scriptler-plugin/master/src/test/resources";
 
     public static String DEFAULT_CATALOG = DEFAULT_LOCATION + "/scriptler-catalog.xml";
 
