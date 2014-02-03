@@ -505,13 +505,13 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
         }
 
         if (StringUtils.isEmpty(id)) {
-            throw new RuntimeException("Please specify a script id. Use ./executePlain/<yourScriptId>");
+            throw new RuntimeException("Please specify a script id. Use /scriptler/run/<yourScriptId>");
         }
 
         Script tempScript = ScriptHelper.getScript(id, true);
 
         if (tempScript == null) {
-            throw new RuntimeException("Unknown script: " + id + ". Use ./executePlain/<yourScriptId>");
+            throw new RuntimeException("Unknown script: " + id + ". Use /scriptler/run/<yourScriptId>");
         }
 
         final boolean isAdmin = Jenkins.getInstance().getACL().hasPermission(Jenkins.ADMINISTER);
