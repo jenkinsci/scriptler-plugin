@@ -133,7 +133,9 @@ public class GroovyScript implements DelegatingCallable<Object, RuntimeException
             t.printStackTrace(logger);
             return Boolean.FALSE;
         } finally {
-           scriptPool.add(parsedScript);
+            if (parsedScript != null) {
+                scriptPool.add(parsedScript);
+            }
         }
     }
 
