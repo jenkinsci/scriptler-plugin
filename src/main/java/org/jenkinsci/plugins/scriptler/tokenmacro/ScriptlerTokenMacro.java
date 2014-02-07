@@ -36,7 +36,7 @@ public class ScriptlerTokenMacro extends DataBoundTokenMacro {
             throw new MacroEvaluationException(Messages.tokenmacro_AdminScriptOnly(scriptId));
         }
 
-        Object output = context.getWorkspace().getChannel().call(new GroovyScript(script.script, null, true, listener));
+        Object output = context.getWorkspace().getChannel().call(new GroovyScript(script.script, null, true, listener, null, context));
 
         return output != null ? output.toString() : "";
     }
