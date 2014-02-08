@@ -28,7 +28,7 @@ public class ScriptlerTokenMacroTest {
         final ScriptlerManagment scriptler = j.getInstance().getExtensionList(ScriptlerManagment.class).get(0);
         ScriptlerManagementHelper helper = new ScriptlerManagementHelper(scriptler);
         File f = new File("dummy.groovy");
-        FileUtils.writeStringToFile(f, "return 'hello world'");
+        FileUtils.writeStringToFile(f, "return \"hello world ${build.number}\"");
         FileItem fi = new FileItemImpl(f);
         helper.saveScript(fi, true, "dummy.groovy");
 
@@ -37,7 +37,7 @@ public class ScriptlerTokenMacroTest {
 
         final StreamTaskListener listener = new StreamTaskListener(System.out);
 
-        Assert.assertEquals("hello world", TokenMacro.expand(b, listener, "${SCRIPTLER,scriptId=\"dummy.groovy\"}"));
+        Assert.assertEquals("hello world 1", TokenMacro.expand(b, listener, "${SCRIPTLER,scriptId=\"dummy.groovy\"}"));
 
     }
 }
