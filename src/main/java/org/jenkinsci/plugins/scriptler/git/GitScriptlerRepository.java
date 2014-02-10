@@ -22,6 +22,7 @@ import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand.ResetType;
 import org.eclipse.jgit.api.RmCommand;
+import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.lib.Repository;
@@ -140,7 +141,13 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
         final Repository repo = this.openRepository();
         final Git git = new Git(repo);
         if (repo.getRepositoryState().canResetHead()) {
-            return git.reset().setMode(ResetType.HARD).setRef("master").call().getObjectId().name();
+            try {
+                return git.reset().setMode(ResetType.HARD).setRef("master").call().getObjectId().name();
+            } catch (CheckoutConflictException e) {
+                throw new IOException("not able to perform a hard reset", e);
+            } catch (GitAPIException e) {
+                throw new IOException("problem executing reset command", e);
+            }
         }
         return "";
     }
@@ -154,6 +161,8 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
             }
         } catch (NoHeadException e) {
             throw new IOException("not able to retrieve git log", e);
+        } catch (GitAPIException e) {
+            throw new IOException("problem executing log command", e);
         }
         return msgs;
     }
