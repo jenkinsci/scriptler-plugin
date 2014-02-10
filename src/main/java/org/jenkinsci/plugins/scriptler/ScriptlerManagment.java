@@ -40,7 +40,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -105,7 +108,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
     public String getUrlName() {
         return "scriptler";
     }
-
+    
     public boolean disableRemoteCatalog() {
         return getConfiguration().isDisbableRemoteCatalog();
     }
@@ -472,6 +475,82 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
         req.setAttribute("output", output);
         req.setAttribute("readOnly", !isChangeScriptAllowed);
         req.getView(this, "runscript.jelly").forward(req, rsp);
+    }
+    
+    /**
+     * Trigger/run/execute the script on a slave and directly forward the result/output to the response.
+     * 
+     * @param req
+     *            request
+     * @param rsp
+     *            response
+     * @param script
+     *            the script code (groovy)
+     * @param node
+     *            the node, to execute the code on, defaults to {@value #MASTER}
+     * @param contentType
+     *            the contentType to use in the response, defaults to text/plain
+     * @throws IOException
+     * @throws ServletException
+     */
+    public void doRun(StaplerRequest req, StaplerResponse rsp, @QueryParameter(fixEmpty = true) String script,
+            @QueryParameter(fixEmpty = true) String node, @QueryParameter(fixEmpty = true) String contentType)
+            throws IOException, ServletException {
+
+        checkPermission(getRequiredPermissionForRunScript());
+
+        String id = req.getRestOfPath();
+        if (id.startsWith("/")) {
+            id = id.substring(1);
+        }
+
+        if (StringUtils.isEmpty(id)) {
+            throw new RuntimeException("Please specify a script id. Use /scriptler/run/<yourScriptId>");
+        }
+
+        Script tempScript = ScriptHelper.getScript(id, true);
+
+        if (tempScript == null) {
+            throw new RuntimeException("Unknown script: " + id + ". Use /scriptler/run/<yourScriptId>");
+        }
+
+        final boolean isAdmin = Jenkins.getInstance().getACL().hasPermission(Jenkins.ADMINISTER);
+        final boolean isChangeScriptAllowed = isAdmin || allowRunScriptEdit();
+
+        if (script == null || !isChangeScriptAllowed) {
+            // use original script
+            script = tempScript.script;
+        }
+
+        Parameter[] paramArray = prepareParameters(req, tempScript);
+
+        rsp.setContentType(contentType == null ? "text/plain" : contentType);
+
+        final String[] slaves = resolveSlaveNames(node == null ? MASTER : node);
+        if (slaves.length > 1) {
+            rsp.getOutputStream().print(ScriptHelper.runScript(slaves, script, paramArray));
+        }
+        else {
+            rsp.getOutputStream().print(ScriptHelper.runScript(slaves[0], script, paramArray));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Parameter[] prepareParameters(StaplerRequest req, Script tempScript) {
+        // retain default parameter values
+        Map<String, Parameter> params = new HashMap<String, Parameter>();
+        for (Parameter param : tempScript.getParameters()) {
+            params.put(param.getName(), param);
+        }
+
+        // overwrite parameters that are passed as parameters
+        for (Map.Entry<String, String[]> param : (Set<Map.Entry<String, String[]>>) req.getParameterMap().entrySet()) {
+            if (params.containsKey(param.getKey())) {
+                params.put(param.getKey(), new Parameter(param.getKey(), param.getValue()[0]));
+            }
+        }
+        Parameter[] paramArray = params.values().toArray(new Parameter[params.size()]);
+        return paramArray;
     }
 
     private String[] resolveSlaveNames(String nameAlias) {
