@@ -3,8 +3,11 @@ package org.jenkinsci.plugins.scriptler.tokenmacro;
 import hudson.Extension;
 import hudson.model.TaskListener;
 import hudson.model.AbstractBuild;
+import hudson.remoting.VirtualChannel;
 
 import java.io.IOException;
+
+import jenkins.model.Jenkins.MasterComputer;
 
 import org.jenkinsci.plugins.scriptler.Messages;
 import org.jenkinsci.plugins.scriptler.config.Script;
@@ -36,7 +39,14 @@ public class ScriptlerTokenMacro extends DataBoundTokenMacro {
             throw new MacroEvaluationException(Messages.tokenmacro_AdminScriptOnly(scriptId));
         }
 
-        Object output = context.getWorkspace().getChannel().call(new GroovyScript(script.script, null, true, listener));
+        VirtualChannel channel;
+        if (script.onlyMaster) {
+            channel = MasterComputer.localChannel;
+        } else {
+            channel = context.getWorkspace().getChannel();
+        }
+        
+        Object output = channel.call(new GroovyScript(script.script, null, true, listener, null, context));
 
         return output != null ? output.toString() : "";
     }
