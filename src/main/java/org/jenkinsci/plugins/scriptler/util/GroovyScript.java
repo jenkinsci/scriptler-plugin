@@ -1,17 +1,22 @@
 package org.jenkinsci.plugins.scriptler.util;
 
 import groovy.lang.GroovyShell;
+import groovy.lang.Script;
 import hudson.Launcher;
 import hudson.model.TaskListener;
 import hudson.model.AbstractBuild;
 import hudson.remoting.DelegatingCallable;
 
 import java.io.PrintStream;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import jenkins.model.Jenkins;
 
+import org.apache.commons.collections.map.LRUMap;
 import org.jenkinsci.plugins.scriptler.Messages;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 
@@ -27,6 +32,9 @@ public class GroovyScript implements DelegatingCallable<Object, RuntimeException
     private transient final AbstractBuild<?, ?> build;
     private transient final Launcher launcher;
     private transient ClassLoader cl;
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, ConcurrentLinkedQueue<Script>> cache = Collections.synchronizedMap(new LRUMap(10));
 
     private static final Set<String> DEFAULT_VARIABLES = new HashSet<String>();
     static {
@@ -88,15 +96,30 @@ public class GroovyScript implements DelegatingCallable<Object, RuntimeException
                 }
             }
         }
-        
+
         // set default variables
         shell.setVariable("out", logger);
         shell.setVariable("listener", listener);
         if(build != null) shell.setVariable("build", build);
         if(launcher != null) shell.setVariable("launcher", launcher);
-        
+
+        ConcurrentLinkedQueue<Script> scriptPool = cache.get(script);
+        if (scriptPool == null) {
+            scriptPool = new ConcurrentLinkedQueue<Script>();
+            cache.put(script, scriptPool);
+            scriptPool = cache.get(script);
+        }
+
+        Script parsedScript = scriptPool.poll();
+
         try {
-            Object output = shell.evaluate(script);
+            if (parsedScript == null) {
+                parsedScript = shell.parse(script);
+            }
+
+            parsedScript.setBinding(shell.getContext());
+
+            Object output = parsedScript.run();
             if (output != null) {
                 logger.println(Messages.resultPrefix() + " " + output);
                 return output;
@@ -109,6 +132,10 @@ public class GroovyScript implements DelegatingCallable<Object, RuntimeException
             }
             t.printStackTrace(logger);
             return Boolean.FALSE;
+        } finally {
+            if (parsedScript != null) {
+                scriptPool.add(parsedScript);
+            }
         }
     }
 
