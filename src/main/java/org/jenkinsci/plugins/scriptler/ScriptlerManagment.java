@@ -456,13 +456,13 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
         final boolean isChangeScriptAllowed = isAdmin || allowRunScriptEdit();
 
         if (!isChangeScriptAllowed) {
-            tempScript = ScriptHelper.getScript(id, true);
+            tempScript = ScriptHelper.getScriptCopy(id, true);
             // use original script, user has no permission to change it!s
             scriptSrc = tempScript.script;
         } else {
             // set the script info back to the request, to display it together with
             // the output.
-            tempScript = ScriptHelper.getScript(id, false);
+            tempScript = ScriptHelper.getScriptCopy(id, false);
             tempScript.setScript(scriptSrc);
         }
 

@@ -93,6 +93,10 @@ public class Script implements Comparable<Script>, NamedResource {
         this.onlyMaster = onlyMaster;
     }
 
+    public Script copy() {
+        return new Script(id, name, comment, originCatalog, originScript, originDate, nonAdministerUsing, parameters, onlyMaster);
+    }
+    
     /*
      * (non-Javadoc)
      * 

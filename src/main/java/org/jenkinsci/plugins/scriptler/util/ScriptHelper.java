@@ -48,6 +48,11 @@ public class ScriptHelper {
         JSON_CLASS_MAPPING.put("parameters", Parameter.class);
     }
 
+    public static Script getScriptCopy(String id, boolean withSrc) {
+        final Script orig = getScript(id, withSrc);
+        return orig.copy();
+    }
+    
     /**
      * Loads the script information.
      * 
