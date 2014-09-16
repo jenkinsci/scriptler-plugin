@@ -86,7 +86,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
     }
 
     public Permission getRequiredPermissionForRunScript() {
-        return isRunScriptPermissionEnabled() ? Jenkins.RUN_SCRIPTS : Jenkins.ADMINISTER;
+        return isRunScriptPermissionEnabled() ? ScritplerPluginImpl.RUN_USER_SCRIPTS : Jenkins.ADMINISTER;
     }
 
     /*
@@ -585,7 +585,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      * @throws ServletException
      */
     public void doShowScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException, ServletException {
-        checkPermission(Hudson.RUN_SCRIPTS);
+        checkPermission(this.getRequiredPermissionForRunScript());
 
         Script script = ScriptHelper.getScript(id, true);
         req.setAttribute("script", script);
