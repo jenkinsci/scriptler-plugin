@@ -41,9 +41,9 @@ import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
  * @author domi
  * 
  */
-public class ScritplerPluginImpl extends Plugin {
+public class ScriptlerPluginImpl extends Plugin {
 
-    private final static Logger LOGGER = Logger.getLogger(ScritplerPluginImpl.class.getName());
+    private final static Logger LOGGER = Logger.getLogger(ScriptlerPluginImpl.class.getName());
 
     @Override
     public void start() throws Exception {
