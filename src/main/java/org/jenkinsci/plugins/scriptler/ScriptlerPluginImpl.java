@@ -58,10 +58,10 @@ public class ScriptlerPluginImpl extends Plugin {
      */
     private void synchronizeConfig() throws IOException {
         LOGGER.info("initialize scriptler");
-        if (!ScriptlerManagment.getScriptlerHomeDirectory().exists()) {
-            ScriptlerManagment.getScriptlerHomeDirectory().mkdirs();
+        if (!ScriptlerManagement.getScriptlerHomeDirectory().exists()) {
+            ScriptlerManagement.getScriptlerHomeDirectory().mkdirs();
         }
-        File scriptDirectory = ScriptlerManagment.getScriptDirectory();
+        File scriptDirectory = ScriptlerManagement.getScriptDirectory();
         // create the directory for the scripts if not available
         if (!scriptDirectory.exists()) {
             scriptDirectory.mkdirs();
@@ -82,7 +82,7 @@ public class ScriptlerPluginImpl extends Plugin {
      * search into the declared backup directory for backup archives
      */
     public List<File> getAvailableScripts() throws IOException {
-        File scriptDirectory = ScriptlerManagment.getScriptDirectory();
+        File scriptDirectory = ScriptlerManagement.getScriptDirectory();
         LOGGER.log(Level.FINE, "Listing files of {0}", scriptDirectory.getAbsoluteFile());
 
         File[] scriptFiles = scriptDirectory.listFiles();

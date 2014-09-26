@@ -33,7 +33,7 @@ import net.sf.json.JSONObject;
 
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptler.Messages;
-import org.jenkinsci.plugins.scriptler.ScriptlerManagment;
+import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.jenkinsci.plugins.scriptler.config.Script;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
@@ -217,8 +217,8 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             return scriptsForBuilder;
         }
 
-        private ScriptlerManagment getScriptler() {
-            return Jenkins.getInstance().getExtensionList(ScriptlerManagment.class).get(0);
+        private ScriptlerManagement getScriptler() {
+            return Jenkins.getInstance().getExtensionList(ScriptlerManagement.class).get(0);
         }
 
         private ScriptlerConfiguration getConfig() {

@@ -29,7 +29,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.jenkinsci.main.modules.sshd.SSHD;
 import org.jenkinsci.plugins.gitserver.FileBackedHttpGitRepository;
-import org.jenkinsci.plugins.scriptler.ScriptlerManagment;
+import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
 import org.jenkinsci.plugins.scriptler.SyncUtil;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
 
@@ -49,7 +49,7 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
     static final String REPOID = "scriptler.git";
 
     public GitScriptlerRepository() {
-        super(ScriptlerManagment.getScriptDirectory());
+        super(ScriptlerManagement.getScriptDirectory());
     }
 
     /**
@@ -84,8 +84,8 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
     @Override
     protected void updateWorkspace(Repository repo) throws IOException, GitAPIException {
         super.updateWorkspace(repo);
-        final ScriptlerConfiguration cfg = Jenkins.getInstance().getExtensionList(ScriptlerManagment.class).get(0).getConfiguration();
-        SyncUtil.syncDirWithCfg(ScriptlerManagment.getScriptDirectory(), cfg);
+        final ScriptlerConfiguration cfg = Jenkins.getInstance().getExtensionList(ScriptlerManagement.class).get(0).getConfiguration();
+        SyncUtil.syncDirWithCfg(ScriptlerManagement.getScriptDirectory(), cfg);
         cfg.save();
     }
 

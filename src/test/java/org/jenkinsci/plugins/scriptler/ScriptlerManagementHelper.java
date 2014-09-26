@@ -4,9 +4,9 @@ import org.apache.commons.fileupload.FileItem;
 
 public class ScriptlerManagementHelper {
 
-    private final ScriptlerManagment scriptler;
+    private final ScriptlerManagement scriptler;
 
-    public ScriptlerManagementHelper(ScriptlerManagment scriptler) {
+    public ScriptlerManagementHelper(ScriptlerManagement scriptler) {
         this.scriptler = scriptler;
     }
 

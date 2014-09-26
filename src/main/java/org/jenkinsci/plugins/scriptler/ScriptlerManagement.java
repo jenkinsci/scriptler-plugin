@@ -74,9 +74,9 @@ import org.kohsuke.stapler.StaplerResponse;
  * @author Dominik Bartholdi (imod)
  */
 @Extension
-public class ScriptlerManagment extends ManagementLink implements RootAction {
+public class ScriptlerManagement extends ManagementLink implements RootAction {
 
-    private final static Logger LOGGER = Logger.getLogger(ScriptlerManagment.class.getName());
+    private final static Logger LOGGER = Logger.getLogger(ScriptlerManagement.class.getName());
     private final static String MASTER = "(master)";
     private final static String ALL = "(all)";
     private final static String ALL_SLAVES = "(all slaves)";
@@ -135,7 +135,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
         return Messages.description();
     }
 
-    public ScriptlerManagment getScriptler() {
+    public ScriptlerManagement getScriptler() {
         return this;
     }
 

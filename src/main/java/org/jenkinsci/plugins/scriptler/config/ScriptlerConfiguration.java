@@ -38,7 +38,7 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.jenkinsci.plugins.scriptler.ScriptlerManagment;
+import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
 import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
 import org.jenkinsci.plugins.scriptler.util.ByIdSorter;
 
@@ -74,7 +74,7 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
     }
 
     public static XmlFile getXmlFile() {
-        return new XmlFile(XSTREAM, new File(ScriptlerManagment.getScriptlerHomeDirectory(), "scriptler.xml"));
+        return new XmlFile(XSTREAM, new File(ScriptlerManagement.getScriptlerHomeDirectory(), "scriptler.xml"));
     }
 
     public static ScriptlerConfiguration load() throws IOException {
