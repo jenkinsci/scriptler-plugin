@@ -144,7 +144,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
     }
 
     public String getPluginResourcePath() {
-        PluginWrapper wrapper = Hudson.getInstance().getPluginManager().getPlugin(ScritplerPluginImpl.class);
+        PluginWrapper wrapper = Hudson.getInstance().getPluginManager().getPlugin(ScriptlerPluginImpl.class);
         return Hudson.getInstance().getRootUrl() + "plugin/" + wrapper.getShortName() + "/";
     }
 
