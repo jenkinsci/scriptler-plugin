@@ -11,6 +11,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.ParametersAction;
 import hudson.model.Project;
+import hudson.model.User;
 import hudson.security.Permission;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
@@ -158,13 +159,20 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         public Permission getRequiredPermission() {
             return getScriptler().getRequiredPermissionForRunScript();
         }
+        
+        private boolean hasPermission(boolean nonAdministerUsing){
+            if(nonAdministerUsing)
+               return Jenkins.getInstance().hasPermission(getScriptler().getRequiredPermissionForRunScript());
+            return Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER);
+        }
 
         @Override
         public ScriptlerBuilder newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             ScriptlerBuilder builder = null;
             String builderId = formData.optString("builderId");
-
-            if (!Jenkins.getInstance().hasPermission(getScriptler().getRequiredPermissionForRunScript())) {
+            final String id = formData.optString("scriptlerScriptId");
+            Script script = ScriptHelper.getScript(id, true);
+            if (script==null || !hasPermission(script.nonAdministerUsing)) {
                 // the user has no permission to change the builders, therefore we reload the builder without his changes!
                 final String backupJobName = formData.optString("backupJobName");
 
@@ -183,7 +191,6 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                 }
 
             } else {
-                final String id = formData.optString("scriptlerScriptId");
                 final boolean inPropagateParams = formData.getBoolean("propagateParams");
                 if (StringUtils.isBlank(builderId)) {
                     // create a unique id - this is only used to identify the builder if a user without privileges modifies the job.

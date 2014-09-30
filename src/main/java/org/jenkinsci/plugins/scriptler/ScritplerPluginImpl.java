@@ -50,8 +50,8 @@ public class ScritplerPluginImpl extends Plugin {
     private final static Logger LOGGER = Logger.getLogger(ScritplerPluginImpl.class.getName());
     
     public static final PermissionGroup PERMISSIONS = new PermissionGroup(ScritplerPluginImpl.class, Messages._scriptler_permission_title());
-    public static final Permission RUN_USER_SCRIPTS = new Permission(PERMISSIONS, "ExcuteScript",Messages._user_script_permission(), Jenkins.ADMINISTER, ScritplerPluginImpl.SCRIPTLER);
-    public static final PermissionScope SCRIPTLER = new PermissionScope(ScritplerPluginImpl.class, PermissionScope.COMPUTER);
+    public static final PermissionScope SCRIPTLER = new PermissionScope(ScritplerPluginImpl.class);
+    public static final Permission RUN_USER_SCRIPTS = new Permission(PERMISSIONS, "ExcuteScript",Messages._user_script_permission(), Jenkins.ADMINISTER, SCRIPTLER);
     
     @Override
     public void start() throws Exception {
