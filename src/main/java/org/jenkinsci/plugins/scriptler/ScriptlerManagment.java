@@ -86,7 +86,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
     }
 
     public Permission getRequiredPermissionForRunScript() {
-        return isRunScriptPermissionEnabled() ? Jenkins.RUN_SCRIPTS : Jenkins.ADMINISTER;
+        return isRunScriptPermissionEnabled() ? ScritplerPluginImpl.RUN_USER_SCRIPTS : Jenkins.ADMINISTER;
     }
 
     /*
@@ -414,8 +414,13 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      * @throws ServletException
      */
     public void doRunScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException, ServletException {
+
         Script script = ScriptHelper.getScript(id, true);
-        checkPermission(getRequiredPermissionForRunScript());
+        if(script.nonAdministerUsing){
+            checkPermission(getRequiredPermissionForRunScript());
+        }else{
+            checkPermission(Jenkins.ADMINISTER);
+        }
 
         final boolean isAdmin = Jenkins.getInstance().getACL().hasPermission(Jenkins.ADMINISTER);
         final boolean isChangeScriptAllowed = isAdmin || allowRunScriptEdit();
@@ -446,17 +451,19 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      * @throws ServletException
      */
     public void doTriggerScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("script") String scriptSrc, @QueryParameter("node") String node) throws IOException, ServletException {
-
-        checkPermission(getRequiredPermissionForRunScript());
+        Script tempScript = ScriptHelper.getScriptCopy(id, true);
+        if(tempScript.nonAdministerUsing){
+            checkPermission(getRequiredPermissionForRunScript());
+        }else{
+            checkPermission(Jenkins.ADMINISTER);
+        }
 
         final Parameter[] parameters = UIHelper.extractParameters(req.getSubmittedForm());
 
-        Script tempScript = null;
         final boolean isAdmin = Jenkins.getInstance().getACL().hasPermission(Jenkins.ADMINISTER);
         final boolean isChangeScriptAllowed = isAdmin || allowRunScriptEdit();
 
         if (!isChangeScriptAllowed) {
-            tempScript = ScriptHelper.getScriptCopy(id, true);
             // use original script, user has no permission to change it!s
             scriptSrc = tempScript.script;
         } else {
@@ -496,9 +503,6 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
     public void doRun(StaplerRequest req, StaplerResponse rsp, @QueryParameter(fixEmpty = true) String script,
             @QueryParameter(fixEmpty = true) String node, @QueryParameter(fixEmpty = true) String contentType)
             throws IOException, ServletException {
-
-        checkPermission(getRequiredPermissionForRunScript());
-
         String id = req.getRestOfPath();
         if (id.startsWith("/")) {
             id = id.substring(1);
@@ -512,6 +516,13 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
 
         if (tempScript == null) {
             throw new RuntimeException("Unknown script: " + id + ". Use /scriptler/run/<yourScriptId>");
+        }
+        
+        if(tempScript.nonAdministerUsing){
+            checkPermission(getRequiredPermissionForRunScript());
+        }
+        else{
+            checkPermission(Jenkins.ADMINISTER);
         }
 
         final boolean isAdmin = Jenkins.getInstance().getACL().hasPermission(Jenkins.ADMINISTER);
@@ -585,7 +596,7 @@ public class ScriptlerManagment extends ManagementLink implements RootAction {
      * @throws ServletException
      */
     public void doShowScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException, ServletException {
-        checkPermission(Hudson.RUN_SCRIPTS);
+        checkPermission(this.getRequiredPermissionForRunScript());
 
         Script script = ScriptHelper.getScript(id, true);
         req.setAttribute("script", script);

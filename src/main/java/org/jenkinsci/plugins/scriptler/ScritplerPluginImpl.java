@@ -25,6 +25,9 @@ package org.jenkinsci.plugins.scriptler;
 
 import hudson.Plugin;
 
+import hudson.security.Permission;
+import hudson.security.PermissionGroup;
+import hudson.security.PermissionScope;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,6 +37,7 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.scriptler.config.Script;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
 
@@ -44,7 +48,11 @@ import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
 public class ScritplerPluginImpl extends Plugin {
 
     private final static Logger LOGGER = Logger.getLogger(ScritplerPluginImpl.class.getName());
-
+    
+    public static final PermissionGroup PERMISSIONS = new PermissionGroup(ScritplerPluginImpl.class, Messages._scriptler_permission_title());
+    public static final PermissionScope SCRIPTLER = new PermissionScope(ScritplerPluginImpl.class);
+    public static final Permission RUN_USER_SCRIPTS = new Permission(PERMISSIONS, "ExcuteScript",Messages._user_script_permission(), Jenkins.ADMINISTER, SCRIPTLER);
+    
     @Override
     public void start() throws Exception {
         super.start();
