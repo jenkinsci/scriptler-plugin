@@ -40,7 +40,7 @@
 					</j:choose>
 					<j:forEach var="t" items="${items}">
 						<tr valign="center" style="border-top: 0px;">
-							<td class="pane" width="86">
+							<td class="pane" width="104">
 								<j:choose>
 									<j:when test="${t.available == false}">
 										<img width="16" height="16" title="${%fileNotAvailable}" src="${imagesURL}/16x16/red.gif" />
