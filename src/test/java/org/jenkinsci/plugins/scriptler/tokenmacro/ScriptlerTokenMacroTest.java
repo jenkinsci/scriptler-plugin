@@ -10,7 +10,7 @@ import java.io.File;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagementHelper;
-import org.jenkinsci.plugins.scriptler.ScriptlerManagment;
+import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -25,7 +25,7 @@ public class ScriptlerTokenMacroTest {
     @Test
     public void testExecutesScript() throws Exception {
 
-        final ScriptlerManagment scriptler = j.getInstance().getExtensionList(ScriptlerManagment.class).get(0);
+        final ScriptlerManagement scriptler = j.getInstance().getExtensionList(ScriptlerManagement.class).get(0);
         ScriptlerManagementHelper helper = new ScriptlerManagementHelper(scriptler);
         File f = new File("dummy.groovy");
         FileUtils.writeStringToFile(f, "return \"hello world ${build.number}\"");
