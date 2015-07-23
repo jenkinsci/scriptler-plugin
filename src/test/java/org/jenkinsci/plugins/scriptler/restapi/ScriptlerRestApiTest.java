@@ -9,7 +9,7 @@ import java.net.URLEncoder;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagementHelper;
-import org.jenkinsci.plugins.scriptler.ScriptlerManagment;
+import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.junit.Before;
 import org.junit.Rule;
@@ -28,7 +28,7 @@ public class ScriptlerRestApiTest {
 
     @Before
     public void setup() throws Exception {
-        final ScriptlerManagment scriptler = j.getInstance().getExtensionList(ScriptlerManagment.class).get(0);
+        final ScriptlerManagement scriptler = j.getInstance().getExtensionList(ScriptlerManagement.class).get(0);
         ScriptlerManagementHelper helper = new ScriptlerManagementHelper(scriptler);
         File f = new File(SCRIPT_ID);
         FileUtils.writeStringToFile(f, "print \"hello $arg1, this is $arg2.\"");

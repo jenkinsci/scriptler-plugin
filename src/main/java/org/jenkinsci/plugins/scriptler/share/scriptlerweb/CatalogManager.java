@@ -35,7 +35,7 @@ import java.net.URL;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.jenkinsci.plugins.scriptler.ScriptlerManagment;
+import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
 import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
 import org.jenkinsci.plugins.scriptler.share.scriptlerweb.ScritplerWebCatalog.CatalogContent;
 
@@ -109,7 +109,7 @@ class CatalogManager {
      * @return the catalog - never <code>null</code>, even if download failed.
      */
     public CatalogContent loadCatalog() {
-        File catFile = new File(ScriptlerManagment.getScriptlerHomeDirectory(), catalogInfo.name.trim() + "-catalog.xml");
+        File catFile = new File(ScriptlerManagement.getScriptlerHomeDirectory(), catalogInfo.name.trim() + "-catalog.xml");
 
         // right now we always download the file - this should be optimized
         // (maybe only once every hour?)

@@ -25,7 +25,7 @@ import net.sf.json.JSONSerializer;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptler.Messages;
-import org.jenkinsci.plugins.scriptler.ScriptlerManagment;
+import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.jenkinsci.plugins.scriptler.config.Script;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
@@ -69,7 +69,7 @@ public class ScriptHelper {
         Script s = ScriptlerConfiguration.getConfiguration().getScriptById(id);
         if (withSrc && s != null) {
             try {
-                File scriptSrc = new File(ScriptlerManagment.getScriptDirectory(), s.getScriptPath());
+                File scriptSrc = new File(ScriptlerManagement.getScriptDirectory(), s.getScriptPath());
                 Reader reader = new FileReader(scriptSrc);
                 String src = IOUtils.toString(reader);
                 s.setScript(src);
