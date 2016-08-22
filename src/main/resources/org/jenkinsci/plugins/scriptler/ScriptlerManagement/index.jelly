@@ -6,7 +6,7 @@
 	IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
 	FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
 
-
+<?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 	<l:layout permission="${app.READ}" norefresh="true">
 		<st:once>
@@ -72,7 +72,7 @@
                                 </j:if>								
 							</td>
 							<td class="pane-header">
-								<j:out value="${t.name}" />
+								${t.name}
 							</td>
 							<td class="pane-header">
 								<j:if test="${!empty(t.originScript)}">
@@ -90,7 +90,7 @@
 								<j:out value=" " />
 							</td>
 							<td colspan="5" style="white-space: normal;">
-								<j:out value="${empty(t.comment) ? '-' : t.comment}" />
+								${empty(t.comment) ? '-' : t.comment}
 							</td>
 						</tr>
 					</j:forEach>
