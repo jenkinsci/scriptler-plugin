@@ -46,7 +46,7 @@ THE SOFTWARE.
 				<br />
 			</p>
 
-			<form action="triggerScript" method="post">
+			<form action="triggerScript" method="post" name="triggerscript">
 				<input type="hidden" value="${script.id}" name="id" />
 				<table class="pane">
 					<tr>
@@ -99,7 +99,7 @@ THE SOFTWARE.
 					<j:out value="${script.script}" />
 				</textarea>
 				<div align="right">
-					<f:submit value="${%Run}" />
+					<f:submit value="${%Run}" name="run" />
 				</div>
 				<script>$('script').focus();</script>
 			</form>

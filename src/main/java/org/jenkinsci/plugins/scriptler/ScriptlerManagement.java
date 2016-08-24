@@ -24,32 +24,14 @@
 package org.jenkinsci.plugins.scriptler;
 
 import hudson.Extension;
-import hudson.Util;
 import hudson.PluginWrapper;
-import hudson.model.ManagementLink;
-import hudson.model.RootAction;
+import hudson.Util;
 import hudson.model.ComputerSet;
 import hudson.model.Hudson;
+import hudson.model.ManagementLink;
+import hudson.model.RootAction;
 import hudson.security.Permission;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-
-import javax.servlet.ServletException;
-
 import jenkins.model.Jenkins;
-
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
@@ -61,12 +43,17 @@ import org.jenkinsci.plugins.scriptler.share.ScriptInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfoCatalog;
 import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
 import org.jenkinsci.plugins.scriptler.util.UIHelper;
-import org.kohsuke.stapler.ForwardToView;
-import org.kohsuke.stapler.HttpRedirect;
-import org.kohsuke.stapler.HttpResponse;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.*;
+import org.kohsuke.stapler.interceptor.RequirePOST;
+
+import javax.servlet.ServletException;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Creates the link on the "manage Jenkins" page and handles all the web requests.
@@ -159,6 +146,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @return
      * @throws IOException
      */
+    @RequirePOST
     public HttpResponse doScriptlerSettings(StaplerRequest res, StaplerResponse rsp, @QueryParameter("disableRemoteCatalog") boolean disableRemoteCatalog, @QueryParameter("allowRunScriptPermission") boolean allowRunScriptPermission,
             @QueryParameter("allowRunScriptEdit") boolean allowRunScriptEdit) throws IOException {
         checkPermission(Hudson.ADMINISTER);
@@ -175,7 +163,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     /**
      * Downloads a script from a catalog and imports it to the local system.
      * 
-     * @param res
+     * @param req
      *            request
      * @param rsp
      *            response
@@ -187,6 +175,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws IOException
      * @throws ServletException
      */
+    @RequirePOST
     public HttpResponse doDownloadScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("catalog") String catalogName) throws IOException, ServletException {
         checkPermission(Hudson.ADMINISTER);
 
@@ -231,7 +220,11 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      *            a comment
      * @param script
      *            script code
-     * @param catalogName
+     * @param nonAdministerUsing
+     *            user which are not admisn, are allowed to use this script
+     * @param onlyMaster
+     *            this script is only allwoed to run on the master node
+     * @param originCatalogName
      *            (optional) the name of the catalog the script is loaded/added from
      * @param originId
      *            (optional) the original id the script had at the catalog
@@ -239,6 +232,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws IOException
      * @throws ServletException
      */
+    @RequirePOST
     public HttpResponse doScriptAdd(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("name") String name, @QueryParameter("comment") String comment, @QueryParameter("script") String script,
             @QueryParameter("nonAdministerUsing") boolean nonAdministerUsing, @QueryParameter("onlyMaster") boolean onlyMaster, String originCatalogName, String originId) throws IOException, ServletException {
 
@@ -322,11 +316,12 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      *            response
      * @param rsp
      *            request
-     * @param name
-     *            the name of the file to be removed
+     * @param id
+     *            the id of the file to be removed
      * @return forward to 'index'
      * @throws IOException
      */
+    @RequirePOST
     public HttpResponse doRemoveScript(StaplerRequest res, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException {
         checkPermission(Hudson.ADMINISTER);
 
@@ -358,6 +353,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws IOException
      * @throws ServletException
      */
+    @RequirePOST
     public HttpResponse doUploadScript(StaplerRequest req) throws IOException, ServletException {
         checkPermission(Hudson.ADMINISTER);
         try {
@@ -408,14 +404,17 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      *            request
      * @param rsp
      *            response
-     * @param scriptName
-     *            the name of the script to be executed
+     * @param id
+     *            the id of the script to be executed
      * @throws IOException
      * @throws ServletException
      */
     public void doRunScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException, ServletException {
         Script script = ScriptHelper.getScript(id, true);
         checkPermission(getRequiredPermissionForRunScript());
+        if(script == null) {
+            throw new IOException(Messages.scriptNotFound(id));
+        }
 
         final boolean isAdmin = Jenkins.getInstance().getACL().hasPermission(Jenkins.ADMINISTER);
         final boolean isChangeScriptAllowed = isAdmin || allowRunScriptEdit();
@@ -436,8 +435,8 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      *            request
      * @param rsp
      *            response
-     * @param scriptName
-     *            the name of the script
+     * @param id
+     *            the id of the script
      * @param scriptSrc
      *            the script code (groovy)
      * @param node
@@ -445,6 +444,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws IOException
      * @throws ServletException
      */
+    @RequirePOST
     public void doTriggerScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("script") String scriptSrc, @QueryParameter("node") String node) throws IOException, ServletException {
 
         checkPermission(getRequiredPermissionForRunScript());
@@ -493,6 +493,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws IOException
      * @throws ServletException
      */
+    @RequirePOST
     public void doRun(StaplerRequest req, StaplerResponse rsp, @QueryParameter(fixEmpty = true) String script,
             @QueryParameter(fixEmpty = true) String node, @QueryParameter(fixEmpty = true) String contentType)
             throws IOException, ServletException {
@@ -579,8 +580,8 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      *            request
      * @param rsp
      *            response
-     * @param scriptName
-     *            the name of the script to be loaded in to the show view.
+     * @param id
+     *            the id of the script to be loaded in to the show view.
      * @throws IOException
      * @throws ServletException
      */
@@ -599,8 +600,8 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      *            request
      * @param rsp
      *            response
-     * @param scriptName
-     *            the name of the script to be loaded in to the edit view.
+     * @param id
+     *            the id of the script to be loaded in to the edit view.
      * @throws IOException
      * @throws ServletException
      */
