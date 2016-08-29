@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.jenkins-ci.plugins</groupId>
 		<artifactId>plugin</artifactId>
-		<version>1.642.3</version>
+		<version>1.480</version>
 		<!-- <version>1.460</version> version caused JENKINS-13518 -->
 	</parent>
 
@@ -100,7 +100,7 @@
 			<plugin>
 				<groupId>org.jenkins-ci.tools</groupId>
 				<artifactId>maven-hpi-plugin</artifactId>
-				<version>1.119</version>
+				<version>1.106</version>
 				<extensions>true</extensions>
 			</plugin>
 			<plugin>
@@ -152,17 +152,17 @@
                 </exclusion>
             </exclusions>
 		</dependency>
-		<dependency>
-			<groupId>org.jenkins-ci.plugins</groupId>
-			<artifactId>git</artifactId>
-			<version>2.3.5</version>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion> <!-- conflicts with used httpclient -->
-					<groupId>org.apache.httpcomponents</groupId>
-					<artifactId>httpclient</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+		<!--<dependency>-->
+			<!--<groupId>org.jenkins-ci.plugins</groupId>-->
+			<!--<artifactId>git</artifactId>-->
+			<!--<version>2.3.5</version>-->
+			<!--<scope>test</scope>-->
+			<!--<exclusions>-->
+				<!--<exclusion> &lt;!&ndash; conflicts with used httpclient &ndash;&gt;-->
+					<!--<groupId>org.apache.httpcomponents</groupId>-->
+					<!--<artifactId>httpclient</artifactId>-->
+				<!--</exclusion>-->
+			<!--</exclusions>-->
+		<!--</dependency>-->
 	</dependencies>
 </project>
