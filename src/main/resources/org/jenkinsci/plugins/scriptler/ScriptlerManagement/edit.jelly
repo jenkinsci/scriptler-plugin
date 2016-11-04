@@ -72,7 +72,7 @@ THE SOFTWARE.
 	                </f:block>					
 					<f:entry title="${%Script}">
 						<textarea id="script" name="script" class="script">
-							<j:out value="${script.script}" />
+							<j:out value="${script.scriptTextAreaEscaped}" />
 						</textarea>
 					</f:entry>
 				</j:jelly>
