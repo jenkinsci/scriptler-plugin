@@ -42,6 +42,11 @@ public class Script implements Comparable<Script>, NamedResource {
      */
     public transient String script;
 
+    /**
+     * same as script, with textarea escaped, when displayed in a textarea
+     */
+    public transient String scriptTextAreaEscaped;
+    
     // for user with RUN_SCRIPT permission
     public final boolean nonAdministerUsing;
 
@@ -117,7 +122,14 @@ public class Script implements Comparable<Script>, NamedResource {
     public void setScript(String script) {
         this.script = script;
     }
-
+    
+    /**
+     * used to escape textarea when script is displayed in a textarea
+     */
+    public void computeTextAreaEscaped() {
+    	if(script!=null)this.scriptTextAreaEscaped = script.replaceAll("</textarea", "&lt;/textarea");
+    }
+    
     public void setParameters(Parameter[] parameters) {
         this.parameters = parameters;
     }
