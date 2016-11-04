@@ -464,6 +464,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             // the output.
             tempScript = ScriptHelper.getScriptCopy(id, false);
             tempScript.setScript(scriptSrc);
+            tempScript.computeTextAreaEscaped();
         }
 
         final String[] slaves = resolveSlaveNames(node);
