@@ -96,7 +96,7 @@ THE SOFTWARE.
 				</table>
 
 				<textarea id="script" name="script" class="script" script-readOnly="${readOnly}">
-					<j:out value="${script.script}" />
+					<j:out value="${script.scriptTextAreaEscaped}" />
 				</textarea>
 				<div align="right">
 					<f:submit value="${%Run}" />
