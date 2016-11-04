@@ -73,6 +73,7 @@ public class ScriptHelper {
                 Reader reader = new FileReader(scriptSrc);
                 String src = IOUtils.toString(reader);
                 s.setScript(src);
+                s.computeTextAreaEscaped();
             } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, Messages.scriptSourceNotFound(id), e);
             }
