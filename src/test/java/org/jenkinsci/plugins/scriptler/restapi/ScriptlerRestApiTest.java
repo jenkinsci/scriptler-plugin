@@ -22,6 +22,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
+import org.jvnet.hudson.test.BuildWatcher;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
@@ -33,6 +34,9 @@ public class ScriptlerRestApiTest {
 
     @Rule
     public JenkinsRule j = new JenkinsRule();
+
+    @Rule
+    public BuildWatcher bw = new BuildWatcher();
 
     @Before
     public void setup() throws Exception {
@@ -48,14 +52,13 @@ public class ScriptlerRestApiTest {
     }
 
     @Test
-    @Ignore("no idea why this does not work anymore since we use POST...")
     public void testSuccessWithDefaults() throws Exception {
 
         JenkinsRule.WebClient webClient = j.createWebClient();
         HtmlPage runScriptPage = webClient.goTo("scriptler/runScript?id=dummy.groovy");
         HtmlForm form = runScriptPage.getFormByName("triggerscript");
 
-        Page page = form.submit();
+        Page page = j.submit(form);
 
         j.assertGoodStatus(page);
         assertTrue(page.getWebResponse().getContentAsString().contains("hello world, this is scriptler."));
