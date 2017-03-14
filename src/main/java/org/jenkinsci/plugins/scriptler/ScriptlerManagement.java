@@ -262,8 +262,11 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         // save (overwrite) the file/script
         File newScriptFile = new File(getScriptDirectory(), finalFileName);
         Writer writer = new FileWriter(newScriptFile);
-        writer.write(script);
-        writer.close();
+        try {
+            writer.write(script);
+        } catch (Exception e) {
+            writer.close();
+        }
 
         commitFileToGitRepo(finalFileName);
 
@@ -327,7 +330,9 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
         // remove the file
         File oldScript = new File(getScriptDirectory(), id);
-        oldScript.delete();
+        if(!oldScript.delete()) {
+            LOGGER.info("not able to delete " + oldScript.getAbsolutePath());
+        }
 
         try {
             final GitScriptlerRepository gitRepo = Jenkins.getInstance().getExtensionList(GitScriptlerRepository.class).get(GitScriptlerRepository.class);

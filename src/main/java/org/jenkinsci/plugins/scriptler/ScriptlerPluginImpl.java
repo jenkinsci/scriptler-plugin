@@ -59,7 +59,10 @@ public class ScriptlerPluginImpl extends Plugin {
     private void synchronizeConfig() throws IOException {
         LOGGER.info("initialize scriptler");
         if (!ScriptlerManagement.getScriptlerHomeDirectory().exists()) {
-            ScriptlerManagement.getScriptlerHomeDirectory().mkdirs();
+            boolean dirsDone = ScriptlerManagement.getScriptlerHomeDirectory().mkdirs();
+            if(!dirsDone) {
+                LOGGER.severe("could ont cereate scriptler home directory: " + ScriptlerManagement.getScriptlerHomeDirectory());
+            }
         }
         File scriptDirectory = ScriptlerManagement.getScriptDirectory();
         // create the directory for the scripts if not available

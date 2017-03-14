@@ -90,7 +90,7 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
     }
 
     // always retrieve via getter
-    private static transient ScriptlerConfiguration cfg = null;
+    private static transient volatile ScriptlerConfiguration cfg = null;
 
     public static ScriptlerConfiguration getConfiguration() {
         if (cfg == null) {
