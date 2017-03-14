@@ -18,10 +18,7 @@ import org.apache.commons.io.FileUtils;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagementHelper;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.jvnet.hudson.test.BuildWatcher;
 import org.jvnet.hudson.test.JenkinsRule;
 
@@ -32,8 +29,8 @@ public class ScriptlerRestApiTest {
 
     private static final String SCRIPT_ID = "dummy.groovy";
 
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+    @ClassRule
+    public static JenkinsRule j = new JenkinsRule();
 
     @Rule
     public BuildWatcher bw = new BuildWatcher();

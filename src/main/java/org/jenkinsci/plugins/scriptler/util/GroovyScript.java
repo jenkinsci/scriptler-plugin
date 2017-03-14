@@ -1,5 +1,12 @@
 package org.jenkinsci.plugins.scriptler.util;
 
+import groovy.lang.GroovyShell;
+import groovy.lang.Script;
+import hudson.Launcher;
+import hudson.model.TaskListener;
+import hudson.model.AbstractBuild;
+import hudson.remoting.DelegatingCallable;
+
 import java.io.PrintStream;
 import java.util.Collections;
 import java.util.HashSet;
@@ -7,22 +14,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import jenkins.model.Jenkins;
+
 import org.apache.commons.collections.map.LRUMap;
 import org.jenkinsci.plugins.scriptler.Messages;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 
-import groovy.lang.GroovyShell;
-import groovy.lang.Script;
-import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.TaskListener;
-import hudson.remoting.DelegatingCallable;
-import jenkins.model.Jenkins;
-
 /**
  * Inspired by hudson.util.RemotingDiagnostics.Script, but adding parameters.
  */
-public class GroovyScript implements DelegatingCallable<Object, RuntimeException> {
+public class GroovyScript implements DelegatingCallable<Object, RuntimeException>{
     private static final long serialVersionUID = 1L;
     private final String script;
     private final Parameter[] parameters;
@@ -61,7 +62,7 @@ public class GroovyScript implements DelegatingCallable<Object, RuntimeException
         this.build = build;
         this.launcher = launcher;
     }
-    
+
     /**
      * Constructor 
      * @param script the script to be executed

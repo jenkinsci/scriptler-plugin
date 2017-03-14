@@ -42,7 +42,7 @@ THE SOFTWARE.
 				</h2>
 			</p>
 			<p>
-				${script.comment}
+				<j:out value="${app.markupFormatter.translate(script.comment)}"/>
 				<br />
 			</p>
 
@@ -96,7 +96,7 @@ THE SOFTWARE.
 				</table>
 
 				<textarea id="script" name="script" class="script" script-readOnly="${readOnly}">
-					<j:out value="${script.script}" />
+					${script.script}
 				</textarea>
 				<div align="right">
 					<f:submit value="${%Run}" name="run" />
