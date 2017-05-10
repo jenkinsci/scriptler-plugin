@@ -26,10 +26,7 @@ package org.jenkinsci.plugins.scriptler;
 import hudson.Extension;
 import hudson.PluginWrapper;
 import hudson.Util;
-import hudson.model.ComputerSet;
-import hudson.model.Hudson;
-import hudson.model.ManagementLink;
-import hudson.model.RootAction;
+import hudson.model.*;
 import hudson.security.Permission;
 import jenkins.model.Jenkins;
 import org.apache.commons.fileupload.FileItem;
@@ -264,7 +261,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         Writer writer = new FileWriter(newScriptFile);
         try {
             writer.write(script);
-        } catch (Exception e) {
+        } finally {
             writer.close();
         }
 
@@ -330,8 +327,8 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
         // remove the file
         File oldScript = new File(getScriptDirectory(), id);
-        if(!oldScript.delete()) {
-            LOGGER.info("not able to delete " + oldScript.getAbsolutePath());
+        if(!oldScript.delete() && oldScript.exists()) {
+            throw new Failure("not able to delete " + oldScript.getAbsolutePath());
         }
 
         try {

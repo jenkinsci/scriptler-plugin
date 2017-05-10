@@ -29,10 +29,10 @@ public class ScriptlerRestApiTest {
 
     private static final String SCRIPT_ID = "dummy.groovy";
 
-    @ClassRule
+    @Rule
     public static JenkinsRule j = new JenkinsRule();
 
-    @Rule
+    @ClassRule
     public BuildWatcher bw = new BuildWatcher();
 
     @Before

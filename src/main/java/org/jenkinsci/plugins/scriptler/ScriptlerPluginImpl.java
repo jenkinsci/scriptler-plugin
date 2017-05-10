@@ -61,7 +61,7 @@ public class ScriptlerPluginImpl extends Plugin {
         if (!ScriptlerManagement.getScriptlerHomeDirectory().exists()) {
             boolean dirsDone = ScriptlerManagement.getScriptlerHomeDirectory().mkdirs();
             if(!dirsDone) {
-                LOGGER.severe("could ont cereate scriptler home directory: " + ScriptlerManagement.getScriptlerHomeDirectory());
+                LOGGER.severe("could not cereate scriptler home directory: " + ScriptlerManagement.getScriptlerHomeDirectory());
             }
         }
         File scriptDirectory = ScriptlerManagement.getScriptDirectory();
