@@ -1,16 +1,11 @@
 /**
- * 
+ *
  */
 package org.jenkinsci.plugins.scriptler.builder;
 
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.model.BuildListener;
-import hudson.model.ParameterValue;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.ParametersAction;
-import hudson.model.Project;
+import hudson.model.*;
 import hudson.security.Permission;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
@@ -88,6 +83,9 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         final Script script = ScriptHelper.getScript(scriptId, true);
 
         if (script != null) {
+            if (!script.nonAdministerUsing) {
+                throw new Failure(script.getName() + " [" + script.getId() + "] is not allowed to be executed in a build, check its configuration!");
+            }
             try {
 
                 // expand the parameters before passing these to the execution, this is to allow any token macro to resolve parameter values
