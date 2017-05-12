@@ -5,6 +5,8 @@ package org.jenkinsci.plugins.scriptler.git;
 
 import hudson.Extension;
 import hudson.model.RootAction;
+import hudson.model.User;
+import hudson.tasks.Mailer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -105,7 +107,9 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
             cmd.call();
 
             CommitCommand co = git.commit();
-            co.setAuthor("Scriptler/" + Jenkins.getAuthentication().getName(), "noreply@jenkins-ci.org");
+            User user = User.current();
+            String email = user.getProperty(Mailer.UserProperty.class).getAddress();
+            co.setAuthor("Scriptler/" + user.getFullName(), email);
             co.setMessage("update script via WebUI: " + fileName);
             co.call();
         } catch (Exception e) {
