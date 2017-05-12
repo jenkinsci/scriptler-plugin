@@ -6,10 +6,12 @@
 	IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
 	FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
 
-
+<?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 	<l:layout permission="${app.READ}" norefresh="true">
-		<!-- <st:include it="${it.primaryView}" page="sidepanel.jelly" xmlns:st="jelly:stapler" /> -->
+		<st:once>
+			<link rel="stylesheet" href="${rootURL}/plugin/scriptler/scriptler.css" />
+		</st:once>
 		<st:include page="sidepanel.jelly" />
 		<l:main-panel>
 			<h1>
@@ -40,26 +42,27 @@
 					</j:choose>
 					<j:forEach var="t" items="${items}">
 						<tr valign="center" style="border-top: 0px;">
-							<td class="pane" width="104">
+							<td class="pane scriptler-nowrap" width="104">
 								<j:choose>
 									<j:when test="${t.available == false}">
-										<img width="16" height="16" title="${%fileNotAvailable}" src="${imagesURL}/16x16/red.gif" />
+										<img width="16" height="16" title="${%fileNotAvailable}" src="${imagesURL}/16x16/red.gif" class="scriptler-nomargin" />
 									</j:when>
 									<j:otherwise>
-										<img width="16" height="16" src="${imagesURL}/16x16/empty.gif" />
+										<img width="16" height="16" src="${imagesURL}/16x16/empty.gif" class="scriptler-nomargin"/>
 									</j:otherwise>
 								</j:choose>
-								<j:out value=" " />
 								<l:hasPermission permission="${app.ADMINISTER}">
-									<a href="editScript?id=${t.id}">
+									<a href="editScript?id=${t.id}" class="scriptler-link-button">
 										<img width="16" height="16" title="${%edit script} ${t.name}" src="${imagesURL }/16x16/document_edit.gif" />
 									</a>
 									<j:out value=" " />
-									<a href="removeScript?id=${t.id}" onclick="return confirmDelete('${t.name}')">
-										<img width="16" height="16" title="${%remove script} ${t.name}" src="${imagesURL}/16x16/edit-delete.gif" />
-									</a>
+									<form method="post" action="removeScript" class="scriptler-inline" onclick="return confirmDelete('${t.name}')">
+										<input type="hidden" name="id" value="${t.id}" />
+										<button type="submit" name="submit_param" value="submit_value" class="scriptler-link-button">
+											<img width="16" height="16" title="${%remove script} ${t.name}" src="${imagesURL}/16x16/edit-delete.gif" />
+										</button>
+									</form>
 								</l:hasPermission>
-								<j:out value=" " />
 								<a href="runScript?id=${t.id}">
 									<img width="16" height="16" title="${%run script} ${t.name}" src="${imagesURL}/16x16/terminal.gif" />
 								</a>
@@ -69,7 +72,7 @@
                                 </j:if>								
 							</td>
 							<td class="pane-header">
-								<j:out value="${t.name}" />
+								${t.name}
 							</td>
 							<td class="pane-header">
 								<j:if test="${!empty(t.originScript)}">
@@ -87,7 +90,7 @@
 								<j:out value=" " />
 							</td>
 							<td colspan="5" style="white-space: normal;">
-								<j:out value="${empty(t.comment) ? '-' : t.comment}" />
+								${empty(t.comment) ? '-' : t.comment}
 							</td>
 						</tr>
 					</j:forEach>

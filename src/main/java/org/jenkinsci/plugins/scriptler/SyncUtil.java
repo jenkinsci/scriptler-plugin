@@ -43,7 +43,7 @@ public class SyncUtil {
                 final ScriptInfo info = ScriptHelper.extractScriptInfo(FileUtils.readFileToString(file, "UTF-8"));
                 if (info != null) {
                     final List<String> paramList = info.getParameters();
-                    Parameter[] parameters = new Parameter[paramList == null ? 0 : paramList.size()];
+                    Parameter[] parameters = new Parameter[paramList.size()];
                     for (int i = 0; i < parameters.length; i++) {
                         parameters[i] = new Parameter(paramList.get(i), null);
                     }

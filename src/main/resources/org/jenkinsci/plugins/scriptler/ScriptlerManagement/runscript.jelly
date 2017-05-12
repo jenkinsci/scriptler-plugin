@@ -21,7 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 -->
-
+<?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
 	xmlns:p="/lib/hudson/scriptler">
 
@@ -38,15 +38,15 @@ THE SOFTWARE.
 			<p>
 				<j:out value="${%intro}" />
 				<h2>
-					<j:out value="${script.name}" />
+					${script.name}
 				</h2>
 			</p>
 			<p>
-				<j:out value="${script.comment}" />
+				<j:out value="${app.markupFormatter.translate(script.comment)}"/>
 				<br />
 			</p>
 
-			<form action="triggerScript" method="post">
+			<form action="triggerScript" method="post" name="triggerscript">
 				<input type="hidden" value="${script.id}" name="id" />
 				<table class="pane">
 					<tr>
@@ -96,10 +96,10 @@ THE SOFTWARE.
 				</table>
 
 				<textarea id="script" name="script" class="script" script-readOnly="${readOnly}">
-					<j:out value="${script.script}" />
+					${script.script}
 				</textarea>
 				<div align="right">
-					<f:submit value="${%Run}" />
+					<f:submit value="${%Run}" name="run" />
 				</div>
 				<script>$('script').focus();</script>
 			</form>

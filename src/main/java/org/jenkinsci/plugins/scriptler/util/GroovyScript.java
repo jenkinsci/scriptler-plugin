@@ -62,7 +62,7 @@ public class GroovyScript implements DelegatingCallable<Object, RuntimeException
         this.build = build;
         this.launcher = launcher;
     }
-    
+
     /**
      * Constructor 
      * @param script the script to be executed

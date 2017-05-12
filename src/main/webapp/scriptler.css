@@ -1,0 +1,36 @@
+.scriptler-inline {
+  display: inline;
+}
+
+.scriptler-inline div {
+  display: inline;
+}
+
+.scriptler-inline button {
+  padding: 0;
+}
+
+.scriptler-link-button {
+  background: none;
+  border: none;
+}
+
+.scriptler-link-button:focus {
+  outline: none;
+}
+
+.scriptler-link-button:active {
+  color:red;
+}
+
+.scriptler-nowrap {
+  white-space: nowrap;
+}
+
+.scriptler-nowrap img {
+  margin-left: 5px;
+}
+
+.scriptler-nowrap img.scriptler-nomargin {
+  margin-left: 0;
+}

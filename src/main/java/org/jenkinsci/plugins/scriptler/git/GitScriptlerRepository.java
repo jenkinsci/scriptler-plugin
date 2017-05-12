@@ -157,7 +157,7 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
         try {
             // TODO find a way to limit the number of log entries - e.g. ..log().addRange(...).call()
             for (RevCommit c : new Git(this.openRepository()).log().call()) {
-                msgs.add(new LogInfo(c.getName(), c.getAuthorIdent().getName(), c.getCommitterIdent().getName(), new Date(c.getCommitTime()), c.getFullMessage()));
+                msgs.add(new LogInfo(c.getName(), c.getAuthorIdent().getName(), c.getCommitterIdent().getName(), new Date(c.getCommitTime() * 1000), c.getFullMessage()));
             }
         } catch (NoHeadException e) {
             throw new IOException("not able to retrieve git log", e);
