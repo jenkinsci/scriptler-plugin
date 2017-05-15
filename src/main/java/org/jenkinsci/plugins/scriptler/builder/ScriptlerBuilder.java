@@ -145,7 +145,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {
-            return Jenkins.getInstance().hasPermission(Jenkins.RUN_SCRIPTS);
+            return Jenkins.getInstance().hasPermission(getRequiredPermission());
         }
 
         @Override
@@ -162,7 +162,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             ScriptlerBuilder builder = null;
             String builderId = formData.optString("builderId");
 
-            if (!Jenkins.getInstance().hasPermission(Jenkins.RUN_SCRIPTS)) {
+            if (!Jenkins.getInstance().hasPermission(ScriptlerManagement.RUN)) {
                 // the user has no permission to change the builders, therefore we reload the builder without his changes!
                 final String backupJobName = formData.optString("backupJobName");
 
@@ -226,7 +226,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         /**
          * gets the argument description to be displayed on the screen when selecting a config in the dropdown
          * 
-         * @param configId
+         * @param scriptlerScriptId
          *            the config id to get the arguments description for
          * @return the description
          */

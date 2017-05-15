@@ -28,6 +28,8 @@ import hudson.PluginWrapper;
 import hudson.Util;
 import hudson.model.*;
 import hudson.security.Permission;
+import hudson.security.PermissionGroup;
+import hudson.security.PermissionScope;
 import jenkins.model.Jenkins;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.lang.StringUtils;
@@ -40,6 +42,7 @@ import org.jenkinsci.plugins.scriptler.share.ScriptInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfoCatalog;
 import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
 import org.jenkinsci.plugins.scriptler.util.UIHelper;
+import org.jvnet.localizer.Localizable;
 import org.kohsuke.stapler.*;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
@@ -64,6 +67,9 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     private final static String MASTER = "(master)";
     private final static String ALL = "(all)";
     private final static String ALL_SLAVES = "(all slaves)";
+
+    public static final PermissionGroup SCRITPLER_PERMISSONS = new PermissionGroup(ScriptlerManagement.class, Messages._permissons_title());
+    public static final Permission RUN = new Permission(SCRITPLER_PERMISSONS, "Run", Messages._permissons_run_description(), Jenkins.ADMINISTER, PermissionScope.JENKINS);
 
     private boolean isRunScriptPermissionEnabled() {
         return getConfiguration().isAllowRunScriptPermission();
@@ -128,8 +134,8 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     }
 
     public String getPluginResourcePath() {
-        PluginWrapper wrapper = Hudson.getInstance().getPluginManager().getPlugin(ScriptlerPluginImpl.class);
-        return Hudson.getInstance().getRootUrl() + "plugin/" + wrapper.getShortName() + "/";
+        PluginWrapper wrapper = Jenkins.getInstance().getPluginManager().getPlugin(ScriptlerPluginImpl.class);
+        return Jenkins.getInstance().getRootUrl() + "plugin/" + wrapper.getShortName() + "/";
     }
 
     /**
@@ -146,7 +152,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     @RequirePOST
     public HttpResponse doScriptlerSettings(StaplerRequest res, StaplerResponse rsp, @QueryParameter("disableRemoteCatalog") boolean disableRemoteCatalog, @QueryParameter("allowRunScriptPermission") boolean allowRunScriptPermission,
             @QueryParameter("allowRunScriptEdit") boolean allowRunScriptEdit) throws IOException {
-        checkPermission(Hudson.ADMINISTER);
+        checkPermission(Jenkins.ADMINISTER);
 
         ScriptlerConfiguration cfg = getConfiguration();
         cfg.setDisbableRemoteCatalog(disableRemoteCatalog);
@@ -174,7 +180,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      */
     @RequirePOST
     public HttpResponse doDownloadScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("catalog") String catalogName) throws IOException, ServletException {
-        checkPermission(Hudson.ADMINISTER);
+        checkPermission(Jenkins.ADMINISTER);
 
         ScriptlerConfiguration c = getConfiguration();
         if (c.isDisbableRemoteCatalog()) {
@@ -233,7 +239,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     public HttpResponse doScriptAdd(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("name") String name, @QueryParameter("comment") String comment, @QueryParameter("script") String script,
             @QueryParameter("nonAdministerUsing") boolean nonAdministerUsing, @QueryParameter("onlyMaster") boolean onlyMaster, String originCatalogName, String originId) throws IOException, ServletException {
 
-        checkPermission(Hudson.ADMINISTER);
+        checkPermission(Jenkins.ADMINISTER);
 
         Parameter[] parameters = UIHelper.extractParameters(req.getSubmittedForm());
 
@@ -304,7 +310,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws IOException
      */
     public HttpResponse doHardResetGit() throws IOException {
-        checkPermission(Hudson.ADMINISTER);
+        checkPermission(Jenkins.ADMINISTER);
         getGitRepo().hardReset();
         return new HttpRedirect("/scriptler.git");
     }
@@ -323,7 +329,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      */
     @RequirePOST
     public HttpResponse doRemoveScript(StaplerRequest res, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException {
-        checkPermission(Hudson.ADMINISTER);
+        checkPermission(Jenkins.ADMINISTER);
 
         // remove the file
         File oldScript = new File(getScriptDirectory(), id);
@@ -357,7 +363,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      */
     @RequirePOST
     public HttpResponse doUploadScript(StaplerRequest req) throws IOException, ServletException {
-        checkPermission(Hudson.ADMINISTER);
+        checkPermission(Jenkins.ADMINISTER);
         try {
             
 
@@ -588,7 +594,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws ServletException
      */
     public void doShowScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException, ServletException {
-        checkPermission(Hudson.RUN_SCRIPTS);
+        checkPermission(ScriptlerManagement.RUN);
 
         Script script = ScriptHelper.getScript(id, true);
         req.setAttribute("script", script);
@@ -608,7 +614,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws ServletException
      */
     public void doEditScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException, ServletException {
-        checkPermission(Hudson.ADMINISTER);
+        checkPermission(Jenkins.ADMINISTER);
 
         Script script = ScriptHelper.getScript(id, true);
         req.setAttribute("script", script);
@@ -696,11 +702,11 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     }
 
     public static File getScriptlerHomeDirectory() {
-        return new File(Hudson.getInstance().getRootDir(), "scriptler");
+        return new File(Jenkins.getInstance().getRootDir(), "scriptler");
     }
 
     private void checkPermission(Permission permission) {
-        Hudson.getInstance().checkPermission(permission);
+        Jenkins.getInstance().checkPermission(permission);
     }
 
     private String fixFileName(String catalogName, String name) {
