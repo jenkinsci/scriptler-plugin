@@ -240,7 +240,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
         /**
          * gets the argument description to be displayed on the screen when selecting a config in the dropdown
-         *
+         * 
          * @param configId
          *            the config id to get the arguments description for
          * @return the description
