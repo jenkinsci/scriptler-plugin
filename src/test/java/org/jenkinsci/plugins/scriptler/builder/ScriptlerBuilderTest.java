@@ -107,6 +107,7 @@ public class ScriptlerBuilderTest {
     }
 
     @Test
+    @Issue("SECURITY-366")
     public void scriptNotUsableByNonAdmin_isNotInjectableBy_configXml() throws Exception {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         j.jenkins.setCrumbIssuer(null);
