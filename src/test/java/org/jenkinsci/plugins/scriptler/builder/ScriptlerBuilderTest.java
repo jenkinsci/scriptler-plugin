@@ -37,6 +37,7 @@ import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.File;
@@ -81,6 +82,7 @@ public class ScriptlerBuilderTest {
     }
 
     @Test
+    @Issue("SECURITY-366")
     public void scriptNotUsableByNonAdmin_isNotInjectableBy_configSubmit() throws Exception {
         // use the same flow as a call to submit in the config page
 
