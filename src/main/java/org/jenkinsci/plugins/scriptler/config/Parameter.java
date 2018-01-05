@@ -6,7 +6,7 @@ public class Parameter implements Serializable {
     private static final long serialVersionUID = 1L;
     private String name;
     private String value;
-
+    
     public Parameter() {
         super();
     }
@@ -15,7 +15,7 @@ public class Parameter implements Serializable {
         this.name = name;
         this.value = value;
     }
-
+    
     public String getName() {
         return name;
     }
