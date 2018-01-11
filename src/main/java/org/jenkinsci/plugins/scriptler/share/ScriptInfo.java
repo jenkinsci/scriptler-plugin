@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.scriptler.share;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.jenkinsci.plugins.scriptler.config.NamedResource;
@@ -140,4 +141,11 @@ public class ScriptInfo implements NamedResource {
         }
     }
 
+    public static Comparator<ScriptInfo> COMPARATOR_BY_NAME = new Comparator<ScriptInfo>() {
+        @Override public int compare(ScriptInfo a, ScriptInfo b) {
+            String nameA = a.getName() != null ? a.getName() : "";
+            String nameB = b.getName() != null ? b.getName() : "";
+            return nameA.compareToIgnoreCase(nameB);
+        }
+    };
 }

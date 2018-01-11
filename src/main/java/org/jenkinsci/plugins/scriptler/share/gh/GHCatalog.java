@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,6 +17,8 @@ import java.util.logging.Logger;
 import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfoCatalog;
+
+import javax.annotation.CheckForNull;
 
 /**
  * Provides access to the scriptler scripts shared at https://github.com/jenkinsci/jenkins-scripts
@@ -35,12 +38,7 @@ public class GHCatalog extends ScriptInfoCatalog<ScriptInfo> {
 
     @Override
     public List<ScriptInfo> getEntries() {
-        try {
-            return Arrays.asList(CentralScriptJsonCatalog.all().get(CentralScriptJsonCatalog.class).toList().list);
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "not abe to load script infos from GH", e);
-        }
-        return Collections.emptyList();
+        return getEntries(ScriptInfo.COMPARATOR_BY_NAME);
     }
 
     @Override
@@ -50,7 +48,7 @@ public class GHCatalog extends ScriptInfoCatalog<ScriptInfo> {
 
     @Override
     public ScriptInfo getEntryById(String id) {
-        for (ScriptInfo info : getEntries()) {
+        for (ScriptInfo info : getEntries(null)) {
             if (id.equals(info.getId())) {
                 return info;
             }
@@ -58,6 +56,21 @@ public class GHCatalog extends ScriptInfoCatalog<ScriptInfo> {
         return null;
     }
 
+    private List<ScriptInfo> getEntries(@CheckForNull Comparator<ScriptInfo> comparator){
+        ScriptInfo[] scriptInfoArray = new ScriptInfo[0];
+        try {
+            scriptInfoArray = CentralScriptJsonCatalog.getCatalog().toList().list;
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "not abe to load script infos from GH", e);
+        }
+        List<ScriptInfo> sortedScriptInfoList = Arrays.asList(scriptInfoArray);
+
+        if(comparator != null)
+            Collections.sort(sortedScriptInfoList, comparator);
+    
+        return sortedScriptInfoList;
+    }
+    
     @Override
     public CatalogInfo getInfo() {
         return CATALOG_INFO;
