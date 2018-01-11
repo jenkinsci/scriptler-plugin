@@ -50,6 +50,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -258,6 +259,12 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
         // save (overwrite) the file/script
         File newScriptFile = new File(getScriptDirectory(), finalFileName);
+    
+        if(!newScriptFile.getCanonicalPath().equals(newScriptFile.getAbsolutePath())){
+            LOGGER.log(Level.WARNING, "Folder traversal detected, file path received: {0}, after fixing: {1}", new Object[]{id, finalFileName});
+            throw new IOException("Invalid file path received: " + id);
+        }
+        
         Writer writer = new FileWriter(newScriptFile);
         try {
             writer.write(script);
@@ -383,18 +390,23 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      */
     /*private*/ void saveScript(FileItem fileItem, boolean nonAdministerUsing, String fileName) throws Exception, IOException {
         // upload can only be to/from local catalog
-        fileName = fixFileName(null, fileName);
+        String fixedFileName = fixFileName(null, fileName);
 
         File rootDir = getScriptDirectory();
-        final File f = new File(rootDir, fileName);
+        final File f = new File(rootDir, fixedFileName);
+        
+        if(!f.getCanonicalPath().equals(f.getAbsolutePath())){
+            LOGGER.log(Level.WARNING, "Folder traversal detected, file path received: {0}, after fixing: {1}", new Object[]{fileName, fixedFileName});
+            throw new IOException("Invalid file path received: " + fileName);
+        }
         
         fileItem.write(f);
 
-        commitFileToGitRepo(fileName);
+        commitFileToGitRepo(fixedFileName);
 
-        Script script = ScriptHelper.getScript(fileName, false);
+        Script script = ScriptHelper.getScript(fixedFileName, false);
         if (script == null) {
-            script = new Script(fileName, fileName, true, nonAdministerUsing, false);
+            script = new Script(fixedFileName, fixedFileName, true, nonAdministerUsing, false);
         }
         ScriptlerConfiguration config = getConfiguration();
         config.addOrReplace(script);

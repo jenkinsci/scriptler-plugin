@@ -2,11 +2,13 @@ package org.jenkinsci.plugins.scriptler.restapi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 //import com.gargoylesoftware.htmlunit.HttpMethod;
 //import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.*;
 //import com.gargoylesoftware.htmlunit.javascript.host.URL;
+import hudson.Functions;
 import hudson.model.FileParameterValue.FileItemImpl;
 
 import java.io.File;
@@ -20,6 +22,7 @@ import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.junit.*;
 import org.jvnet.hudson.test.BuildWatcher;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
@@ -39,15 +42,40 @@ public class ScriptlerRestApiTest {
     public void setup() throws Exception {
         final ScriptlerManagement scriptler = j.getInstance().getExtensionList(ScriptlerManagement.class).get(0);
         ScriptlerManagementHelper helper = new ScriptlerManagementHelper(scriptler);
-        File f = new File(SCRIPT_ID);
-        FileUtils.writeStringToFile(f, "print \"hello $arg1, this is $arg2.\"");
-        FileItem fi = new FileItemImpl(f);
-        helper.saveScript(fi, true, SCRIPT_ID);
+        saveFile(helper, SCRIPT_ID, "print \"hello $arg1, this is $arg2.\"");
 
         scriptler.getConfiguration().getScriptById(SCRIPT_ID)
                 .setParameters(new Parameter[]{ new Parameter("arg1", "world"), new Parameter("arg2", "scriptler") });
     }
+    
+    private void saveFile(ScriptlerManagementHelper helper, String scriptId, String scriptContent) throws Exception {
+        File f = new File(scriptId);
+        FileUtils.writeStringToFile(f, scriptContent);
+        FileItem fi = new FileItemImpl(f);
+        helper.saveScript(fi, true, scriptId);
+    }
+    
+    @Test
+    @Issue("SECURITY-691")
+    public void fixFolderTraversalThroughScriptId() throws Exception{
+        ScriptlerManagement scriptler = j.getInstance().getExtensionList(ScriptlerManagement.class).get(0);
+        ScriptlerManagementHelper helper = new ScriptlerManagementHelper(scriptler);
+        
+        String maliciousCode = "print 'hello'";
+    
+        try{
+            // will be just aside scriptler.xml
+            saveFile(helper, "../clickOnMe", maliciousCode);
+            fail();
+        }
+        catch(IOException e){
+            assertTrue(e.getMessage().contains("Invalid file path received"));
+        }
 
+        // this work since we use concatenation of the script folder destination with the script filename
+        saveFile(helper, "/directlyInDiskRoot", maliciousCode);
+    }
+    
     @Test
     public void testSuccessWithDefaults() throws Exception {
 
