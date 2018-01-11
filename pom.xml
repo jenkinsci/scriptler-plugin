@@ -57,13 +57,13 @@
 			<version>1.9</version>
 			<scope>provided</scope><!-- this is in the core -->
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.jenkins-ci.plugins</groupId>
 			<artifactId>git-server</artifactId>
 			<version>1.7</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.jenkins-ci.plugins</groupId>
 			<artifactId>script-security</artifactId>
