@@ -91,7 +91,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see hudson.model.ManagementLink#getIconFileName()
      */
     @Override
@@ -101,7 +101,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see hudson.model.ManagementLink#getUrlName()
      */
     @Override
@@ -115,7 +115,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see hudson.model.Action#getDisplayName()
      */
     public String getDisplayName() {
@@ -142,7 +142,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * save the scriptler 'global' settings (on settings screen, not global Jenkins config)
-     *
+     * 
      * @param res
      * @param rsp
      * @param disableRemoteCatalog
@@ -162,7 +162,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * Downloads a script from a catalog and imports it to the local system.
-     *
+     * 
      * @param req
      *            request
      * @param rsp
@@ -207,7 +207,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * Saves a script snipplet as file to the system.
-     *
+     * 
      * @param req
      *            response
      * @param rsp
@@ -246,7 +246,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * Save the script details and return the forward to index
-     *
+     * 
      * @return the final name of the saved script - which is also the id of the script!
      * @throws IOException
      */
@@ -287,7 +287,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * adds/commits the given file to the local git repo - file must be written to scripts directory!
-     *
+     * 
      * @param finalFileName
      * @throws IOException
      */
@@ -316,7 +316,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * Removes a script from the config and filesystem.
-     *
+     * 
      * @param res
      *            response
      * @param rsp
@@ -353,7 +353,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * Uploads a script and stores it with the given filename to the configuration. It will be stored on the filessytem.
-     *
+     * 
      * @param req
      *            request
      * @return forward to index page.
@@ -410,7 +410,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * Display the screen to trigger a script. The source of the script get loaded from the filesystem and placed in the request to display it on the page before execution.
-     *
+     * 
      * @param req
      *            request
      * @param rsp
@@ -447,7 +447,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * Trigger/run/execute the script on a slave and show the result/output. The request then gets forward to <code>runScript.jelly</code> (This is usually also where the request came from). The
      * script passed to this method gets restored in the request again (and not loaded from the system). This way one is able to modify the script before execution and reuse the modified version for
      * further executions.
-     *
+     * 
      * @param req
      *            request
      * @param rsp
@@ -507,7 +507,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     
     /**
      * Trigger/run/execute the script on a slave and directly forward the result/output to the response.
-     *
+     * 
      * @param req
      *            request
      * @param rsp
@@ -606,7 +606,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * Loads the script by its name and forwards the request to "show.jelly".
-     *
+     * 
      * @param req
      *            request
      * @param rsp
@@ -625,7 +625,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * Loads the script by its name and forwards the request to "edit.jelly".
-     *
+     * 
      * @param req
      *            request
      * @param rsp
@@ -645,7 +645,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * Gets the names of all configured slaves, regardless whether they are online, including alias of ALL and ALL_SLAVES
-     *
+     * 
      * @return list with all slave names
      */
     public List<String> getSlaveAlias(Script script) {
@@ -683,7 +683,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * Gets the remote catalogs containing the available scripts for download.
-     *
+     * 
      * @return the catalog
      */
     public List<ScriptInfoCatalog> getCatalogs() {
@@ -716,7 +716,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * returns the directory where the script files get stored
-     *
+     * 
      * @return the script directory
      */
     public static File getScriptDirectory() {

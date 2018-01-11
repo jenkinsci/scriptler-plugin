@@ -94,7 +94,7 @@ public class ScriptlerPluginImpl extends Plugin {
 
         cfg.save();
     }
-    
+
     @Override
     public void postInitialize() throws Exception {
         for (Script script : ScriptlerConfiguration.getConfiguration().getScripts()) {
@@ -105,7 +105,7 @@ public class ScriptlerPluginImpl extends Plugin {
             ScriptHelper.putScriptInApprovalQueueIfRequired(scriptSource);
         }
     }
-    
+
     /**
      * search into the declared backup directory for backup archives
      */
