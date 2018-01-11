@@ -1,17 +1,11 @@
 package org.jenkinsci.plugins.scriptler.restapi;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-//import com.gargoylesoftware.htmlunit.HttpMethod;
-//import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.*;
-//import com.gargoylesoftware.htmlunit.javascript.host.URL;
 import hudson.model.FileParameterValue.FileItemImpl;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URLEncoder;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.FileUtils;
@@ -30,10 +24,10 @@ public class ScriptlerRestApiTest {
     private static final String SCRIPT_ID = "dummy.groovy";
 
     @Rule
-    public static JenkinsRule j = new JenkinsRule();
+    public JenkinsRule j = new JenkinsRule();
 
     @ClassRule
-    public BuildWatcher bw = new BuildWatcher();
+    public static BuildWatcher bw = new BuildWatcher();
 
     @Before
     public void setup() throws Exception {

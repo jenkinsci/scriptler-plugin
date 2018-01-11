@@ -125,7 +125,7 @@ public class Script implements Comparable<Script>, NamedResource {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
     public int compareTo(Script o) {

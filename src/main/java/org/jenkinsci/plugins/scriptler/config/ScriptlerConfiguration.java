@@ -55,16 +55,16 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
 
     private boolean disbableRemoteCatalog = false;
 
-    // keep to avoid loading issues with older version
     /**
+     * /!\ keep to avoid loading issues with older version
      * The regular permission required is Scriptler/RunScripts now
      * @deprecated no need to replace them, Script Security is used now
      */
     @Deprecated
     private boolean allowRunScriptPermission = false;
     
-    // keep to avoid loading issues with older version
     /**
+     * /!\ keep to avoid loading issues with older version
      * The regular permission required is Scriptler/Configure now
      * @deprecated no need to replace them, Script Security is used now
      */
