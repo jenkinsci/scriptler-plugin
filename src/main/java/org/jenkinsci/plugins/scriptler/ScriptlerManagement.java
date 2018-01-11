@@ -30,6 +30,7 @@ import hudson.model.*;
 import hudson.security.Permission;
 import jenkins.model.Jenkins;
 import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.jenkinsci.plugins.scriptler.config.Script;
@@ -399,7 +400,10 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         if (script == null) {
             script = new Script(fileName, fileName, true, nonAdministerUsing, false);
         }
-        //TODO add approval queue for the source code
+
+        String scriptSource = FileUtils.readFileToString(f, "UTF-8");
+        ScriptHelper.putScriptInApprovalQueueIfRequired(scriptSource);
+
         ScriptlerConfiguration config = getConfiguration();
         config.addOrReplace(script);
     }
