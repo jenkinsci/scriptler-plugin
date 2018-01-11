@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.CheckForNull;
 import javax.servlet.ServletException;
 
 import jenkins.model.Jenkins.MasterComputer;
@@ -52,11 +53,6 @@ public class ScriptHelper {
         JSON_CLASS_MAPPING.put("parameters", Parameter.class);
     }
 
-    public static Script getScriptCopy(String id, boolean withSrc) {
-        final Script orig = getScript(id, withSrc);
-        return orig.copy();
-    }
-    
     /**
      * Loads the script information.
      * 
@@ -66,7 +62,7 @@ public class ScriptHelper {
      *            should the script sources be loaded too?
      * @return the script - <code>null</code> if the id is not set or the script with the given id can not be resolved
      */
-    public static Script getScript(String id, boolean withSrc) {
+    public static @CheckForNull Script getScript(String id, boolean withSrc) {
         if (StringUtils.isBlank(id)) {
             return null;
         }
@@ -94,17 +90,39 @@ public class ScriptHelper {
     }
     
     /**
+     * @param scriptSourceCode Source code that must be approved
      * @return true iff the script was approved or created by a user with RUN_SCRIPT permission
      * @since TODO
      */
     public static boolean isApproved(String scriptSourceCode){
+        return isApproved(scriptSourceCode, true);
+    }
+    
+    /**
+     * @param scriptSourceCode Source code that must be approved
+     * @param putInApprovalQueueIfNotApprovedYet true means we try to know if the user has permission
+     *                                          to approve the script automatically in case it was not approved yet
+     * @return true iff the script is approved
+     * @since TODO
+     */
+    public static boolean isApproved(String scriptSourceCode, boolean putInApprovalQueueIfNotApprovedYet){
         try{
             ScriptApproval.get().using(scriptSourceCode, GroovyLanguage.get());
             return true;
         }
         catch(UnapprovedUsageException e){
-            // in case there is some ways that are not covered
-            putScriptInApprovalQueueIfRequired(scriptSourceCode);
+            if(putInApprovalQueueIfNotApprovedYet){
+                // in case there is some ways that are not covered
+                putScriptInApprovalQueueIfRequired(scriptSourceCode);
+                try{
+                    ScriptApproval.get().using(scriptSourceCode, GroovyLanguage.get());
+                    // user has permission to approve the script
+                    return true;
+                }
+                catch(UnapprovedUsageException e2){
+                    // user does not have the permission to approve the script
+                }
+            }
             return false;
         }
     }

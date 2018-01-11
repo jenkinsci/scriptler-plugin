@@ -30,10 +30,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import hudson.security.Permission;
+import hudson.security.PermissionGroup;
+import hudson.security.PermissionScope;
+import jenkins.model.Jenkins;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.plugins.scriptler.config.Script;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
@@ -46,7 +49,20 @@ import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
 public class ScriptlerPluginImpl extends Plugin {
 
     private final static Logger LOGGER = Logger.getLogger(ScriptlerPluginImpl.class.getName());
+    
+    public static final PermissionGroup SCRIPTLER_PERMISSONS = new PermissionGroup(ScriptlerManagement.class, Messages._permissons_title());
 
+    public static final Permission CONFIGURE = new Permission(
+            SCRIPTLER_PERMISSONS, "Configure",
+            Messages._permissons_configure_description(), Jenkins.RUN_SCRIPTS,
+            PermissionScope.JENKINS
+    );
+    public static final Permission RUN_SCRIPTS = new Permission(
+            SCRIPTLER_PERMISSONS, "RunScripts",
+            Messages._permissons_runScript_description(), Jenkins.RUN_SCRIPTS,
+            PermissionScope.JENKINS
+    );
+    
     @Override
     public void start() throws Exception {
         super.start();
@@ -59,11 +75,11 @@ public class ScriptlerPluginImpl extends Plugin {
      * @throws IOException
      */
     private void synchronizeConfig() throws IOException {
-        LOGGER.info("initialize scriptler");
+        LOGGER.info("initialize Scriptler");
         if (!ScriptlerManagement.getScriptlerHomeDirectory().exists()) {
             boolean dirsDone = ScriptlerManagement.getScriptlerHomeDirectory().mkdirs();
             if(!dirsDone) {
-                LOGGER.severe("could not cereate scriptler home directory: " + ScriptlerManagement.getScriptlerHomeDirectory());
+                LOGGER.severe("could not create Scriptler home directory: " + ScriptlerManagement.getScriptlerHomeDirectory());
             }
         }
         File scriptDirectory = ScriptlerManagement.getScriptDirectory();
@@ -73,14 +89,10 @@ public class ScriptlerPluginImpl extends Plugin {
         }
 
         ScriptlerConfiguration cfg = ScriptlerConfiguration.load();
-        if (cfg == null) {
-            cfg = new ScriptlerConfiguration(new TreeSet<Script>());
-        }
 
         SyncUtil.syncDirWithCfg(scriptDirectory, cfg);
 
         cfg.save();
-
     }
     
     @Override

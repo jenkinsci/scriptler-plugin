@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 -->
 
-
+<!--Used for the build step popup "view selected script"-->
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
 	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
@@ -32,7 +32,11 @@ THE SOFTWARE.
 	<link rel="stylesheet" href="${it.pluginResourcePath}mode/clike/clike.css" ></link>
 	<style>.CodeMirror {border: 2px inset #dee;}</style>
 	
-	<l:layout norefresh="true">
+	<!--
+	Concerning the "type" attribute, as it's a popup we desire to have full size usage of the screen,
+	not used in core version required by this plugin but not disturbing the correct processing
+	-->
+	<l:layout norefresh="true" type="full-screen">
 		<l:main-panel>
 			<h1>
 				<img width="48" height="48" src="${imagesURL}/16x16/document_edit.gif" />

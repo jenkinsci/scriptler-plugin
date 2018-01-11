@@ -30,6 +30,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.jenkinsci.main.modules.sshd.SSHD;
 import org.jenkinsci.plugins.gitserver.FileBackedHttpGitRepository;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
+import org.jenkinsci.plugins.scriptler.ScriptlerPluginImpl;
 import org.jenkinsci.plugins.scriptler.SyncUtil;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
 
@@ -78,7 +79,7 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
      */
     @Override
     protected void checkPushPermission() {
-        Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
+        Jenkins.getInstance().checkPermission(ScriptlerPluginImpl.CONFIGURE);
     }
 
     @Override

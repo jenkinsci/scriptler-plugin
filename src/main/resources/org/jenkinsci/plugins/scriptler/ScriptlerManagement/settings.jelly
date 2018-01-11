@@ -22,7 +22,7 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
 	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-	<l:layout permission="${app.ADMINISTER}" norefresh="true">
+	<l:layout permission="${it.scriptlerConfigure}" norefresh="true">
 		<st:include page="sidepanel.jelly" />
 		<l:main-panel>
 			<h1>
@@ -33,20 +33,14 @@
 
 			<j:out value="${%intro}" />
 			<h4>${%Directories}</h4>
-			<j:out value="${%scriptlerdirectorytext}" /> <j:out value="${it.scriptlerHomeDirectory}" /><br />
-			<j:out value="${%scriptdirectorytext}" /> <j:out value="${it.scriptDirectory}" />
+			<j:out value="${%scriptlerdirectorytext}" /> <code><j:out value="${it.scriptlerHomeDirectory}" /></code><br />
+			<j:out value="${%scriptdirectorytext}" /> <code><j:out value="${it.scriptDirectory}" /></code>
 			<p />
 			<f:form method="post" action="scriptlerSettings">
 				<j:jelly xmlns:j="jelly:core">
 					<f:entry title="${%Disable remote catalog}" help="/plugin/scriptler/help-disableRemoterCatalog.html">
 						<f:checkbox name="disableRemoteCatalog" checked="${it.disableRemoteCatalog()}" />
 					</f:entry>
-                    <f:entry title="${%Allow RunScript permission}" help="/plugin/scriptler/help-allowRunScriptPermission.html">
-                        <f:checkbox name="allowRunScriptPermission" checked="${it.allowRunScriptPermission()}" />
-                    </f:entry>
-                    <f:entry title="${%Allow RunScript editing}" help="/plugin/scriptler/help-allowRunScriptEdit.html">
-                        <f:checkbox name="allowRunScriptEdit" checked="${it.allowRunScriptEdit()}" />
-                    </f:entry>
 				</j:jelly>
 				<f:block>
 					<f:submit value="${%Submit}" />

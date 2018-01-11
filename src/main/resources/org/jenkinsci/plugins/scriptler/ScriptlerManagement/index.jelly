@@ -8,7 +8,8 @@
 
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-	<l:layout permission="${app.READ}" norefresh="true">
+	${it.checkAtLeastOneScriptlerPermission()}
+	<l:layout norefresh="true">
 		<st:once>
 			<link rel="stylesheet" href="${rootURL}/plugin/scriptler/scriptler.css" />
 		</st:once>
@@ -32,14 +33,7 @@
 					</h3>
 				</j:if>
 				<table class="pane">
-					<j:choose>
-						<j:when test="${h.hasPermission(it,app.ADMINISTER)}">
-							<j:set var="items" value="${it.configuration.scripts}" />
-						</j:when>
-						<j:otherwise>
-							<j:set var="items" value="${it.configuration.UserScripts}" />
-						</j:otherwise>
-					</j:choose>
+					<j:set var="items" value="${it.configuration.scripts}" />
 					<j:forEach var="t" items="${items}">
 						<tr valign="center" style="border-top: 0px;">
 							<td class="pane scriptler-nowrap" width="104">
@@ -51,7 +45,7 @@
 										<img width="16" height="16" src="${imagesURL}/16x16/empty.gif" class="scriptler-nomargin"/>
 									</j:otherwise>
 								</j:choose>
-								<l:hasPermission permission="${app.ADMINISTER}">
+								<l:hasPermission permission="${it.scriptlerConfigure}">
 									<a href="editScript?id=${t.id}" class="scriptler-link-button">
 										<img width="16" height="16" title="${%edit script} ${t.name}" src="${imagesURL }/16x16/document_edit.gif" />
 									</a>
@@ -63,12 +57,14 @@
 										</button>
 									</form>
 								</l:hasPermission>
-								<a href="runScript?id=${t.id}">
-									<img width="16" height="16" title="${%run script} ${t.name}" src="${imagesURL}/16x16/terminal.gif" />
-								</a>
+								<l:hasPermission permission="${it.scriptlerRunScripts}">
+									<a href="runScript?id=${t.id}">
+										<img width="16" height="16" title="${%run script} ${t.name}" src="${imagesURL}/16x16/terminal.gif" />
+									</a>
+								</l:hasPermission>
                                 <j:if test="${t.nonAdministerUsing}">
                                    <j:out value=" " />
-                                   <img width="16" height="16" title="${%freeForRunSciptPermission}" src="${imagesURL}/16x16/user.png" />
+                                   <img width="16" height="16" title="${%usableInBuildStep}" src="${imagesURL}/16x16/setting.png" />
                                 </j:if>								
 							</td>
 							<td class="pane-header">

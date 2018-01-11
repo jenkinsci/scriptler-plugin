@@ -68,27 +68,40 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     private final static String ALL = "(all)";
     private final static String ALL_SLAVES = "(all slaves)";
 
-    private boolean isRunScriptPermissionEnabled() {
-        return getConfiguration().isAllowRunScriptPermission();
+    // used in Jelly view
+    public Permission getScriptlerRunScripts() {
+        return ScriptlerPluginImpl.RUN_SCRIPTS;
     }
-
-    public Permission getRequiredPermissionForRunScript() {
-        return isRunScriptPermissionEnabled() ? Jenkins.RUN_SCRIPTS : Jenkins.ADMINISTER;
+    
+    // used in Jelly view
+    public Permission getScriptlerConfigure() {
+        return ScriptlerPluginImpl.CONFIGURE;
+    }
+    
+    public boolean hasAtLeastOneScriptlerPermission(){
+        return Jenkins.getInstance().hasPermission(ScriptlerPluginImpl.RUN_SCRIPTS) || Jenkins.getInstance().hasPermission(ScriptlerPluginImpl.CONFIGURE);
+    }
+    
+    public void checkAtLeastOneScriptlerPermission(){
+        // to be sure the user has either CONFIGURE or RUN_SCRIPTS permission
+        if(!Jenkins.getInstance().hasPermission(ScriptlerPluginImpl.RUN_SCRIPTS)){
+            Jenkins.getInstance().checkPermission(ScriptlerPluginImpl.CONFIGURE);
+        }
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hudson.model.ManagementLink#getIconFileName()
      */
     @Override
     public String getIconFileName() {
-        return Jenkins.getInstance().hasPermission(getRequiredPermissionForRunScript()) ? "notepad.gif" : null;
+        return hasAtLeastOneScriptlerPermission() ? "notepad.gif" : null;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hudson.model.ManagementLink#getUrlName()
      */
     @Override
@@ -100,17 +113,9 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         return getConfiguration().isDisbableRemoteCatalog();
     }
 
-    public boolean allowRunScriptEdit() {
-        return getConfiguration().isAllowRunScriptEdit();
-    }
-
-    public boolean allowRunScriptPermission() {
-        return getConfiguration().isAllowRunScriptPermission();
-    }
-
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hudson.model.Action#getDisplayName()
      */
     public String getDisplayName() {
@@ -131,30 +136,25 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     }
 
     public String getPluginResourcePath() {
-        PluginWrapper wrapper = Hudson.getInstance().getPluginManager().getPlugin(ScriptlerPluginImpl.class);
-        return Hudson.getInstance().getRootUrl() + "plugin/" + wrapper.getShortName() + "/";
+        PluginWrapper wrapper = Jenkins.getInstance().getPluginManager().getPlugin(ScriptlerPluginImpl.class);
+        return Jenkins.getInstance().getRootUrl() + "plugin/" + wrapper.getShortName() + "/";
     }
 
     /**
      * save the scriptler 'global' settings (on settings screen, not global Jenkins config)
-     * 
+     *
      * @param res
      * @param rsp
      * @param disableRemoteCatalog
-     * @param allowRunScriptPermission
-     * @param allowRunScriptEdit
      * @return
      * @throws IOException
      */
     @RequirePOST
-    public HttpResponse doScriptlerSettings(StaplerRequest res, StaplerResponse rsp, @QueryParameter("disableRemoteCatalog") boolean disableRemoteCatalog, @QueryParameter("allowRunScriptPermission") boolean allowRunScriptPermission,
-            @QueryParameter("allowRunScriptEdit") boolean allowRunScriptEdit) throws IOException {
-        checkPermission(Hudson.ADMINISTER);
+    public HttpResponse doScriptlerSettings(StaplerRequest res, StaplerResponse rsp, @QueryParameter("disableRemoteCatalog") boolean disableRemoteCatalog) throws IOException {
+        checkPermission(ScriptlerPluginImpl.CONFIGURE);
 
         ScriptlerConfiguration cfg = getConfiguration();
         cfg.setDisbableRemoteCatalog(disableRemoteCatalog);
-        cfg.setAllowRunScriptEdit(allowRunScriptEdit);
-        cfg.setAllowRunScriptPermission(allowRunScriptPermission);
         cfg.save();
 
         return new HttpRedirect("settings");
@@ -162,7 +162,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * Downloads a script from a catalog and imports it to the local system.
-     * 
+     *
      * @param req
      *            request
      * @param rsp
@@ -177,7 +177,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      */
     @RequirePOST
     public HttpResponse doDownloadScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("catalog") String catalogName) throws IOException, ServletException {
-        checkPermission(Hudson.ADMINISTER);
+        checkPermission(ScriptlerPluginImpl.CONFIGURE);
 
         ScriptlerConfiguration c = getConfiguration();
         if (c.isDisbableRemoteCatalog()) {
@@ -207,7 +207,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * Saves a script snipplet as file to the system.
-     * 
+     *
      * @param req
      *            response
      * @param rsp
@@ -221,7 +221,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @param script
      *            script code
      * @param nonAdministerUsing
-     *            user which are not admisn, are allowed to use this script
+     *            allow usage in Scriptler build step
      * @param onlyMaster
      *            this script is only allwoed to run on the master node
      * @param originCatalogName
@@ -236,7 +236,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     public HttpResponse doScriptAdd(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("name") String name, @QueryParameter("comment") String comment, @QueryParameter("script") String script,
             @QueryParameter("nonAdministerUsing") boolean nonAdministerUsing, @QueryParameter("onlyMaster") boolean onlyMaster, String originCatalogName, String originId) throws IOException, ServletException {
 
-        checkPermission(Hudson.ADMINISTER);
+        checkPermission(ScriptlerPluginImpl.CONFIGURE);
 
         Parameter[] parameters = UIHelper.extractParameters(req.getSubmittedForm());
 
@@ -246,7 +246,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * Save the script details and return the forward to index
-     * 
+     *
      * @return the final name of the saved script - which is also the id of the script!
      * @throws IOException
      */
@@ -287,7 +287,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * adds/commits the given file to the local git repo - file must be written to scripts directory!
-     * 
+     *
      * @param finalFileName
      * @throws IOException
      */
@@ -309,14 +309,14 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws IOException
      */
     public HttpResponse doHardResetGit() throws IOException {
-        checkPermission(Hudson.ADMINISTER);
+        checkPermission(ScriptlerPluginImpl.CONFIGURE);
         getGitRepo().hardReset();
         return new HttpRedirect("/scriptler.git");
     }
 
     /**
      * Removes a script from the config and filesystem.
-     * 
+     *
      * @param res
      *            response
      * @param rsp
@@ -328,7 +328,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      */
     @RequirePOST
     public HttpResponse doRemoveScript(StaplerRequest res, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException {
-        checkPermission(Hudson.ADMINISTER);
+        checkPermission(ScriptlerPluginImpl.CONFIGURE);
 
         // remove the file
         File oldScript = new File(getScriptDirectory(), id);
@@ -353,7 +353,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * Uploads a script and stores it with the given filename to the configuration. It will be stored on the filessytem.
-     * 
+     *
      * @param req
      *            request
      * @return forward to index page.
@@ -362,7 +362,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      */
     @RequirePOST
     public HttpResponse doUploadScript(StaplerRequest req) throws IOException, ServletException {
-        checkPermission(Hudson.ADMINISTER);
+        checkPermission(ScriptlerPluginImpl.CONFIGURE);
         try {
             
 
@@ -410,7 +410,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * Display the screen to trigger a script. The source of the script get loaded from the filesystem and placed in the request to display it on the page before execution.
-     * 
+     *
      * @param req
      *            request
      * @param rsp
@@ -421,27 +421,33 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws ServletException
      */
     public void doRunScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException, ServletException {
+        checkPermission(ScriptlerPluginImpl.RUN_SCRIPTS);
+
         Script script = ScriptHelper.getScript(id, true);
-        checkPermission(getRequiredPermissionForRunScript());
         if(script == null) {
+            //TODO check if we cannot do better here
             throw new IOException(Messages.scriptNotFound(id));
         }
 
-        final boolean isAdmin = Jenkins.getInstance().getACL().hasPermission(Jenkins.ADMINISTER);
-        final boolean isChangeScriptAllowed = isAdmin || allowRunScriptEdit();
+        boolean canByPassScriptApproval = Jenkins.getInstance().hasPermission(Jenkins.RUN_SCRIPTS);
 
+        // we do not want user with approval right to auto-approve script when landing on that page
+        if(!ScriptHelper.isApproved(script.script, false)){
+            req.setAttribute("notApprovedYet", true);
+        }
+        
         req.setAttribute("script", script);
-        req.setAttribute("readOnly", !isChangeScriptAllowed);
+        req.setAttribute("canByPassScriptApproval", canByPassScriptApproval);
         // set default selection
         req.setAttribute("currentNode", MASTER);
-        req.getView(this, "runscript.jelly").forward(req, rsp);
+        req.getView(this, "runScript.jelly").forward(req, rsp);
     }
 
     /**
-     * Trigger/run/execute the script on a slave and show the result/output. The request then gets forward to <code>runscript.jelly</code> (This is usually also where the request came from). The
+     * Trigger/run/execute the script on a slave and show the result/output. The request then gets forward to <code>runScript.jelly</code> (This is usually also where the request came from). The
      * script passed to this method gets restored in the request again (and not loaded from the system). This way one is able to modify the script before execution and reuse the modified version for
      * further executions.
-     * 
+     *
      * @param req
      *            request
      * @param rsp
@@ -457,49 +463,51 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      */
     @RequirePOST
     public void doTriggerScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("script") String scriptSrc, @QueryParameter("node") String node) throws IOException, ServletException {
-
-        checkPermission(getRequiredPermissionForRunScript());
+        checkPermission(ScriptlerPluginImpl.RUN_SCRIPTS);
 
         final Parameter[] parameters = UIHelper.extractParameters(req.getSubmittedForm());
 
-        Script tempScript = null;
-        final boolean isAdmin = Jenkins.getInstance().getACL().hasPermission(Jenkins.ADMINISTER);
-        final boolean isChangeScriptAllowed = isAdmin || allowRunScriptEdit();
+        boolean canByPassScriptApproval = Jenkins.getInstance().hasPermission(Jenkins.RUN_SCRIPTS);
 
-        if (!isChangeScriptAllowed) {
-            tempScript = ScriptHelper.getScriptCopy(id, true);
-            // use original script, user has no permission to change it!s
-            scriptSrc = tempScript.script;
-        } else {
-            // set the script info back to the request, to display it together with
-            // the output.
-            tempScript = ScriptHelper.getScriptCopy(id, false);
-            tempScript.setScript(scriptSrc);
-            
-            ScriptHelper.putScriptInApprovalQueueIfRequired(scriptSrc);
-        }
-
-        boolean approved = ScriptHelper.isApproved(scriptSrc);
-        if(!approved){
-            LOGGER.log(Level.WARNING, "Script {} was not approved yet, consider asking your administrator to approve it.", id);
-            rsp.sendError(HttpServletResponse.SC_FORBIDDEN, "Script not approved yet, consider asking your administrator to approve it.");
+        // set the script info back to the request, to display it together with the output.
+        Script originalScript = ScriptHelper.getScript(id, true);
+        if(originalScript == null){
+            rsp.sendError(404, "No script found for id=" + id);
             return;
         }
 
-        final String[] slaves = resolveSlaveNames(node);
-        String output = ScriptHelper.runScript(slaves, scriptSrc, parameters);
+        String originalScriptSourceCode = originalScript.script;
+
+        Script tempScript = originalScript.copy();
+        if(originalScriptSourceCode.equals(scriptSrc)){
+            // not copied by default
+            tempScript.setScript(originalScriptSourceCode);
+        }else{
+            tempScript.setScript(scriptSrc);
+            ScriptHelper.putScriptInApprovalQueueIfRequired(scriptSrc);
+        }
+
+        String output;
+        if(ScriptHelper.isApproved(scriptSrc)){
+            String[] slaves = resolveSlaveNames(node);
+            output = ScriptHelper.runScript(slaves, scriptSrc, parameters);
+        }else{
+            LOGGER.log(Level.WARNING, "Script {0} was not approved yet, consider asking your administrator to approve it.", id);
+            output = null;
+            req.setAttribute("notApprovedYet", true);
+        }
 
         tempScript.setParameters(parameters);// show the same parameters to the user
         req.setAttribute("script", tempScript);
         req.setAttribute("currentNode", node);
         req.setAttribute("output", output);
-        req.setAttribute("readOnly", !isChangeScriptAllowed);
-        req.getView(this, "runscript.jelly").forward(req, rsp);
+        req.setAttribute("canByPassScriptApproval", canByPassScriptApproval);
+        req.getView(this, "runScript.jelly").forward(req, rsp);
     }
     
     /**
      * Trigger/run/execute the script on a slave and directly forward the result/output to the response.
-     * 
+     *
      * @param req
      *            request
      * @param rsp
@@ -518,7 +526,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             @QueryParameter(fixEmpty = true) String node, @QueryParameter(fixEmpty = true) String contentType)
             throws IOException, ServletException {
 
-        checkPermission(getRequiredPermissionForRunScript());
+        checkPermission(ScriptlerPluginImpl.RUN_SCRIPTS);
 
         String id = req.getRestOfPath();
         if (id.startsWith("/")) {
@@ -535,16 +543,12 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             throw new RuntimeException("Unknown script: " + id + ". Use /scriptler/run/<yourScriptId>");
         }
 
-        final boolean isAdmin = Jenkins.getInstance().getACL().hasPermission(Jenkins.ADMINISTER);
-        final boolean isChangeScriptAllowed = isAdmin || allowRunScriptEdit();
-
-        if (script == null || !isChangeScriptAllowed) {
+        if (script == null) {
             // use original script
             script = tempScript.script;
         }
 
-        boolean approved = ScriptHelper.isApproved(script);
-        if(!approved){
+        if(!ScriptHelper.isApproved(script)){
             LOGGER.log(Level.WARNING, "Script {0} was not approved yet, consider asking your administrator to approve it.", id);
             rsp.sendError(HttpServletResponse.SC_FORBIDDEN, "Script not approved yet, consider asking your administrator to approve it.");
             return;
@@ -602,7 +606,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * Loads the script by its name and forwards the request to "show.jelly".
-     * 
+     *
      * @param req
      *            request
      * @param rsp
@@ -613,8 +617,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws ServletException
      */
     public void doShowScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException, ServletException {
-        checkPermission(Hudson.RUN_SCRIPTS);
-
+        // action directly accessible to any people configuring job, so no permission check
         Script script = ScriptHelper.getScript(id, true);
         req.setAttribute("script", script);
         req.getView(this, "show.jelly").forward(req, rsp);
@@ -622,7 +625,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * Loads the script by its name and forwards the request to "edit.jelly".
-     * 
+     *
      * @param req
      *            request
      * @param rsp
@@ -633,7 +636,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws ServletException
      */
     public void doEditScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException, ServletException {
-        checkPermission(Hudson.ADMINISTER);
+        checkPermission(ScriptlerPluginImpl.CONFIGURE);
 
         Script script = ScriptHelper.getScript(id, true);
         req.setAttribute("script", script);
@@ -642,7 +645,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * Gets the names of all configured slaves, regardless whether they are online, including alias of ALL and ALL_SLAVES
-     * 
+     *
      * @return list with all slave names
      */
     public List<String> getSlaveAlias(Script script) {
@@ -680,7 +683,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * Gets the remote catalogs containing the available scripts for download.
-     * 
+     *
      * @return the catalog
      */
     public List<ScriptInfoCatalog> getCatalogs() {
@@ -713,7 +716,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * returns the directory where the script files get stored
-     * 
+     *
      * @return the script directory
      */
     public static File getScriptDirectory() {
@@ -721,11 +724,11 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     }
 
     public static File getScriptlerHomeDirectory() {
-        return new File(Hudson.getInstance().getRootDir(), "scriptler");
+        return new File(Jenkins.getInstance().getRootDir(), "scriptler");
     }
 
     private void checkPermission(Permission permission) {
-        Hudson.getInstance().checkPermission(permission);
+        Jenkins.getInstance().checkPermission(permission);
     }
 
     private String fixFileName(String catalogName, String name) {

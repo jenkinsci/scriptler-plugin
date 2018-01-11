@@ -1,7 +1,5 @@
-import hudson.model.Hudson;
-import jenkins.model.Jenkins;
-
-import org.jenkinsci.plugins.scriptler.git.GitScriptlerRepository;
+import jenkins.model.Jenkins
+import org.jenkinsci.plugins.scriptler.git.GitScriptlerRepository
 
 def l=namespace(lib.LayoutTagLib)
 
@@ -25,7 +23,7 @@ l.layout {
             }
         }
         
-        if(app.hasPermission(hudson.model.Hudson.ADMINISTER)){
+        if(app.hasPermission(org.jenkinsci.plugins.scriptler.ScriptlerPluginImpl.CONFIGURE)){
             p {
                 raw _("reset")
                 br {

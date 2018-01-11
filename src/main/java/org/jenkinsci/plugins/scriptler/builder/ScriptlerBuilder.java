@@ -29,6 +29,7 @@ import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptler.Messages;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
+import org.jenkinsci.plugins.scriptler.ScriptlerPluginImpl;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.jenkinsci.plugins.scriptler.config.Script;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
@@ -151,7 +152,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {
-            return Jenkins.getInstance().hasPermission(Jenkins.RUN_SCRIPTS);
+            return Jenkins.getInstance().hasPermission(ScriptlerPluginImpl.RUN_SCRIPTS);
         }
 
         @Override
@@ -159,8 +160,9 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             return Messages.builder_name();
         }
 
+        // used by Jelly views
         public Permission getRequiredPermission() {
-            return getScriptler().getRequiredPermissionForRunScript();
+            return ScriptlerPluginImpl.RUN_SCRIPTS;
         }
 
         @Override
@@ -168,7 +170,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             ScriptlerBuilder builder = null;
             String builderId = formData.optString("builderId");
 
-            if (!Jenkins.getInstance().hasPermission(Jenkins.RUN_SCRIPTS)) {
+            if (!Jenkins.getInstance().hasPermission(ScriptlerPluginImpl.RUN_SCRIPTS)) {
                 // the user has no permission to change the builders, therefore we reload the builder without his changes!
                 final String backupJobName = formData.optString("backupJobName");
 

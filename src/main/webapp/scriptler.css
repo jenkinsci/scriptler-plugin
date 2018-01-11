@@ -13,6 +13,7 @@
 .scriptler-link-button {
   background: none;
   border: none;
+  cursor: pointer;
 }
 
 .scriptler-link-button:focus {

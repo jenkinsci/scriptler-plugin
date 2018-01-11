@@ -40,7 +40,7 @@ public class Script implements Comparable<Script>, NamedResource {
      */
     public transient String script;
 
-    // for user with RUN_SCRIPT permission
+    // User with Scriptler/RUN_SCRIPT permission can add/edit Scriptler step in projects
     public final boolean nonAdministerUsing;
 
     // script is runnable only on Master

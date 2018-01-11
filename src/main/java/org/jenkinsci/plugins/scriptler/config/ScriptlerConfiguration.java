@@ -41,6 +41,8 @@ import org.jenkinsci.plugins.scriptler.util.ByIdSorter;
 
 import com.thoughtworks.xstream.XStream;
 
+import javax.annotation.Nonnull;
+
 /**
  */
 public final class ScriptlerConfiguration extends ScriptSet implements Saveable {
@@ -53,8 +55,20 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
 
     private boolean disbableRemoteCatalog = false;
 
+    // keep to avoid loading issues with older version
+    /**
+     * The regular permission required is Scriptler/RunScripts now
+     * @deprecated no need to replace them, Script Security is used now
+     */
+    @Deprecated
     private boolean allowRunScriptPermission = false;
-
+    
+    // keep to avoid loading issues with older version
+    /**
+     * The regular permission required is Scriptler/Configure now
+     * @deprecated no need to replace them, Script Security is used now
+     */
+    @Deprecated
     private boolean allowRunScriptEdit = false;
 
     public ScriptlerConfiguration(SortedSet<Script> scripts) {
@@ -74,7 +88,7 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
         return new XmlFile(XSTREAM, new File(ScriptlerManagement.getScriptlerHomeDirectory(), "scriptler.xml"));
     }
 
-    public static ScriptlerConfiguration load() throws IOException {
+    public static @Nonnull ScriptlerConfiguration load() throws IOException {
         XmlFile f = getXmlFile();
         if (f.exists()) {
             // As it might be that we have an unsorted set, we ensure the
@@ -119,21 +133,5 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
 
     public void setDisbableRemoteCatalog(boolean disbableRemoteCatalog) {
         this.disbableRemoteCatalog = disbableRemoteCatalog;
-    }
-
-    public void setAllowRunScriptEdit(boolean allowRunScriptEdit) {
-        this.allowRunScriptEdit = allowRunScriptEdit;
-    }
-
-    public void setAllowRunScriptPermission(boolean allowRunScriptPermission) {
-        this.allowRunScriptPermission = allowRunScriptPermission;
-    }
-
-    public boolean isAllowRunScriptEdit() {
-        return allowRunScriptEdit;
-    }
-
-    public boolean isAllowRunScriptPermission() {
-        return allowRunScriptPermission;
     }
 }
