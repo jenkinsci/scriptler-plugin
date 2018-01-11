@@ -44,12 +44,14 @@ import org.kohsuke.stapler.*;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -267,6 +269,8 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
         commitFileToGitRepo(finalFileName);
 
+        ScriptHelper.putScriptInApprovalQueueIfRequired(script);
+        
         Script newScript = null;
         if (!StringUtils.isEmpty(originId)) {
             newScript = new Script(finalFileName, displayName, comment, true, originCatalogName, originId, new SimpleDateFormat("dd MMM yyyy HH:mm:ss a").format(new Date()), parameters);
@@ -395,6 +399,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         if (script == null) {
             script = new Script(fileName, fileName, true, nonAdministerUsing, false);
         }
+        //TODO add approval queue for the source code
         ScriptlerConfiguration config = getConfiguration();
         config.addOrReplace(script);
     }
@@ -466,6 +471,15 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             // the output.
             tempScript = ScriptHelper.getScriptCopy(id, false);
             tempScript.setScript(scriptSrc);
+            
+            ScriptHelper.putScriptInApprovalQueueIfRequired(scriptSrc);
+        }
+
+        boolean approved = ScriptHelper.isApproved(scriptSrc);
+        if(!approved){
+            LOGGER.log(Level.WARNING, "Script {} was not approved yet, consider asking your administrator to approve it.", id);
+            rsp.sendError(HttpServletResponse.SC_FORBIDDEN, "Script not approved yet, consider asking your administrator to approve it.");
+            return;
         }
 
         final String[] slaves = resolveSlaveNames(node);
@@ -525,6 +539,13 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             script = tempScript.script;
         }
 
+        boolean approved = ScriptHelper.isApproved(script);
+        if(!approved){
+            LOGGER.log(Level.WARNING, "Script {0} was not approved yet, consider asking your administrator to approve it.", id);
+            rsp.sendError(HttpServletResponse.SC_FORBIDDEN, "Script not approved yet, consider asking your administrator to approve it.");
+            return;
+        }
+        
         Parameter[] paramArray = prepareParameters(req, tempScript);
 
         rsp.setContentType(contentType == null ? "text/plain" : contentType);

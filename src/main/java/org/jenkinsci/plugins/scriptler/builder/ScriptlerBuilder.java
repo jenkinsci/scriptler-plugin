@@ -86,6 +86,12 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             if (!script.nonAdministerUsing) {
                 throw new Failure(script.getName() + " [" + script.getId() + "] is not allowed to be executed in a build, check its configuration!");
             }
+            
+            if(!ScriptHelper.isApproved(script.script)){
+                LOGGER.log(Level.WARNING, "The script [{0}] is not approved yet, consider asking your administrator to approve it.", script.getName());
+                return false;
+            }
+            
             try {
 
                 // expand the parameters before passing these to the execution, this is to allow any token macro to resolve parameter values

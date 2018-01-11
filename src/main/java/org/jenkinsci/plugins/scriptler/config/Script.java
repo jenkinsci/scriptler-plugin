@@ -23,8 +23,6 @@
  */
 package org.jenkinsci.plugins.scriptler.config;
 
-import org.kohsuke.stapler.DataBoundConstructor;
-
 public class Script implements Comparable<Script>, NamedResource {
 
     private String id;
@@ -51,7 +49,6 @@ public class Script implements Comparable<Script>, NamedResource {
     /**
      * used to create/update a new script in the UI
      */
-    @DataBoundConstructor
     public Script(String id, String name, String comment, boolean nonAdministerUsing, Parameter[] parameters, boolean onlyMaster) {
         this(id, name, comment, null, null, null, nonAdministerUsing, parameters, onlyMaster);
     }
@@ -128,7 +125,7 @@ public class Script implements Comparable<Script>, NamedResource {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
     public int compareTo(Script o) {

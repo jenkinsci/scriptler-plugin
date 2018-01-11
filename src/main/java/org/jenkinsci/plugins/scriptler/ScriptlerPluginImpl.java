@@ -34,8 +34,10 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.FileUtils;
 import org.jenkinsci.plugins.scriptler.config.Script;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
+import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
 
 /**
  * @author domi
@@ -80,7 +82,18 @@ public class ScriptlerPluginImpl extends Plugin {
         cfg.save();
 
     }
+    
+    @Override
+    public void postInitialize() throws Exception {
+        for (Script script : ScriptlerConfiguration.getConfiguration().getScripts()) {
+            File scriptFile = new File(ScriptlerManagement.getScriptDirectory(), script.getScriptPath());
+            String scriptSource = FileUtils.readFileToString(scriptFile, "UTF-8");
 
+            // we cannot do that during start since the ScriptApproval is not yet loaded
+            ScriptHelper.putScriptInApprovalQueueIfRequired(scriptSource);
+        }
+    }
+    
     /**
      * search into the declared backup directory for backup archives
      */

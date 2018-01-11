@@ -35,7 +35,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.javadoc.skip>true</maven.javadoc.skip>
-		<jenkins.version>1.580</jenkins.version>
+		<jenkins.version>1.580.1</jenkins.version>
 		<java.level>6</java.level>
 		<findbugs.failOnError>false</findbugs.failOnError>
 	</properties>
@@ -57,11 +57,17 @@
 			<version>1.9</version>
 			<scope>provided</scope><!-- this is in the core -->
 		</dependency>
-
+		
 		<dependency>
 			<groupId>org.jenkins-ci.plugins</groupId>
 			<artifactId>git-server</artifactId>
 			<version>1.7</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.jenkins-ci.plugins</groupId>
+			<artifactId>script-security</artifactId>
+			<version>1.26</version>
 		</dependency>
 	</dependencies>
 </project>

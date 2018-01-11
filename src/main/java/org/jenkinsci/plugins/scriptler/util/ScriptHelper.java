@@ -31,6 +31,10 @@ import org.jenkinsci.plugins.scriptler.config.Script;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfo.Author;
+import org.jenkinsci.plugins.scriptsecurity.scripts.ApprovalContext;
+import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
+import org.jenkinsci.plugins.scriptsecurity.scripts.UnapprovedUsageException;
+import org.jenkinsci.plugins.scriptsecurity.scripts.languages.GroovyLanguage;
 
 /**
  * 
@@ -78,6 +82,31 @@ public class ScriptHelper {
             }
         }
         return s;
+    }
+    
+    /**
+     * @since TODO
+     */
+    public static void putScriptInApprovalQueueIfRequired(String scriptSourceCode){
+        // we cannot use sandbox since the script is potentially sent to slaves
+        // and the sandbox mode is not meant to be used with remoting
+        ScriptApproval.get().configuring(scriptSourceCode, GroovyLanguage.get(), ApprovalContext.create().withCurrentUser());
+    }
+    
+    /**
+     * @return true iff the script was approved or created by a user with RUN_SCRIPT permission
+     * @since TODO
+     */
+    public static boolean isApproved(String scriptSourceCode){
+        try{
+            ScriptApproval.get().using(scriptSourceCode, GroovyLanguage.get());
+            return true;
+        }
+        catch(UnapprovedUsageException e){
+            // in case there is some ways that are not covered
+            putScriptInApprovalQueueIfRequired(scriptSourceCode);
+            return false;
+        }
     }
 
     public static String runScript(String[] slaves, String scriptTxt, Parameter[] parameters) throws IOException, ServletException {
