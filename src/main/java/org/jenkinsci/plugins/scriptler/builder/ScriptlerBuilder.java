@@ -60,6 +60,21 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         this.scriptId = scriptId;
         this.parameters = parameters;
         this.propagateParams = propagateParams;
+
+        this.readResolve();
+    }
+
+    private Object readResolve() {
+        Script script = ScriptHelper.getScript(scriptId, true);
+
+        if (script != null) {
+            if (!script.nonAdministerUsing) {
+                this.scriptId = null;
+                throw new IllegalArgumentException("The script is not allowed to be executed in a build, check its configuration!");
+            }
+        }
+
+        return this;
     }
 
     public String getScriptId() {
