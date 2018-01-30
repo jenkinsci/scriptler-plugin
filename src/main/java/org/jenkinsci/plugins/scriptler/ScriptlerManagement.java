@@ -303,10 +303,11 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @return redirects to the repo entry page at <code>http://jenkins.orga.com/scriptler.git</code>
      * @throws IOException
      */
+    @RequirePOST
     public HttpResponse doHardResetGit() throws IOException {
         checkPermission(Hudson.ADMINISTER);
         getGitRepo().hardReset();
-        return new HttpRedirect("/scriptler.git");
+        return new HttpRedirect("../scriptler.git");
     }
 
     /**
