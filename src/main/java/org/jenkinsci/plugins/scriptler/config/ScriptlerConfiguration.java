@@ -35,6 +35,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
 import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
 import org.jenkinsci.plugins.scriptler.util.ByIdSorter;
@@ -135,5 +136,19 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
 
     public boolean isAllowRunScriptPermission() {
         return allowRunScriptPermission;
+    }
+
+    // for Jelly view
+    public List<Script> getSortedScripts(){
+        List<Script> sortedScripts;
+        if(Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER)){
+            sortedScripts = new ArrayList<Script>(this.getScripts());
+        }else{
+            sortedScripts = new ArrayList<Script>(this.getUserScripts());
+        }
+
+        Collections.sort(sortedScripts, Script.COMPARATOR_BY_NAME);
+
+        return sortedScripts;
     }
 }
