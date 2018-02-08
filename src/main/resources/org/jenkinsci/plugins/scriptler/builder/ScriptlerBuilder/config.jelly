@@ -3,7 +3,7 @@
 
     <st:adjunct assumes="org.kohsuke.stapler.framework.prototype.prototype" includes="org.kohsuke.stapler.bind"/>
 	<st:once>
-		<script type="text/javascript" src="${rootURL}/plugin/scriptler/lib/scriptler.js" />
+		<script type="text/javascript" src="${resURL}/plugin/scriptler/lib/scriptler.js" />
 	</st:once>
 	<j:choose>
 		<j:when test="${empty(descriptor.scripts)}">

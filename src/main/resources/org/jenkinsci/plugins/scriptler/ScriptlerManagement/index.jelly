@@ -33,7 +33,7 @@
 					</h3>
 				</j:if>
 				<table class="pane">
-					<j:set var="items" value="${it.configuration.scripts}" />
+					<j:set var="items" value="${it.configuration.sortedScripts}" />
 					<j:forEach var="t" items="${items}">
 						<tr valign="center" style="border-top: 0px;">
 							<td class="pane scriptler-nowrap" width="104">

@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.scriptler.share.gh;
 
 import hudson.Extension;
+import hudson.ExtensionList;
 import hudson.model.DownloadService.Downloadable;
 
 import java.io.IOException;
@@ -32,4 +33,7 @@ public class CentralScriptJsonCatalog extends Downloadable {
         return (ScriptInfoList) JSONObject.toBean(d, ScriptInfoList.class);
     }
 
+    public static CentralScriptJsonCatalog getCatalog() {
+        return ExtensionList.lookup(CentralScriptJsonCatalog.class).get(CentralScriptJsonCatalog.class);
+    }
 }

@@ -2,6 +2,7 @@ import jenkins.model.Jenkins
 import org.jenkinsci.plugins.scriptler.git.GitScriptlerRepository
 
 def l=namespace(lib.LayoutTagLib)
+def f=namespace(lib.FormTagLib)
 
 l.layout {
     l.main_panel {
@@ -26,10 +27,8 @@ l.layout {
         if(app.hasPermission(org.jenkinsci.plugins.scriptler.ScriptlerPluginImpl.CONFIGURE)){
             p {
                 raw _("reset")
-                br {
-                    button (type: "button", onclick: "document.location.href=${app.rootUrl}scriptler/hardResetGit"){
-                       raw "hard reset"
-                    }
+                f.form(method:"POST", action: "${app.rootUrl}scriptler/hardResetGit") {
+                    f.submit(value:_('Hard reset'))
                 }
             } 
         }

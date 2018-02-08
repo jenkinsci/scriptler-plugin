@@ -11,7 +11,8 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 
 import java.io.Serializable;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -211,15 +212,16 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             return builder;
         }
 
-        public Set<Script> getScripts() {
+        public List<Script> getScripts() {
             // TODO currently only script for RUN_SCRIPT permissions are returned?
-            final Set<Script> scripts = getConfig().getScripts();
-            final Set<Script> scriptsForBuilder = new HashSet<Script>();
+            Set<Script> scripts = getConfig().getScripts();
+            List<Script> scriptsForBuilder = new ArrayList<Script>();
             for (Script script : scripts) {
                 if (script.nonAdministerUsing) {
                     scriptsForBuilder.add(script);
                 }
             }
+            Collections.sort(scriptsForBuilder, Script.COMPARATOR_BY_NAME);
             return scriptsForBuilder;
         }
 
