@@ -24,7 +24,7 @@
 	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 	<l:layout permission="${it.scriptlerConfigure}" norefresh="true">
 		<st:once>
-			<link rel="stylesheet" href="${rootURL}/plugin/scriptler/scriptler.css" />
+			<link rel="stylesheet" href="${resURL}/plugin/scriptler/scriptler.css" />
 		</st:once>
 		<st:include page="sidepanel.jelly" />
 		<l:main-panel>

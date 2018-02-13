@@ -11,7 +11,7 @@
 	${it.checkAtLeastOneScriptlerPermission()}
 	<l:layout norefresh="true">
 		<st:once>
-			<link rel="stylesheet" href="${rootURL}/plugin/scriptler/scriptler.css" />
+			<link rel="stylesheet" href="${resURL}/plugin/scriptler/scriptler.css" />
 		</st:once>
 		<st:include page="sidepanel.jelly" />
 		<l:main-panel>
@@ -62,10 +62,10 @@
 										<img width="16" height="16" title="${%run script} ${t.name}" src="${imagesURL}/16x16/terminal.gif" />
 									</a>
 								</l:hasPermission>
-                                <j:if test="${t.nonAdministerUsing}">
-                                   <j:out value=" " />
-                                   <img width="16" height="16" title="${%usableInBuildStep}" src="${imagesURL}/16x16/setting.png" />
-                                </j:if>								
+								<j:if test="${t.nonAdministerUsing}">
+									<j:out value=" " />
+									<img width="16" height="16" title="${%usableInBuildStep}" src="${imagesURL}/16x16/setting.png" />
+								</j:if>
 							</td>
 							<td class="pane-header">
 								${t.name}

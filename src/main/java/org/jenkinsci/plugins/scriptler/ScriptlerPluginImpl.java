@@ -99,10 +99,15 @@ public class ScriptlerPluginImpl extends Plugin {
     public void postInitialize() throws Exception {
         for (Script script : ScriptlerConfiguration.getConfiguration().getScripts()) {
             File scriptFile = new File(ScriptlerManagement.getScriptDirectory(), script.getScriptPath());
-            String scriptSource = FileUtils.readFileToString(scriptFile, "UTF-8");
-
-            // we cannot do that during start since the ScriptApproval is not yet loaded
-            ScriptHelper.putScriptInApprovalQueueIfRequired(scriptSource);
+            try{
+                String scriptSource = FileUtils.readFileToString(scriptFile, "UTF-8");
+    
+                // we cannot do that during start since the ScriptApproval is not yet loaded
+                ScriptHelper.putScriptInApprovalQueueIfRequired(scriptSource);
+            }
+            catch(IOException e){
+                LOGGER.log(Level.WARNING, "Source file for the script [{0}] was not found", script.getId());
+            }
         }
     }
 
