@@ -52,14 +52,14 @@ public class Script implements Comparable<Script>, NamedResource {
      * used to create/update a new script in the UI
      */
     public Script(String id, String name, String comment, boolean nonAdministerUsing, Parameter[] parameters, boolean onlyMaster) {
-        this(id, name, comment, null, null, null, nonAdministerUsing, parameters, onlyMaster);
+        this(id, name, comment, true, null, null, null, nonAdministerUsing, parameters, onlyMaster);
     }
 
     /**
      * used during plugin start to synchronize available scripts
      */
     public Script(String id, String comment, boolean available, boolean nonAdministerUsing, boolean onlyMaster) {
-        this(id, id, comment, null, null, null, nonAdministerUsing, new Parameter[0], onlyMaster);
+        this(id, id, comment, available, null, null, null, nonAdministerUsing, new Parameter[0], onlyMaster);
     }
 
     /**
@@ -67,23 +67,25 @@ public class Script implements Comparable<Script>, NamedResource {
      * 
      */
     public Script(String id, String name, String comment, boolean available, String originCatalog, String originScript, String originDate, Parameter[] parameters) {
-        this(id, name, comment, originCatalog, originScript, originDate, false, parameters, false);
+        this(id, name, comment, available, originCatalog, originScript, originDate, false, parameters, false);
     }
 
-    /**
-     * used to merge scripts
-     */
-    public Script(String id, String name, String comment, boolean available, String originCatalog, String originScript, String originDate, boolean nonAdministerUsing, Parameter[] parameters, boolean onlyMaster) {
-        this(id, name, comment, originCatalog, originScript, originDate, nonAdministerUsing, parameters, onlyMaster);
-    }
-
+    // Not used anymore
     /**
      * used to merge scripts
      */
     public Script(String id, String name, String comment, String originCatalog, String originScript, String originDate, boolean nonAdministerUsing, Parameter[] parameters, boolean onlyMaster) {
+        this(id, name, comment, true, originCatalog, originScript, originDate, nonAdministerUsing, parameters, onlyMaster);
+    }
+    
+    /**
+     * used to merge scripts
+     */
+    public Script(String id, String name, String comment, boolean available, String originCatalog, String originScript, String originDate, boolean nonAdministerUsing, Parameter[] parameters, boolean onlyMaster) {
         this.id = id;
         this.name = name;
         this.comment = comment;
+        this.available = available;
         this.originCatalog = originCatalog;
         this.originScript = originScript;
         this.originDate = originDate;
@@ -93,7 +95,7 @@ public class Script implements Comparable<Script>, NamedResource {
     }
 
     public Script copy() {
-        return new Script(id, name, comment, originCatalog, originScript, originDate, nonAdministerUsing, parameters, onlyMaster);
+        return new Script(id, name, comment, available, originCatalog, originScript, originDate, nonAdministerUsing, parameters, onlyMaster);
     }
     
     /*

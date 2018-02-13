@@ -65,6 +65,13 @@ public class SyncUtil {
             } else {
                 unavailableScripts.add(new Script(s.getId(), s.comment, false, false, false));
                 LOGGER.info("for repo '" + scriptDirectory.getAbsolutePath() + "' " + s + " is not available!");
+    
+    
+//                Script unavailableScript = new Script(s.getId(), s.getName(), s.comment, false, s.getParameters(), false);
+//                unavailableScript.setAvailable(false);
+//    
+//                unavailableScripts.add(unavailableScript);
+//                LOGGER.info("for repo '" + scriptDirectory.getAbsolutePath() + "' " + s + " is not available!");
             }
         }
 

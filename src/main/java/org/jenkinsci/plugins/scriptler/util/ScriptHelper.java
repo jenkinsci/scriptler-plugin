@@ -75,7 +75,7 @@ public class ScriptHelper {
                 String src = IOUtils.toString(reader);
                 s.setScript(src);
             } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, Messages.scriptSourceNotFound(id), e);
+                LOGGER.log(Level.SEVERE, Messages.scriptSourceNotFound(id));
             }
         }
         return s;
