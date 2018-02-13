@@ -91,7 +91,7 @@ public class ScriptHelper {
     
     /**
      * @param scriptSourceCode Source code that must be approved
-     * @return true iff the script was approved or created by a user with RUN_SCRIPT permission
+     * @return true if the script was approved or created by a user with RUN_SCRIPT permission
      * @since TODO
      */
     public static boolean isApproved(String scriptSourceCode){
@@ -102,7 +102,7 @@ public class ScriptHelper {
      * @param scriptSourceCode Source code that must be approved
      * @param putInApprovalQueueIfNotApprovedYet true means we try to know if the user has permission
      *                                          to approve the script automatically in case it was not approved yet
-     * @return true iff the script is approved
+     * @return true if the script is approved
      * @since TODO
      */
     public static boolean isApproved(String scriptSourceCode, boolean putInApprovalQueueIfNotApprovedYet){
