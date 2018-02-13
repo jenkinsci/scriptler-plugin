@@ -36,47 +36,64 @@ THE SOFTWARE.
 				<j:out value="${%title}" />
 			</h1>
 			<f:form method="post" action="scriptAdd">
-				<j:jelly xmlns:j="jelly:core">
-				    <f:entry title="${%Id}" description="${%IdDescription}">
-                        <f:textbox name="id" value="${script.id}" />
-                    </f:entry>
-					<f:entry title="${%Name}">
-						<f:textbox name="name" value="${script.name}" />
-					</f:entry>
-					<f:entry title="${%Comment}">
-						<f:textbox name="comment" value="${script.comment}" />
-					</f:entry>
-                    <f:entry title="${%Permission}" description="${%PermissionDescription}">
-						<f:checkbox name="nonAdministerUsing" checked="${script.nonAdministerUsing}" />
-					</f:entry>
-                    <f:entry title="${%Restriction}" description="${%RestrictionDescription}">
-                        <f:checkbox name="onlyMaster" checked="${script.onlyMaster}" />
-		            </f:entry>
-                    <f:block>
-	                    <table>
-	                        <f:optionalBlock name="defineParams" title="${%ParametersDescription}" checked="${!empty(script.parameters)}">
-	                            <f:entry title="${%Parameters}" field="parameters">
-	                                <f:repeatable var="param" items="${script.parameters}" name="parameters" noAddButton="true" minimum="1">
-	                                    <table width="100%">
-	                                        <f:entry>
-	                                            ${%ParameterName} <input type="text" name="name" value="${param.name}" size="50"/>
-	                                            ${%ParameterDefaultValue} <input type="text" name="value" value="${param.value}" size="80"/>
-	                                            <input type="button" name="delete_button" value="${%DeleteParameter}" class="repeatable-delete show-if-not-only" style="margin-left: 1em;" />
-	                                            <input type="button" name="add_button" value="${%AddParameter}" class="repeatable-add show-if-last" />
-	                                        </f:entry>
-	                                    </table>
-	                                </f:repeatable>
-	                            </f:entry>
-	                        </f:optionalBlock>
-	                    </table>
-	                </f:block>					
-					<f:entry title="${%Script}">
-						<textarea id="script" name="script" class="script">
-							<j:out value="${script.script}" />
-						</textarea>
-					</f:entry>
-				</j:jelly>
+				<f:entry title="${%Id}" description="${%IdDescription}">
+					<f:textbox name="id" value="${script.id}" />
+				</f:entry>
+				<f:entry title="${%Name}">
+					<f:textbox name="name" value="${script.name}" />
+				</f:entry>
+				<f:entry title="${%Comment}">
+					<f:textbox name="comment" value="${script.comment}" />
+				</f:entry>
+				<f:entry title="${%Permission}" description="${%PermissionDescription}">
+					<f:checkbox name="nonAdministerUsing" checked="${script.nonAdministerUsing}" />
+				</f:entry>
+				<f:entry title="${%Restriction}" description="${%RestrictionDescription}">
+					<f:checkbox name="onlyMaster" checked="${script.onlyMaster}" />
+				</f:entry>
 				<f:block>
+					<table>
+						<f:optionalBlock name="defineParams" title="${%ParametersDescription}" checked="${!empty(script.parameters)}">
+							<f:entry title="${%Parameters}" field="parameters">
+								<f:repeatable var="param" items="${script.parameters}" name="parameters" noAddButton="true" minimum="1">
+									<table width="100%">
+										<f:entry>
+											${%ParameterName} <input type="text" name="name" value="${param.name}" size="50"/>
+											${%ParameterDefaultValue} <input type="text" name="value" value="${param.value}" size="80"/>
+											<input type="button" name="delete_button" value="${%DeleteParameter}" class="repeatable-delete show-if-not-only" style="margin-left: 1em;" />
+											<input type="button" name="add_button" value="${%AddParameter}" class="repeatable-add show-if-last" />
+										</f:entry>
+									</table>
+								</f:repeatable>
+							</f:entry>
+						</f:optionalBlock>
+					</table>
+				</f:block>					
+				<f:entry title="${%Script}">
+					<textarea id="script" name="script" class="script">
+						<j:choose>
+							<j:when test="${scriptNotFound}">
+								${%ScriptNotFound}
+							</j:when>
+							<j:otherwise>
+								<j:out value="${script.script}" />
+							</j:otherwise>
+						</j:choose>
+					</textarea>
+				</f:entry>
+				<f:block>
+					<j:if test="${notApprovedYet}">
+						<j:choose>
+							<j:when test="${h.hasPermission(it, app.RUN_SCRIPTS)}">
+								<div class="warning">${%NotApprovedYetButHasRightWarn}</div>
+								<div class="info">${%NotApprovedYetButHasRightInfo}</div>
+							</j:when>
+							<j:otherwise>
+								<div class="warning">${%NotApprovedYet}</div>
+							</j:otherwise>
+						</j:choose>			
+						<br />
+					</j:if>
 					<f:submit value="${%Submit}" />
 				</f:block>
 			</f:form>

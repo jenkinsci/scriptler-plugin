@@ -101,13 +101,15 @@ THE SOFTWARE.
 				</table>
 
 				<textarea id="script" name="script" class="script">
-					${script.script}
+					<j:choose>
+						<j:when test="${scriptNotFound}">
+							${%ScriptNotFound}
+						</j:when>
+						<j:otherwise>
+							<j:out value="${script.script}" />
+						</j:otherwise>
+					</j:choose>
 				</textarea>
-				<div align="right">
-					<f:submit value="${%Run}" name="run" />
-				</div>
-				<script>$('script').focus();</script>
-			</form>
 			<j:if test="${notApprovedYet}">
 				<j:choose>
 					<j:when test="${h.hasPermission(it, app.RUN_SCRIPTS)}">
@@ -119,6 +121,11 @@ THE SOFTWARE.
 					</j:otherwise>
 				</j:choose>
 			</j:if>
+				<div align="right">
+					<f:submit value="${%Run}" name="run" />
+				</div>
+				<script>$('script').focus();</script>
+			</form>
 			<j:if test="${output!=null}">
 				<h2>${%Result}</h2>
 				<pre>

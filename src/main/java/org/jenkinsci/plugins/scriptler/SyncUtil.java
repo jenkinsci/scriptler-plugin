@@ -63,15 +63,11 @@ public class SyncUtil {
             if ((new File(scriptDirectory, s.getScriptPath()).exists())) {
                 s.setAvailable(true);
             } else {
-                unavailableScripts.add(new Script(s.getId(), s.comment, false, false, false));
+                Script unavailableScript = new Script(s.getId(), s.comment, false, false, false);
+                // to no loose parameter configuration if we loose the file
+                unavailableScript.setParameters(s.getParameters());
+                unavailableScripts.add(unavailableScript);
                 LOGGER.info("for repo '" + scriptDirectory.getAbsolutePath() + "' " + s + " is not available!");
-    
-    
-//                Script unavailableScript = new Script(s.getId(), s.getName(), s.comment, false, s.getParameters(), false);
-//                unavailableScript.setAvailable(false);
-//    
-//                unavailableScripts.add(unavailableScript);
-//                LOGGER.info("for repo '" + scriptDirectory.getAbsolutePath() + "' " + s + " is not available!");
             }
         }
 

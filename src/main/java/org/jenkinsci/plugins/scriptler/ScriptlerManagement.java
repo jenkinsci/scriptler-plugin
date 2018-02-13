@@ -429,16 +429,20 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             //TODO check if we cannot do better here
             throw new IOException(Messages.scriptNotFound(id));
         }
-
-        boolean canByPassScriptApproval = Jenkins.getInstance().hasPermission(Jenkins.RUN_SCRIPTS);
-
-        // we do not want user with approval right to auto-approve script when landing on that page
-        if(!ScriptHelper.isApproved(script.script, false)){
-            req.setAttribute("notApprovedYet", true);
-        }
+        if(script.script == null){
+            req.setAttribute("scriptNotFound", true);
+        }else{
+            boolean canByPassScriptApproval = Jenkins.getInstance().hasPermission(Jenkins.RUN_SCRIPTS);
         
+            // we do not want user with approval right to auto-approve script when landing on that page
+            if(!ScriptHelper.isApproved(script.script, false)){
+                req.setAttribute("notApprovedYet", true);
+            }
+        
+            req.setAttribute("canByPassScriptApproval", canByPassScriptApproval);
+        }
+
         req.setAttribute("script", script);
-        req.setAttribute("canByPassScriptApproval", canByPassScriptApproval);
         // set default selection
         req.setAttribute("currentNode", MASTER);
         req.getView(this, "runScript.jelly").forward(req, rsp);
@@ -480,7 +484,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         String originalScriptSourceCode = originalScript.script;
 
         Script tempScript = originalScript.copy();
-        if(originalScriptSourceCode.equals(scriptSrc)){
+        if(originalScriptSourceCode != null && originalScriptSourceCode.equals(scriptSrc)){
             // not copied by default
             tempScript.setScript(originalScriptSourceCode);
         }else{
@@ -638,8 +642,21 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      */
     public void doEditScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException, ServletException {
         checkPermission(ScriptlerPluginImpl.CONFIGURE);
-
+    
         Script script = ScriptHelper.getScript(id, true);
+        if(script.script == null){
+            req.setAttribute("scriptNotFound", true);
+        }else{
+            boolean canByPassScriptApproval = Jenkins.getInstance().hasPermission(Jenkins.RUN_SCRIPTS);
+        
+            // we do not want user with approval right to auto-approve script when landing on that page
+            if(!ScriptHelper.isApproved(script.script, false)){
+                req.setAttribute("notApprovedYet", true);
+            }
+    
+            req.setAttribute("canByPassScriptApproval", canByPassScriptApproval);
+        }
+        
         req.setAttribute("script", script);
         req.getView(this, "edit.jelly").forward(req, rsp);
     }
