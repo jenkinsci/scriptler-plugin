@@ -27,12 +27,11 @@ import hudson.Plugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import hudson.init.InitMilestone;
+import hudson.init.Initializer;
 import hudson.security.Permission;
 import hudson.security.PermissionGroup;
 import hudson.security.PermissionScope;
@@ -50,15 +49,15 @@ public class ScriptlerPluginImpl extends Plugin {
 
     private final static Logger LOGGER = Logger.getLogger(ScriptlerPluginImpl.class.getName());
     
-    public static final PermissionGroup SCRIPTLER_PERMISSONS = new PermissionGroup(ScriptlerManagement.class, Messages._permissons_title());
+    public static final PermissionGroup SCRIPTLER_PERMISSIONS = new PermissionGroup(ScriptlerManagement.class, Messages._permissons_title());
 
     public static final Permission CONFIGURE = new Permission(
-            SCRIPTLER_PERMISSONS, "Configure",
+            SCRIPTLER_PERMISSIONS, "Configure",
             Messages._permissons_configure_description(), Jenkins.RUN_SCRIPTS,
             PermissionScope.JENKINS
     );
     public static final Permission RUN_SCRIPTS = new Permission(
-            SCRIPTLER_PERMISSONS, "RunScripts",
+            SCRIPTLER_PERMISSIONS, "RunScripts",
             Messages._permissons_runScript_description(), Jenkins.RUN_SCRIPTS,
             PermissionScope.JENKINS
     );
@@ -95,38 +94,23 @@ public class ScriptlerPluginImpl extends Plugin {
         cfg.save();
     }
 
-    @Override
-    public void postInitialize() throws Exception {
+    @Initializer(after = InitMilestone.JOB_LOADED)
+    public static void afterJobLoaded() throws Exception {
+        setupExistingScripts();
+    }
+    
+    private static void setupExistingScripts() throws Exception {
         for (Script script : ScriptlerConfiguration.getConfiguration().getScripts()) {
             File scriptFile = new File(ScriptlerManagement.getScriptDirectory(), script.getScriptPath());
             try{
                 String scriptSource = FileUtils.readFileToString(scriptFile, "UTF-8");
     
                 // we cannot do that during start since the ScriptApproval is not yet loaded
+                // and only after JOB_LOADED to have the securityRealm configured
                 ScriptHelper.putScriptInApprovalQueueIfRequired(scriptSource);
-            }
-            catch(IOException e){
+            } catch (IOException e) {
                 LOGGER.log(Level.WARNING, "Source file for the script [{0}] was not found", script.getId());
             }
         }
-    }
-
-    /**
-     * search into the declared backup directory for backup archives
-     */
-    public List<File> getAvailableScripts() throws IOException {
-        File scriptDirectory = ScriptlerManagement.getScriptDirectory();
-        LOGGER.log(Level.FINE, "Listing files of {0}", scriptDirectory.getAbsoluteFile());
-
-        File[] scriptFiles = scriptDirectory.listFiles();
-
-        List<File> fileList;
-        if (scriptFiles == null) {
-            fileList = new ArrayList<File>();
-        } else {
-            fileList = Arrays.asList(scriptFiles);
-        }
-
-        return fileList;
     }
 }

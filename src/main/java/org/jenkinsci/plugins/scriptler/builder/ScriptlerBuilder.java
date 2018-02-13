@@ -99,7 +99,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         boolean isOk = false;
         if (!script.nonAdministerUsing) {
             listener.getLogger().println(Messages.scriptNotUsableInBuildStep(script.getName()));
-            LOGGER.log(Level.WARNING, "The script [{0} ({1})] is not allowed to be executed in a build, check its configuration. It concerns the build {2}:{3}", 
+            LOGGER.log(Level.WARNING, "The script [{0} ({1})] is not allowed to be executed in a build, check its configuration. It concerns the build [{2}:{3}]", 
                     new Object[]{script.getName(), script.getId(), build.getProject().getName(), build.getDisplayName()}
                     );
             return false;
@@ -107,7 +107,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         
         if(!ScriptHelper.isApproved(script.script)){
             listener.getLogger().println(Messages.scriptNotApprovedYet(script.getName()));
-            LOGGER.log(Level.WARNING, "The script [{0} ({1})] is not approved yet, consider asking your administrator to approve it. It concerns the build {2}:{3}", 
+            LOGGER.log(Level.WARNING, "The script [{0} ({1})] is not approved yet, consider asking your administrator to approve it. It concerns the build [{2}:{3}]", 
                     new Object[]{script.getName(), script.getId(), build.getProject().getName(), build.getDisplayName()}
                     );
             return false;

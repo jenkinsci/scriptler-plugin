@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 import javax.annotation.CheckForNull;
 import javax.servlet.ServletException;
 
+import jenkins.model.Jenkins;
 import jenkins.model.Jenkins.MasterComputer;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
@@ -157,7 +158,7 @@ public class ScriptHelper {
         if (node != null && scriptTxt != null) {
 
             try {
-                Computer comp = Hudson.getInstance().getComputer(node);
+                Computer comp = Jenkins.getInstance().getComputer(node);
                 if (comp == null && "(master)".equals(node)) {
                     output = MasterComputer.localChannel.call(new GroovyScript(scriptTxt, parameters, false, new StreamTaskListener(sos)));
                 } else if (comp == null) {

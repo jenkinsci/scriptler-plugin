@@ -34,9 +34,22 @@
 				</j:if>
 				<table class="pane">
 					<j:set var="items" value="${it.configuration.sortedScripts}" />
-					<j:forEach var="t" items="${items}">
+					<j:forEach var="i" items="${items}">
+						<j:set var="approved" value="${i.approved}" />
+						<j:set var="t" value="${i.script}" />
 						<tr valign="center" style="border-top: 0px;">
 							<td class="pane scriptler-nowrap" width="104">
+								<j:choose>
+									<j:when test="${approved == null}">
+										<img width="16" height="16" title="${%scriptNotFound}" src="${imagesURL}/16x16/warning.png" class="scriptler-nomargin" />
+									</j:when>
+									<j:when test="${approved == true}">
+										<img width="16" height="16" title="${%scriptApproved}" src="${imagesURL}/16x16/accept.png" class="scriptler-nomargin" />
+									</j:when>
+									<j:otherwise>
+										<img width="16" height="16" title="${%scriptNotYetApproved}" src="${imagesURL}/16x16/lock.png" class="scriptler-nomargin"/>
+									</j:otherwise>
+								</j:choose>
 								<j:choose>
 									<j:when test="${t.available == false}">
 										<img width="16" height="16" title="${%fileNotAvailable}" src="${imagesURL}/16x16/red.gif" class="scriptler-nomargin" />

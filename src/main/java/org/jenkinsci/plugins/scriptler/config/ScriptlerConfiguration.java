@@ -42,6 +42,7 @@ import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
 import org.jenkinsci.plugins.scriptler.util.ByIdSorter;
 
 import com.thoughtworks.xstream.XStream;
+import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.DoNotUse;
 
@@ -156,7 +157,7 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
     }
 
     @Restricted(DoNotUse.class) // for Jelly view
-    public List<Script> getSortedScripts(){
+    public List<ScriptAndApproved> getSortedScripts(){
         List<Script> sortedScripts;
         if(Jenkins.getInstance().hasPermission(ScriptlerPluginImpl.CONFIGURE)){
             sortedScripts = new ArrayList<Script>(this.getScripts());
@@ -166,6 +167,34 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
 
         Collections.sort(sortedScripts, Script.COMPARATOR_BY_NAME);
 
-        return sortedScripts;
+        List<ScriptAndApproved> result = new ArrayList<ScriptAndApproved>(sortedScripts.size());
+        for (Script script : sortedScripts) {
+            Script scriptWithSrc = ScriptHelper.getScript(script.getId(), true);
+            Boolean approved = null;
+            if(scriptWithSrc != null && scriptWithSrc.script != null){
+                approved = ScriptHelper.isApproved(scriptWithSrc.script, false);
+            }
+            result.add(new ScriptAndApproved(script, approved));
+        }
+        return result;
+    }
+    
+    @Restricted(DoNotUse.class) // for Jelly view
+    public static class ScriptAndApproved {
+        private Script script;
+        private Boolean approved;
+    
+        private ScriptAndApproved(Script script, Boolean approved) {
+            this.script = script;
+            this.approved = approved;
+        }
+    
+        public Script getScript() {
+            return script;
+        }
+    
+        public Boolean getApproved() {
+            return approved;
+        }
     }
 }
