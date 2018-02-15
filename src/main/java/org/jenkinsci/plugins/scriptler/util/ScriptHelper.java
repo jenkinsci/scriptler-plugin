@@ -1,14 +1,15 @@
 package org.jenkinsci.plugins.scriptler.util;
 
 import hudson.model.Computer;
-import hudson.model.Hudson;
 import hudson.util.StreamTaskListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -71,7 +72,7 @@ public class ScriptHelper {
         if (withSrc && s != null) {
             try {
                 File scriptSrc = new File(ScriptlerManagement.getScriptDirectory(), s.getScriptPath());
-                Reader reader = new FileReader(scriptSrc);
+                Reader reader = new InputStreamReader(new FileInputStream(scriptSrc), Charset.forName("UTF-8"));
                 String src = IOUtils.toString(reader);
                 s.setScript(src);
             } catch (IOException e) {
@@ -177,7 +178,7 @@ public class ScriptHelper {
                 throw new ServletException(e);
             }
         }
-        return sos.toString();
+        return sos.toString(Charset.forName("UTF-8").name());
     }
 
     /**

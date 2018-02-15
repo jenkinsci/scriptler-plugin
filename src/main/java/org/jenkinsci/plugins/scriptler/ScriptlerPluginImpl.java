@@ -23,6 +23,7 @@
  */
 package org.jenkinsci.plugins.scriptler;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Plugin;
 
 import java.io.File;
@@ -82,16 +83,20 @@ public class ScriptlerPluginImpl extends Plugin {
             }
         }
         File scriptDirectory = ScriptlerManagement.getScriptDirectory();
-        // create the directory for the scripts if not available
-        if (!scriptDirectory.exists()) {
-            scriptDirectory.mkdirs();
-        }
+        createMissingFolders(scriptDirectory);
 
         ScriptlerConfiguration cfg = ScriptlerConfiguration.load();
 
         SyncUtil.syncDirWithCfg(scriptDirectory, cfg);
 
         cfg.save();
+    }
+    
+    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
+    private void createMissingFolders(File folder){
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
     }
 
     @Initializer(after = InitMilestone.JOB_LOADED)

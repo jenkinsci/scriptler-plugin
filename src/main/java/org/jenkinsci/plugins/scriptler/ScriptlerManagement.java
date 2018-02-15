@@ -47,9 +47,11 @@ import org.kohsuke.stapler.interceptor.RequirePOST;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
@@ -261,7 +263,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
         // save (overwrite) the file/script
         File newScriptFile = new File(getScriptDirectory(), finalFileName);
-        Writer writer = new FileWriter(newScriptFile);
+        Writer writer = new OutputStreamWriter(new FileOutputStream(newScriptFile), Charset.forName("UTF-8"));
         try {
             writer.write(script);
         } finally {

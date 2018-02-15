@@ -45,6 +45,7 @@ import com.thoughtworks.xstream.XStream;
 import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.DoNotUse;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 import javax.annotation.Nonnull;
 
@@ -179,7 +180,7 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
         return result;
     }
     
-    @Restricted(DoNotUse.class) // for Jelly view
+    @Restricted(NoExternalUse.class) // for Jelly view
     public static class ScriptAndApproved {
         private Script script;
         private Boolean approved;

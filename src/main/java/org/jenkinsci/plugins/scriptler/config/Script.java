@@ -193,7 +193,7 @@ public class Script implements Comparable<Script>, NamedResource {
         return true;
     }
 
-    public static Comparator<Script> COMPARATOR_BY_NAME = new Comparator<Script>() {
+    public static final Comparator<Script> COMPARATOR_BY_NAME = new Comparator<Script>() {
         @Override public int compare(Script a, Script b) {
             String nameA = a.getName() != null ? a.getName() : "";
             String nameB = b.getName() != null ? b.getName() : "";
