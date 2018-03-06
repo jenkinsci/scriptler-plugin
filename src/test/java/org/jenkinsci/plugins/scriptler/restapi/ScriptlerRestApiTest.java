@@ -13,7 +13,6 @@ import hudson.model.FileParameterValue.FileItemImpl;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URLEncoder;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.FileUtils;
@@ -49,7 +48,7 @@ public class ScriptlerRestApiTest {
     }
     
     private void saveFile(ScriptlerManagementHelper helper, String scriptId, String scriptContent) throws Exception {
-        File f = new File(scriptId);
+        File f = File.createTempFile(scriptId, "-temp");
         FileUtils.writeStringToFile(f, scriptContent);
         FileItem fi = new FileItemImpl(f);
         helper.saveScript(fi, true, scriptId);
@@ -63,17 +62,32 @@ public class ScriptlerRestApiTest {
         
         String maliciousCode = "print 'hello'";
     
+        // will be just aside scriptler.xml
+        assertSaveFileFail(helper, "../clickOnMe", maliciousCode);
+
+        if(Functions.isWindows()){
+            // will be used as relative inside the folder
+            saveFile(helper, "/directlyInDiskRoot", maliciousCode);
+            
+            assertSaveFileFail(helper, "//directlyInDiskRoot", maliciousCode);
+    
+            // C:\ + ...
+            String rootLetter = new File(".").getAbsolutePath().substring(0, 3);
+            assertSaveFileFail(helper, rootLetter + "directlyInDiskRoot", maliciousCode);
+        }else{
+            assertSaveFileFail(helper, "/directlyInDiskRoot", maliciousCode);
+        }
+    }
+    
+    private void assertSaveFileFail(ScriptlerManagementHelper helper, String scriptId, String scriptContent) throws Exception {
         try{
             // will be just aside scriptler.xml
-            saveFile(helper, "../clickOnMe", maliciousCode);
+            saveFile(helper, scriptId, scriptContent);
             fail();
         }
         catch(IOException e){
             assertTrue(e.getMessage().contains("Invalid file path received"));
         }
-
-        // this work since we use concatenation of the script folder destination with the script filename
-        saveFile(helper, "/directlyInDiskRoot", maliciousCode);
     }
     
     @Test
