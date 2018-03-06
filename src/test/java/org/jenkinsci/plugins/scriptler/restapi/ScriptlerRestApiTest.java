@@ -30,10 +30,10 @@ public class ScriptlerRestApiTest {
     private static final String SCRIPT_ID = "dummy.groovy";
 
     @Rule
-    public static JenkinsRule j = new JenkinsRule();
+    public JenkinsRule j = new JenkinsRule();
 
     @ClassRule
-    public BuildWatcher bw = new BuildWatcher();
+    public static BuildWatcher bw = new BuildWatcher();
 
     @Before
     public void setup() throws Exception {
