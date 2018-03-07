@@ -3,30 +3,28 @@
  */
 package org.jenkinsci.plugins.scriptler.builder;
 
+import com.thoughtworks.xstream.XStreamException;
+import com.thoughtworks.xstream.converters.ConversionException;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.BuildListener;
+import hudson.model.Failure;
+import hudson.model.ParameterValue;
+import hudson.model.ParametersAction;
+import hudson.model.Project;
 import hudson.security.Permission;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.servlet.ServletException;
-
+import hudson.util.FormApply;
+import hudson.util.VersionNumber;
+import hudson.util.XStream2;
 import jenkins.model.Jenkins;
 import jenkins.model.Jenkins.MasterComputer;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptler.Messages;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
@@ -38,14 +36,39 @@ import org.jenkinsci.plugins.scriptler.util.GroovyScript;
 import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
 import org.jenkinsci.plugins.scriptler.util.UIHelper;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
+import org.kohsuke.stapler.HttpResponse;
+import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.servlet.ServletException;
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static hudson.util.QuotedStringTokenizer.quote;
 
 /**
  * @author Dominik Bartholdi (imod)
  * 
  */
 public class ScriptlerBuilder extends Builder implements Serializable {
+    private static final AtomicInteger CURRENT_ID = new AtomicInteger();
     private static final long serialVersionUID = 1L;
 
     private final static Logger LOGGER = Logger.getLogger(ScriptlerBuilder.class.getName());
@@ -61,6 +84,83 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         this.scriptId = scriptId;
         this.parameters = parameters;
         this.propagateParams = propagateParams;
+    }
+
+    private @Nonnull Map<String, String> checkGenericData() {
+        Map<String, String> errors = new HashMap<String, String>();
+
+        Script script = ScriptHelper.getScript(scriptId, true);
+        if (script != null) {
+            if (!script.nonAdministerUsing) {
+                this.scriptId = null;
+                errors.put("scriptId", "The script is not allowed to be executed in a build, check its configuration!");
+            }
+        }
+
+        checkPermission(errors);
+
+        return errors;
+    }
+
+    private void checkPermission(@Nonnull Map<String, String> errors){
+        if(Jenkins.getInstance().hasPermission(Jenkins.RUN_SCRIPTS)){
+            // user has right to add / edit Scripler steps
+            return;
+        }
+
+        Project project = retrieveProjectUsingCurrentRequest();
+        if(project != null){
+            if(!hasSameScriptlerBuilderInProject(project, this)){
+                if(StringUtils.isBlank(builderId)){
+                    errors.put("builderId", "As the given builder does not have ID, it must be equals to one of the existing builder that does not have ID");
+                }else{
+                    errors.put("builderId", "The builderId must correspond to an existing builder of that project since the user does not have the rights to add/edit Scriptler step");
+                }
+            }
+        }
+        // else: we are not in a request context
+    }
+
+    /**
+     * Must not be called inside XML processing since the modified data are not stored
+     */
+    private void generateBuilderIdIfRequired(){
+        if(StringUtils.isBlank(builderId)){
+            builderId = generateBuilderId();
+        }
+    }
+
+    private Object readResolve() {
+        return this;
+    }
+
+    private boolean hasSameScriptlerBuilderInProject(@Nonnull Project project, @Nonnull ScriptlerBuilder targetBuilder){
+        List<ScriptlerBuilder> allScriptlerBuilders = _getAllScriptlerBuildersFromProject(project);
+        for (ScriptlerBuilder builder : allScriptlerBuilders) {
+            if(targetBuilder.equals(builder)){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @SuppressWarnings("unchecked")
+    private @Nonnull List<ScriptlerBuilder> _getAllScriptlerBuildersFromProject(@Nonnull Project project){
+        return project.getBuildersList().getAll(ScriptlerBuilder.class);
+    }
+
+    private @CheckForNull Project<?, ?> retrieveProjectUsingCurrentRequest(){
+        StaplerRequest currentRequest = Stapler.getCurrentRequest();
+        if(currentRequest != null) {
+            Project project = Stapler.getCurrentRequest().findAncestorObject(Project.class);
+            if (project != null) {
+                return project;
+            }
+        }
+
+        // we are not in a request or manipulating a builder outside of a project
+        return null;
     }
 
     public String getScriptId() {
@@ -153,16 +253,105 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         return isOk;
     }
 
+    private static String generateBuilderId(){
+        return System.currentTimeMillis() + "_" + CURRENT_ID.addAndGet(1);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        ScriptlerBuilder that = (ScriptlerBuilder) o;
+
+        if (propagateParams != that.propagateParams)
+            return false;
+        if (builderId != null ? !builderId.equals(that.builderId) : that.builderId != null)
+            return false;
+        if (scriptId != null ? !scriptId.equals(that.scriptId) : that.scriptId != null)
+            return false;
+
+        return Arrays.equals(parameters, that.parameters);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = builderId != null ? builderId.hashCode() : 0;
+        result = 31 * result + (scriptId != null ? scriptId.hashCode() : 0);
+        result = 31 * result + (propagateParams ? 1 : 0);
+        result = 31 * result + Arrays.hashCode(parameters);
+        return result;
+    }
+
     // Overridden for better type safety.
     @Override
     public DescriptorImpl getDescriptor() {
         return (DescriptorImpl) super.getDescriptor();
     }
 
+    /**
+     * Automatically registered by {@link XStream2.AssociatedConverterImpl#findConverter(Class)}
+     * Process the class regularly but add a check after that
+     */
+    public static final class ConverterImpl extends XStream2.PassthruConverter<ScriptlerBuilder>{
+        public ConverterImpl(XStream2 xstream) {
+            super(xstream);
+        }
+
+        @Override
+        public boolean canConvert(Class type) {
+            return super.canConvert(type);
+        }
+
+        @Override
+        protected void callback(ScriptlerBuilder obj, UnmarshallingContext context) {
+            Map<String, String> errors = obj.checkGenericData();
+
+            if(!errors.isEmpty()){
+                ConversionException conversionException = new ConversionException("Validation failed");
+                for (Map.Entry<String, String> error : errors.entrySet()) {
+                    conversionException.add(error.getKey(), error.getValue());
+                }
+
+                //TODO when upgrading to 1.625+, we could remove this code
+                if(!Jenkins.getVersion().isOlderThan(new VersionNumber("1.625"))){
+                    XStreamException criticalXStreamException = buildCriticalXStreamException(conversionException);
+                    throw criticalXStreamException;
+                }
+
+                // go directly to XmlFile#unmarshal catch
+                throw new Error(conversionException);
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        private @CheckForNull XStreamException buildCriticalXStreamException(ConversionException conversionException){
+            XStreamException xStreamException = null;
+            try {
+                Class<? extends XStreamException> criticalXStreamExceptionClass = (Class<? extends XStreamException>) this.getClass().getClassLoader().loadClass("jenkins.util.xstream.CriticalXStreamException");
+                Constructor<? extends XStreamException> constructor = criticalXStreamExceptionClass.getConstructor(XStreamException.class);
+                xStreamException = constructor.newInstance(conversionException);
+            } catch (ClassNotFoundException e) {
+                LOGGER.log(Level.SEVERE, "The CriticalXStreamException was not found using jenkins.util.xstream.CriticalXStreamException", e);
+            } catch (NoSuchMethodException e) {
+                LOGGER.log(Level.SEVERE, "The CriticalXStreamException does not have the expected constructor accepting only XStreamException as parameter", e);
+            } catch (IllegalAccessException e) {
+                LOGGER.log(Level.SEVERE, "Problem during invocation of constructor", e);
+            } catch (InstantiationException e) {
+                LOGGER.log(Level.SEVERE, "Problem during invocation of constructor", e);
+            } catch (InvocationTargetException e) {
+                LOGGER.log(Level.SEVERE, "Problem during invocation of constructor", e);
+            }
+
+            return xStreamException;
+        }
+    }
+
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
-        private static final AtomicInteger CURRENT_ID = new AtomicInteger();
 
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {
@@ -183,45 +372,32 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         public ScriptlerBuilder newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             ScriptlerBuilder builder = null;
             String builderId = formData.optString("builderId");
+            String id = formData.optString("scriptlerScriptId");
 
-            if (!Jenkins.getInstance().hasPermission(ScriptlerPluginImpl.RUN_SCRIPTS)) {
-                // the user has no permission to change the builders, therefore we reload the builder without his changes!
-                final String backupJobName = formData.optString("backupJobName");
-
-                if (StringUtils.isNotBlank(builderId) && StringUtils.isNotBlank(backupJobName)) {
-                    final Project<?, ?> project = Jenkins.getInstance().getItemByFullName(backupJobName, Project.class);
-                    final List<Builder> builders = project.getBuilders();
-                    for (Builder b : builders) {
-                        if (b instanceof ScriptlerBuilder) {
-                            ScriptlerBuilder sb = (ScriptlerBuilder) b;
-                            if (builderId.equals(sb.getBuilderId())) {
-                                LOGGER.log(Level.FINE, "reloading ScriptlerBuilder [" + builderId + "] on project [" + backupJobName + "], as user has no permission to change it!");
-                                return sb;
-                            }
-                        }
-                    }
+            if (StringUtils.isNotBlank(id)) {
+                boolean inPropagateParams = formData.getBoolean("propagateParams");
+                Parameter[] params = null;
+                try {
+                    params = UIHelper.extractParameters(formData);
+                } catch (ServletException e) {
+                    throw new FormException(Messages.parameterExtractionFailed(), "parameters");
                 }
+                builder = new ScriptlerBuilder(builderId, id, inPropagateParams, params);
+            }
 
-            } else {
-                final String id = formData.optString("scriptlerScriptId");
-                final boolean inPropagateParams = formData.getBoolean("propagateParams");
-                if (StringUtils.isBlank(builderId)) {
-                    // create a unique id - this is only used to identify the builder if a user without privileges modifies the job.
-                    builderId = System.currentTimeMillis() + "_" + CURRENT_ID.addAndGet(1);
-                }
-                if (StringUtils.isNotBlank(id)) {
-                    Parameter[] params = null;
-                    try {
-                        params = UIHelper.extractParameters(formData);
-                    } catch (ServletException e) {
-                        throw new FormException(Messages.parameterExtractionFailed(), "parameters");
-                    }
-                    builder = new ScriptlerBuilder(builderId, id, inPropagateParams, params);
+            if(builder != null){
+                Map<String, String> errors = builder.checkGenericData();
+                if(!errors.isEmpty()){
+                    throw new MultipleErrorFormValidation(errors);
                 }
             }
+
             if (builder == null) {
                 builder = new ScriptlerBuilder(builderId, null, false, null);
             }
+
+            builder.generateBuilderIdIfRequired();
+
             return builder;
         }
 
@@ -249,7 +425,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         /**
          * gets the argument description to be displayed on the screen when selecting a config in the dropdown
          * 
-         * @param configId
+         * @param scriptlerScriptId
          *            the config id to get the arguments description for
          * @return the description
          */
@@ -261,6 +437,48 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             }
             return null;
         }
+    }
 
+    /**
+     * Notify the user with multiple message about the validation that failed
+     */
+    private static class MultipleErrorFormValidation extends RuntimeException implements HttpResponse {
+        private Map<String, String> fieldToMessage = new HashMap<String, String>();
+
+        public MultipleErrorFormValidation(Map<String, String> fieldToMessage) {
+            this.fieldToMessage = fieldToMessage;
+        }
+
+        private String getAggregatedMessage(){
+            List<String> errorMessageList = new ArrayList<String>();
+            for (Map.Entry<String, String> error : fieldToMessage.entrySet()) {
+                errorMessageList.add(buildMessageForField(error.getKey(), error.getValue()));
+            }
+            return StringUtils.join(errorMessageList, ", ");
+        }
+
+        private String buildMessageForField(String fieldName, String fieldMessage){
+            return fieldName + ": " + fieldMessage;
+        }
+
+        @Override
+        public void generateResponse(StaplerRequest req, StaplerResponse rsp, Object node) throws IOException, ServletException {
+            if (FormApply.isApply(req)) {
+                StringBuilder scriptBuilder = new StringBuilder();
+                for (Map.Entry<String, String> error : fieldToMessage.entrySet()) {
+                    String errorMessage = buildMessageForField(error.getKey(), error.getValue());
+                    scriptBuilder
+                            .append("notificationBar.show(")
+                            .append(quote(errorMessage))
+                            .append(",notificationBar.ERROR)")
+                    ;
+                }
+
+                FormApply.applyResponse(scriptBuilder.toString())
+                        .generateResponse(req, rsp, node);
+            } else {
+                new Failure(getAggregatedMessage()).generateResponse(req,rsp,node);
+            }
+        }
     }
 }
