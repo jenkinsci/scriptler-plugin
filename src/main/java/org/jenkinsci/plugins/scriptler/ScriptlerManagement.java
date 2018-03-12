@@ -260,7 +260,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         // save (overwrite) the file/script
         File newScriptFile = new File(getScriptDirectory(), finalFileName);
     
-        if(!newScriptFile.getCanonicalPath().equals(newScriptFile.getAbsolutePath())){
+        if(!Util.isDescendant(getScriptDirectory(), new File(getScriptDirectory(),finalFileName))) {
             LOGGER.log(Level.WARNING, "Folder traversal detected, file path received: {0}, after fixing: {1}", new Object[]{id, finalFileName});
             throw new IOException("Invalid file path received: " + id);
         }
@@ -393,6 +393,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         String fixedFileName = fixFileName(null, fileName);
 
         File fixedFile = new File(fixedFileName);
+
         if(fixedFile.isAbsolute()){
             LOGGER.log(Level.WARNING, "Folder traversal detected, file path received: {0}, after fixing: {1}. Seems to be an attempt to use absolute path instead of relative one", new Object[]{fileName, fixedFileName});
             throw new IOException("Invalid file path received: " + fileName);
@@ -401,7 +402,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         File rootDir = getScriptDirectory();
         final File f = new File(rootDir, fixedFileName);
         
-        if(!f.getCanonicalPath().equals(f.getAbsolutePath())){
+        if(!Util.isDescendant(rootDir, new File(rootDir,fixedFileName))) {
             LOGGER.log(Level.WARNING, "Folder traversal detected, file path received: {0}, after fixing: {1}. Seems to be an attempt to use folder escape.", new Object[]{fileName, fixedFileName});
             throw new IOException("Invalid file path received: " + fileName);
         }
