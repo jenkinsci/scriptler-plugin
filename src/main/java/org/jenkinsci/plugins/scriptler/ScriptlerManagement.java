@@ -48,6 +48,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -263,7 +264,13 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
         // save (overwrite) the file/script
         File newScriptFile = new File(getScriptDirectory(), finalFileName);
-        Writer writer = new OutputStreamWriter(new FileOutputStream(newScriptFile), Charset.forName("UTF-8"));
+    
+        if(!Util.isDescendant(getScriptDirectory(), new File(getScriptDirectory(),finalFileName))) {
+            LOGGER.log(Level.WARNING, "Folder traversal detected, file path received: {0}, after fixing: {1}", new Object[]{id, finalFileName});
+            throw new IOException("Invalid file path received: " + id);
+        }
+        
+        Writer writer = new FileWriter(newScriptFile);
         try {
             writer.write(script);
         } finally {
@@ -390,18 +397,30 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      */
     /*private*/ void saveScript(FileItem fileItem, boolean nonAdministerUsing, String fileName) throws Exception, IOException {
         // upload can only be to/from local catalog
-        fileName = fixFileName(null, fileName);
+        String fixedFileName = fixFileName(null, fileName);
 
+        File fixedFile = new File(fixedFileName);
+
+        if(fixedFile.isAbsolute()){
+            LOGGER.log(Level.WARNING, "Folder traversal detected, file path received: {0}, after fixing: {1}. Seems to be an attempt to use absolute path instead of relative one", new Object[]{fileName, fixedFileName});
+            throw new IOException("Invalid file path received: " + fileName);
+        }
+        
         File rootDir = getScriptDirectory();
-        final File f = new File(rootDir, fileName);
+        final File f = new File(rootDir, fixedFileName);
+        
+        if(!Util.isDescendant(rootDir, new File(rootDir,fixedFileName))) {
+            LOGGER.log(Level.WARNING, "Folder traversal detected, file path received: {0}, after fixing: {1}. Seems to be an attempt to use folder escape.", new Object[]{fileName, fixedFileName});
+            throw new IOException("Invalid file path received: " + fileName);
+        }
         
         fileItem.write(f);
 
-        commitFileToGitRepo(fileName);
+        commitFileToGitRepo(fixedFileName);
 
-        Script script = ScriptHelper.getScript(fileName, false);
+        Script script = ScriptHelper.getScript(fixedFileName, false);
         if (script == null) {
-            script = new Script(fileName, fileName, true, nonAdministerUsing, false);
+            script = new Script(fixedFileName, fixedFileName, true, nonAdministerUsing, false);
         }
 
         String scriptSource = FileUtils.readFileToString(f, "UTF-8");
