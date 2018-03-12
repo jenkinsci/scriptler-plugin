@@ -1,14 +1,15 @@
 package org.jenkinsci.plugins.scriptler.util;
 
 import hudson.model.Computer;
-import hudson.model.Hudson;
 import hudson.util.StreamTaskListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -16,8 +17,10 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.CheckForNull;
 import javax.servlet.ServletException;
 
+import jenkins.model.Jenkins;
 import jenkins.model.Jenkins.MasterComputer;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
@@ -31,6 +34,10 @@ import org.jenkinsci.plugins.scriptler.config.Script;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfo.Author;
+import org.jenkinsci.plugins.scriptsecurity.scripts.ApprovalContext;
+import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
+import org.jenkinsci.plugins.scriptsecurity.scripts.UnapprovedUsageException;
+import org.jenkinsci.plugins.scriptsecurity.scripts.languages.GroovyLanguage;
 
 /**
  * 
@@ -48,11 +55,6 @@ public class ScriptHelper {
         JSON_CLASS_MAPPING.put("parameters", Parameter.class);
     }
 
-    public static Script getScriptCopy(String id, boolean withSrc) {
-        final Script orig = getScript(id, withSrc);
-        return orig.copy();
-    }
-    
     /**
      * Loads the script information.
      * 
@@ -62,7 +64,7 @@ public class ScriptHelper {
      *            should the script sources be loaded too?
      * @return the script - <code>null</code> if the id is not set or the script with the given id can not be resolved
      */
-    public static Script getScript(String id, boolean withSrc) {
+    public static @CheckForNull Script getScript(String id, boolean withSrc) {
         if (StringUtils.isBlank(id)) {
             return null;
         }
@@ -70,14 +72,61 @@ public class ScriptHelper {
         if (withSrc && s != null) {
             try {
                 File scriptSrc = new File(ScriptlerManagement.getScriptDirectory(), s.getScriptPath());
-                Reader reader = new FileReader(scriptSrc);
+                Reader reader = new InputStreamReader(new FileInputStream(scriptSrc), Charset.forName("UTF-8"));
                 String src = IOUtils.toString(reader);
                 s.setScript(src);
             } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, Messages.scriptSourceNotFound(id), e);
+                LOGGER.log(Level.SEVERE, Messages.scriptSourceNotFound(id));
             }
         }
         return s;
+    }
+    
+    /**
+     * @since TODO
+     */
+    public static void putScriptInApprovalQueueIfRequired(String scriptSourceCode){
+        // we cannot use sandbox since the script is potentially sent to slaves
+        // and the sandbox mode is not meant to be used with remoting
+        ScriptApproval.get().configuring(scriptSourceCode, GroovyLanguage.get(), ApprovalContext.create().withCurrentUser());
+    }
+    
+    /**
+     * @param scriptSourceCode Source code that must be approved
+     * @return true if the script was approved or created by a user with RUN_SCRIPT permission
+     * @since TODO
+     */
+    public static boolean isApproved(String scriptSourceCode){
+        return isApproved(scriptSourceCode, true);
+    }
+    
+    /**
+     * @param scriptSourceCode Source code that must be approved
+     * @param putInApprovalQueueIfNotApprovedYet true means we try to know if the user has permission
+     *                                          to approve the script automatically in case it was not approved yet
+     * @return true if the script is approved
+     * @since TODO
+     */
+    public static boolean isApproved(String scriptSourceCode, boolean putInApprovalQueueIfNotApprovedYet){
+        try{
+            ScriptApproval.get().using(scriptSourceCode, GroovyLanguage.get());
+            return true;
+        }
+        catch(UnapprovedUsageException e){
+            if(putInApprovalQueueIfNotApprovedYet){
+                // in case there is some ways that are not covered
+                putScriptInApprovalQueueIfRequired(scriptSourceCode);
+                try{
+                    ScriptApproval.get().using(scriptSourceCode, GroovyLanguage.get());
+                    // user has permission to approve the script
+                    return true;
+                }
+                catch(UnapprovedUsageException e2){
+                    // user does not have the permission to approve the script
+                }
+            }
+            return false;
+        }
     }
 
     public static String runScript(String[] slaves, String scriptTxt, Parameter[] parameters) throws IOException, ServletException {
@@ -110,7 +159,7 @@ public class ScriptHelper {
         if (node != null && scriptTxt != null) {
 
             try {
-                Computer comp = Hudson.getInstance().getComputer(node);
+                Computer comp = Jenkins.getInstance().getComputer(node);
                 if (comp == null && "(master)".equals(node)) {
                     output = MasterComputer.localChannel.call(new GroovyScript(scriptTxt, parameters, false, new StreamTaskListener(sos)));
                 } else if (comp == null) {
@@ -129,7 +178,7 @@ public class ScriptHelper {
                 throw new ServletException(e);
             }
         }
-        return sos.toString();
+        return sos.toString(Charset.forName("UTF-8").name());
     }
 
     /**

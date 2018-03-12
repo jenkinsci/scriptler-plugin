@@ -16,9 +16,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import jenkins.model.Jenkins;
 
+import jenkins.security.Roles;
 import org.apache.commons.collections.map.LRUMap;
 import org.jenkinsci.plugins.scriptler.Messages;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
+import org.jenkinsci.remoting.Role;
+import org.jenkinsci.remoting.RoleChecker;
 
 /**
  * Inspired by hudson.util.RemotingDiagnostics.Script, but adding parameters.
@@ -136,6 +139,15 @@ public class GroovyScript implements DelegatingCallable<Object, RuntimeException
             if (parsedScript != null) {
                 scriptPool.add(parsedScript);
             }
+        }
+    }
+
+    @Override
+    public void checkRoles(RoleChecker roleChecker) throws SecurityException {
+        if(launcher != null && build != null){
+            roleChecker.check(this, Roles.MASTER);
+        }else{
+            roleChecker.check(this, Role.UNKNOWN);
         }
     }
 

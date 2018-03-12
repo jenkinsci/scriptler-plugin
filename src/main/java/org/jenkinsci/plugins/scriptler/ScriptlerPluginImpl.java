@@ -23,19 +23,24 @@
  */
 package org.jenkinsci.plugins.scriptler;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Plugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import hudson.init.InitMilestone;
+import hudson.init.Initializer;
+import hudson.security.Permission;
+import hudson.security.PermissionGroup;
+import hudson.security.PermissionScope;
+import jenkins.model.Jenkins;
+import org.apache.commons.io.FileUtils;
 import org.jenkinsci.plugins.scriptler.config.Script;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
+import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
 
 /**
  * @author domi
@@ -44,7 +49,20 @@ import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
 public class ScriptlerPluginImpl extends Plugin {
 
     private final static Logger LOGGER = Logger.getLogger(ScriptlerPluginImpl.class.getName());
+    
+    public static final PermissionGroup SCRIPTLER_PERMISSIONS = new PermissionGroup(ScriptlerManagement.class, Messages._permissons_title());
 
+    public static final Permission CONFIGURE = new Permission(
+            SCRIPTLER_PERMISSIONS, "Configure",
+            Messages._permissons_configure_description(), Jenkins.RUN_SCRIPTS,
+            PermissionScope.JENKINS
+    );
+    public static final Permission RUN_SCRIPTS = new Permission(
+            SCRIPTLER_PERMISSIONS, "RunScripts",
+            Messages._permissons_runScript_description(), Jenkins.RUN_SCRIPTS,
+            PermissionScope.JENKINS
+    );
+    
     @Override
     public void start() throws Exception {
         super.start();
@@ -57,46 +75,47 @@ public class ScriptlerPluginImpl extends Plugin {
      * @throws IOException
      */
     private void synchronizeConfig() throws IOException {
-        LOGGER.info("initialize scriptler");
+        LOGGER.info("initialize Scriptler");
         if (!ScriptlerManagement.getScriptlerHomeDirectory().exists()) {
             boolean dirsDone = ScriptlerManagement.getScriptlerHomeDirectory().mkdirs();
             if(!dirsDone) {
-                LOGGER.severe("could not cereate scriptler home directory: " + ScriptlerManagement.getScriptlerHomeDirectory());
+                LOGGER.severe("could not create Scriptler home directory: " + ScriptlerManagement.getScriptlerHomeDirectory());
             }
         }
         File scriptDirectory = ScriptlerManagement.getScriptDirectory();
-        // create the directory for the scripts if not available
-        if (!scriptDirectory.exists()) {
-            scriptDirectory.mkdirs();
-        }
+        createMissingFolders(scriptDirectory);
 
         ScriptlerConfiguration cfg = ScriptlerConfiguration.load();
-        if (cfg == null) {
-            cfg = new ScriptlerConfiguration(new TreeSet<Script>());
-        }
 
         SyncUtil.syncDirWithCfg(scriptDirectory, cfg);
 
         cfg.save();
-
+    }
+    
+    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
+    private void createMissingFolders(File folder){
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
     }
 
-    /**
-     * search into the declared backup directory for backup archives
-     */
-    public List<File> getAvailableScripts() throws IOException {
-        File scriptDirectory = ScriptlerManagement.getScriptDirectory();
-        LOGGER.log(Level.FINE, "Listing files of {0}", scriptDirectory.getAbsoluteFile());
-
-        File[] scriptFiles = scriptDirectory.listFiles();
-
-        List<File> fileList;
-        if (scriptFiles == null) {
-            fileList = new ArrayList<File>();
-        } else {
-            fileList = Arrays.asList(scriptFiles);
+    @Initializer(after = InitMilestone.JOB_LOADED)
+    public static void afterJobLoaded() throws Exception {
+        setupExistingScripts();
+    }
+    
+    private static void setupExistingScripts() throws Exception {
+        for (Script script : ScriptlerConfiguration.getConfiguration().getScripts()) {
+            File scriptFile = new File(ScriptlerManagement.getScriptDirectory(), script.getScriptPath());
+            try{
+                String scriptSource = FileUtils.readFileToString(scriptFile, "UTF-8");
+    
+                // we cannot do that during start since the ScriptApproval is not yet loaded
+                // and only after JOB_LOADED to have the securityRealm configured
+                ScriptHelper.putScriptInApprovalQueueIfRequired(scriptSource);
+            } catch (IOException e) {
+                LOGGER.log(Level.WARNING, "Source file for the script [{0}] was not found", script.getId());
+            }
         }
-
-        return fileList;
     }
 }

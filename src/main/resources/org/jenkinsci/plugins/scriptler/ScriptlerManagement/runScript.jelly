@@ -25,7 +25,7 @@ THE SOFTWARE.
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
 	xmlns:p="/lib/hudson/scriptler">
 
-	<l:layout norefresh="true">
+	<l:layout permission="${it.scriptlerRunScripts}" norefresh="true">
 		<st:include page="sidepanel.jelly" />
 
 		<l:main-panel>
@@ -37,6 +37,11 @@ THE SOFTWARE.
 
 			<p>
 				<j:out value="${%intro}" />
+				<j:if test="!canByPassScriptApproval">
+					<div class="warning">
+						<j:out value="${%modificationRequiredApproval}" />
+					</div>
+				</j:if>
 				<h2>
 					${script.name}
 				</h2>
@@ -95,9 +100,27 @@ THE SOFTWARE.
 					</tr>
 				</table>
 
-				<textarea id="script" name="script" class="script" script-readOnly="${readOnly}">
-					${script.script}
+				<textarea id="script" name="script" class="script">
+					<j:choose>
+						<j:when test="${scriptNotFound}">
+							${%ScriptNotFound}
+						</j:when>
+						<j:otherwise>
+							<j:out value="${script.script}" />
+						</j:otherwise>
+					</j:choose>
 				</textarea>
+			<j:if test="${notApprovedYet}">
+				<j:choose>
+					<j:when test="${h.hasPermission(it, app.RUN_SCRIPTS)}">
+						<div class="warning">${%NotApprovedYetButHasRightWarn}</div>
+						<div class="info">${%NotApprovedYetButHasRightInfo}</div>
+					</j:when>
+					<j:otherwise>
+						<div class="warning">${%NotApprovedYet}</div>
+					</j:otherwise>
+				</j:choose>
+			</j:if>
 				<div align="right">
 					<f:submit value="${%Run}" name="run" />
 				</div>

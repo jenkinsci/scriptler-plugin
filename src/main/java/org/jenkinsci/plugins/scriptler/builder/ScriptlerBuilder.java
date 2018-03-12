@@ -28,6 +28,7 @@ import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptler.Messages;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
+import org.jenkinsci.plugins.scriptler.ScriptlerPluginImpl;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.jenkinsci.plugins.scriptler.config.Script;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
@@ -180,56 +181,75 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
-        boolean isOk = false;
         final Script script = ScriptHelper.getScript(scriptId, true);
-
-        if (script != null) {
-            if (!script.nonAdministerUsing) {
-                throw new Failure(script.getName() + " [" + script.getId() + "] is not allowed to be executed in a build, check its configuration!");
+    
+        if (script == null) {
+            if (StringUtils.isBlank(scriptId)) {
+                LOGGER.log(Level.WARNING, "The script id was blank for the build {0}:{1}", new Object[]{build.getProject().getName(), build.getDisplayName()});
+                listener.getLogger().println(Messages.scriptNotDefined());
+            } else {
+                LOGGER.log(Level.WARNING, "The source corresponding to the scriptId {0} was not found (missing file ?) for the build {1}:{2}",
+                        new Object[]{scriptId, build.getProject().getName(), build.getDisplayName()}
+                        );
+                listener.getLogger().println(Messages.scriptNotFound(scriptId));
             }
-            try {
+            return false;
+        } 
+        
+        boolean isOk = false;
+        if (!script.nonAdministerUsing) {
+            listener.getLogger().println(Messages.scriptNotUsableInBuildStep(script.getName()));
+            LOGGER.log(Level.WARNING, "The script [{0} ({1})] is not allowed to be executed in a build, check its configuration. It concerns the build [{2}:{3}]", 
+                    new Object[]{script.getName(), script.getId(), build.getProject().getName(), build.getDisplayName()}
+                    );
+            return false;
+        }
+        
+        if(!ScriptHelper.isApproved(script.script)){
+            listener.getLogger().println(Messages.scriptNotApprovedYet(script.getName()));
+            LOGGER.log(Level.WARNING, "The script [{0} ({1})] is not approved yet, consider asking your administrator to approve it. It concerns the build [{2}:{3}]", 
+                    new Object[]{script.getName(), script.getId(), build.getProject().getName(), build.getDisplayName()}
+                    );
+            return false;
+        }
+        
+        try {
 
-                // expand the parameters before passing these to the execution, this is to allow any token macro to resolve parameter values
-                List<Parameter> expandedParams = new LinkedList<Parameter>();
+            // expand the parameters before passing these to the execution, this is to allow any token macro to resolve parameter values
+            List<Parameter> expandedParams = new LinkedList<Parameter>();
 
-                if (propagateParams) {
-                    final ParametersAction paramsAction = build.getAction(ParametersAction.class);
-                    if (paramsAction == null) {
-                        listener.getLogger().println(Messages.no_parameters_defined());
-                    } else {
-                        final List<ParameterValue> jobParams = paramsAction.getParameters();
-                        for (ParameterValue parameterValue : jobParams) {
-                            // pass the params to the token expander in a way that these get expanded by environment variables (params are also environment variables)
-                            expandedParams.add(new Parameter(parameterValue.getName(), TokenMacro.expandAll(build, listener, "${" + parameterValue.getName() + "}", false, null)));
-                        }
+            if (propagateParams) {
+                final ParametersAction paramsAction = build.getAction(ParametersAction.class);
+                if (paramsAction == null) {
+                    listener.getLogger().println(Messages.no_parameters_defined());
+                } else {
+                    final List<ParameterValue> jobParams = paramsAction.getParameters();
+                    for (ParameterValue parameterValue : jobParams) {
+                        // pass the params to the token expander in a way that these get expanded by environment variables (params are also environment variables)
+                        expandedParams.add(new Parameter(parameterValue.getName(), TokenMacro.expandAll(build, listener, "${" + parameterValue.getName() + "}", false, null)));
                     }
                 }
-                for (Parameter parameter : parameters) {
-                    expandedParams.add(new Parameter(parameter.getName(), TokenMacro.expandAll(build, listener, parameter.getValue())));
-                }
-                final Object output;
-                if (script.onlyMaster) {
-                    // When run on master, make build, launcher, listener available to script
-                    output = MasterComputer.localChannel.call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, listener, launcher, build));
-                } else {
-                    output = launcher.getChannel().call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, listener));
-                }
-                if (output instanceof Boolean && Boolean.FALSE.equals(output)) {
-                    isOk = false;
-                } else {
-                    isOk = true;
-                }
-            } catch (Exception e) {
-                listener.getLogger().print(Messages.scriptExecutionFailed(scriptId) + " - " + e.getMessage());
-                e.printStackTrace(listener.getLogger());
             }
-        } else {
-            if (StringUtils.isBlank(scriptId)) {
-                listener.getLogger().print(Messages.scriptNotDefined());
+            for (Parameter parameter : parameters) {
+                expandedParams.add(new Parameter(parameter.getName(), TokenMacro.expandAll(build, listener, parameter.getValue())));
+            }
+            final Object output;
+            if (script.onlyMaster) {
+                // When run on master, make build, launcher, listener available to script
+                output = MasterComputer.localChannel.call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, listener, launcher, build));
             } else {
-                listener.getLogger().print(Messages.scriptNotFound(scriptId));
+                output = launcher.getChannel().call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, listener));
             }
+            if (output instanceof Boolean && Boolean.FALSE.equals(output)) {
+                isOk = false;
+            } else {
+                isOk = true;
+            }
+        } catch (Exception e) {
+            listener.getLogger().println(Messages.scriptExecutionFailed(scriptId) + " - " + e.getMessage());
+            e.printStackTrace(listener.getLogger());
         }
+
         return isOk;
     }
 
@@ -335,7 +355,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {
-            return Jenkins.getInstance().hasPermission(Jenkins.RUN_SCRIPTS);
+            return Jenkins.getInstance().hasPermission(ScriptlerPluginImpl.RUN_SCRIPTS);
         }
 
         @Override
@@ -343,8 +363,9 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             return Messages.builder_name();
         }
 
+        // used by Jelly views
         public Permission getRequiredPermission() {
-            return getScriptler().getRequiredPermissionForRunScript();
+            return ScriptlerPluginImpl.RUN_SCRIPTS;
         }
 
         @Override

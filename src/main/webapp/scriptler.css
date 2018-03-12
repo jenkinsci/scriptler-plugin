@@ -13,6 +13,7 @@
 .scriptler-link-button {
   background: none;
   border: none;
+  cursor: pointer;
 }
 
 .scriptler-link-button:focus {
@@ -23,14 +24,14 @@
   color:red;
 }
 
-.scriptler-nowrap {
+.scriptler-toolbar {
   white-space: nowrap;
 }
 
-.scriptler-nowrap img {
-  margin-left: 5px;
+.scriptler-toolbar .scriptler-icon-slot-first {
+  margin-left: 0px;
 }
 
-.scriptler-nowrap img.scriptler-nomargin {
-  margin-left: 0;
+.scriptler-toolbar .scriptler-icon-slot {
+  margin-left: 8px;
 }

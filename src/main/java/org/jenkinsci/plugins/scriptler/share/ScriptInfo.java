@@ -141,7 +141,7 @@ public class ScriptInfo implements NamedResource {
         }
     }
 
-    public static Comparator<ScriptInfo> COMPARATOR_BY_NAME = new Comparator<ScriptInfo>() {
+    public static final Comparator<ScriptInfo> COMPARATOR_BY_NAME = new Comparator<ScriptInfo>() {
         @Override public int compare(ScriptInfo a, ScriptInfo b) {
             String nameA = a.getName() != null ? a.getName() : "";
             String nameB = b.getName() != null ? b.getName() : "";

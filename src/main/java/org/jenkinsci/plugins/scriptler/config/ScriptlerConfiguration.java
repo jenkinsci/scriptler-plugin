@@ -37,10 +37,17 @@ import java.util.logging.Logger;
 
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
+import org.jenkinsci.plugins.scriptler.ScriptlerPluginImpl;
 import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
 import org.jenkinsci.plugins.scriptler.util.ByIdSorter;
 
 import com.thoughtworks.xstream.XStream;
+import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.DoNotUse;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
+
+import javax.annotation.Nonnull;
 
 /**
  */
@@ -54,8 +61,20 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
 
     private boolean disbableRemoteCatalog = false;
 
+    /**
+     * /!\ keep to avoid loading issues with older version
+     * The regular permission required is Scriptler/RunScripts now
+     * @deprecated no need to replace them, Script Security is used now
+     */
+    @Deprecated
     private boolean allowRunScriptPermission = false;
-
+    
+    /**
+     * /!\ keep to avoid loading issues with older version
+     * The regular permission required is Scriptler/Configure now
+     * @deprecated no need to replace them, Script Security is used now
+     */
+    @Deprecated
     private boolean allowRunScriptEdit = false;
 
     public ScriptlerConfiguration(SortedSet<Script> scripts) {
@@ -75,7 +94,7 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
         return new XmlFile(XSTREAM, new File(ScriptlerManagement.getScriptlerHomeDirectory(), "scriptler.xml"));
     }
 
-    public static ScriptlerConfiguration load() throws IOException {
+    public static @Nonnull ScriptlerConfiguration load() throws IOException {
         XmlFile f = getXmlFile();
         if (f.exists()) {
             // As it might be that we have an unsorted set, we ensure the
@@ -138,10 +157,10 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
         return allowRunScriptPermission;
     }
 
-    // for Jelly view
-    public List<Script> getSortedScripts(){
+    @Restricted(DoNotUse.class) // for Jelly view
+    public List<ScriptAndApproved> getSortedScripts(){
         List<Script> sortedScripts;
-        if(Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER)){
+        if(Jenkins.getInstance().hasPermission(ScriptlerPluginImpl.CONFIGURE)){
             sortedScripts = new ArrayList<Script>(this.getScripts());
         }else{
             sortedScripts = new ArrayList<Script>(this.getUserScripts());
@@ -149,6 +168,34 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
 
         Collections.sort(sortedScripts, Script.COMPARATOR_BY_NAME);
 
-        return sortedScripts;
+        List<ScriptAndApproved> result = new ArrayList<ScriptAndApproved>(sortedScripts.size());
+        for (Script script : sortedScripts) {
+            Script scriptWithSrc = ScriptHelper.getScript(script.getId(), true);
+            Boolean approved = null;
+            if(scriptWithSrc != null && scriptWithSrc.script != null){
+                approved = ScriptHelper.isApproved(scriptWithSrc.script, false);
+            }
+            result.add(new ScriptAndApproved(script, approved));
+        }
+        return result;
+    }
+    
+    @Restricted(NoExternalUse.class) // for Jelly view
+    public static class ScriptAndApproved {
+        private Script script;
+        private Boolean approved;
+    
+        private ScriptAndApproved(Script script, Boolean approved) {
+            this.script = script;
+            this.approved = approved;
+        }
+    
+        public Script getScript() {
+            return script;
+        }
+    
+        public Boolean getApproved() {
+            return approved;
+        }
     }
 }

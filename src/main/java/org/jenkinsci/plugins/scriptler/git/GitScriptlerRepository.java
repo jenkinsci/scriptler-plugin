@@ -30,6 +30,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.jenkinsci.main.modules.sshd.SSHD;
 import org.jenkinsci.plugins.gitserver.FileBackedHttpGitRepository;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
+import org.jenkinsci.plugins.scriptler.ScriptlerPluginImpl;
 import org.jenkinsci.plugins.scriptler.SyncUtil;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
 
@@ -78,7 +79,7 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
      */
     @Override
     protected void checkPushPermission() {
-        Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
+        Jenkins.getInstance().checkPermission(ScriptlerPluginImpl.CONFIGURE);
     }
 
     @Override
@@ -157,7 +158,7 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
         try {
             // TODO find a way to limit the number of log entries - e.g. ..log().addRange(...).call()
             for (RevCommit c : new Git(this.openRepository()).log().call()) {
-                msgs.add(new LogInfo(c.getName(), c.getAuthorIdent().getName(), c.getCommitterIdent().getName(), new Date(c.getCommitTime() * 1000), c.getFullMessage()));
+                msgs.add(new LogInfo(c.getName(), c.getAuthorIdent().getName(), c.getCommitterIdent().getName(), new Date(c.getCommitTime() * 1000L), c.getFullMessage()));
             }
         } catch (NoHeadException e) {
             throw new IOException("not able to retrieve git log", e);

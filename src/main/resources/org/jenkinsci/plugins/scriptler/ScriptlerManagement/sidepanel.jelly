@@ -31,13 +31,17 @@ THE SOFTWARE.
   <l:side-panel>
     <l:tasks>
       <l:task icon="images/24x24/setting.gif" href="${rootURL}/manage" title="${%Manage Jenkins}" permission="${app.ADMINISTER}" />
-      <l:task icon="images/24x24/next.gif" href="${rootURL}/scriptler" title="${%Run/Edit Scripts}" />
-      <l:task icon="images/24x24/new-package.gif" href="scriptsettings" title="${%Add a new Script}" permission="${app.ADMINISTER}" />
-      <j:if test="${!it.disableRemoteCatalog()}">
-      		<l:task icon="images/24x24/folder.gif" href="catalog" title="${%Remote Script catalogs}" permission="${app.ADMINISTER}" />
+      <j:if test="${it.hasAtLeastOneScriptlerPermission()}">
+        <l:task icon="images/24x24/next.gif" href="${rootURL}/scriptler" title="${%Run/Edit Scripts}" />
       </j:if>
-      <l:task icon="images/24x24/setting.gif" href="settings" title="${%Scriptler settings}" permission="${app.ADMINISTER}" />
-      <l:task icon="plugin/scriptler/images/Git-Icon-1788C.png" href="${rootURL}/scriptler.git" title="${%Git repo}" permission="${app.ADMINISTER}" />
+      <l:hasPermission permission="${it.scriptlerConfigure}">
+        <l:task icon="images/24x24/new-package.gif" href="scriptSettings" title="${%Add a new Script}" />
+        <j:if test="${!it.disableRemoteCatalog()}">
+              <l:task icon="images/24x24/folder.gif" href="catalog" title="${%Remote Script catalogs}" />
+        </j:if>
+        <l:task icon="images/24x24/setting.gif" href="settings" title="${%Scriptler settings}" />
+        <l:task icon="plugin/scriptler/images/Git-Icon-1788C.png" href="${rootURL}/scriptler.git" title="${%Git repo}" />
+      </l:hasPermission>
     </l:tasks>
     <t:executors computers="${h.singletonList(it)}" />
   </l:side-panel>
