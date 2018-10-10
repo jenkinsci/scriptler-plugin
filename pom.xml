@@ -8,7 +8,7 @@
 
 	<artifactId>scriptler</artifactId>
 	<name>Scriptler</name>
-	<version>2.10-SNAPSHOT</version>
+	<version>3.0-alpha</version>
 	<packaging>hpi</packaging>
 	<description>Scriptler allows you to store/edit/execute Groovy scripts on any of the slaves/nodes... no need to copy paste Groovy code anymore. Beside administer your scripts, Scriptler also provides a way to share scripts between users via hosted script catalogs on the internet.</description>
 	<url>http://wiki.jenkins-ci.org/display/JENKINS/Scriptler+Plugin</url>
@@ -43,7 +43,8 @@
 		<connection>scm:git:git://github.com/jenkinsci/scriptler-plugin.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/jenkinsci/scriptler-plugin.git</developerConnection>
 		<url>https://github.com/jenkinsci/scriptler-plugin</url>
-  	</scm>
+  	  <tag>scriptler-3.0-alpha</tag>
+  </scm>
 	<dependencies>
 		<dependency>
 			<groupId>org.jenkins-ci.plugins</groupId>
