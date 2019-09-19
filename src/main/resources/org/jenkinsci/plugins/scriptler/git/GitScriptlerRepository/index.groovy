@@ -13,11 +13,11 @@ l.layout {
         }
 
         p {
-            raw _("blurb",app.rootUrl)
+            raw _("blurb")
         }
         pre {
             def url = "${app.rootUrl}scriptler.git"
-            raw "git clone <a href='${url}'>${url}</a>"
+            raw _("git_clone_command", url)
 
             if (my.sshd.actualPort>0) {
                 raw "\ngit clone ssh://${new URL(app.rootUrl).host}:${my.sshd.actualPort}/scriptler.git"
