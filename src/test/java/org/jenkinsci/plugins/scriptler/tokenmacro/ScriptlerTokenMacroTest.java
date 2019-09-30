@@ -35,7 +35,7 @@ public class ScriptlerTokenMacroTest {
         FreeStyleProject p = j.createFreeStyleProject("foo");
         FreeStyleBuild b = p.scheduleBuild2(0).get();
 
-        final StreamTaskListener listener = new StreamTaskListener(System.out);
+        final StreamTaskListener listener = StreamTaskListener.fromStdout();
 
         Assert.assertEquals("hello world 1", TokenMacro.expand(b, listener, "${SCRIPTLER,scriptId=\"dummy.groovy\"}"));
 

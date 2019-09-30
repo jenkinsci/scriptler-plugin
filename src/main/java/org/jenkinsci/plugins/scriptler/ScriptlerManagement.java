@@ -47,12 +47,9 @@ import org.kohsuke.stapler.interceptor.RequirePOST;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
@@ -711,12 +708,11 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     }
 
     private List<String> getSlaveNames() {
-        ComputerSet computers = Jenkins.getInstance().getComputer();
-        List<String> slaveNames = computers.get_slaveNames();
-
-        // slaveNames is unmodifiable, therefore create a new list
+        Computer[] computers = Jenkins.getInstance().getComputers();
         List<String> slaves = new ArrayList<String>();
-        slaves.addAll(slaveNames);
+        for (Computer c : computers) {
+            slaves.add(c.getName());
+        }
         return slaves;
     }
 
