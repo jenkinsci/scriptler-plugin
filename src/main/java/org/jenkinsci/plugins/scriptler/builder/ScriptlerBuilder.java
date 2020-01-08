@@ -7,6 +7,7 @@ import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -236,7 +237,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             final Object output;
             if (script.onlyMaster) {
                 // When run on master, make build, launcher, listener available to script
-                output = MasterComputer.localChannel.call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, listener, launcher, build));
+                output = FilePath.localChannel.call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, listener, launcher, build));
             } else {
                 output = launcher.getChannel().call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, listener));
             }

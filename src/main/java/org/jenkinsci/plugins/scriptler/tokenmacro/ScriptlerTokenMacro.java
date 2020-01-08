@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.scriptler.tokenmacro;
 
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.model.TaskListener;
 import hudson.model.AbstractBuild;
 import hudson.remoting.VirtualChannel;
@@ -41,7 +42,7 @@ public class ScriptlerTokenMacro extends DataBoundTokenMacro {
 
         VirtualChannel channel;
         if (script.onlyMaster) {
-            channel = MasterComputer.localChannel;
+            channel = FilePath.localChannel;
         } else {
             channel = context.getWorkspace().getChannel();
         }
