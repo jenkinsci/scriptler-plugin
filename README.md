@@ -1,16 +1,4 @@
-Older versions of this plugin may not be safe to use. Please review the
-following warnings before using an older version:
-
--   [Persistent cross-site scripting
-    vulnerability](https://jenkins.io/security/advisory/2017-04-10/)
--   [Cross-site request forgery vulnerabilities in Scriptler script
-    management](https://jenkins.io/security/advisory/2017-04-10/)
--   [Any user can add Scriptler scripts to build
-    configurations](https://jenkins.io/security/advisory/2017-04-10/)
--   [Arbitrary code execution vulnerability in rare
-    circumstances](https://jenkins.io/security/advisory/2017-04-10/)
--   [Any Scriptler script can be executed as part of
-    builds](https://jenkins.io/security/advisory/2017-04-10/)
+# Scriptler Plugin for Jenkins
 
 Scriptler allows you to store/edit groovy scripts and execute it on any
 of the agents/nodes... no need to copy/paste groovy code anymore.
@@ -106,7 +94,7 @@ this:
 
 **optional script header**
 
-``` syntaxhighlighter-pre
+``` groovy
 /*** BEGIN META {
   "name" : "Clear build queue",
   "comment" : "If you accidently trigger a lot of unneeded builds, it is useful to be able to <b>cancel</b> them all",
@@ -136,13 +124,13 @@ two ways
 
 **macro**
 
-``` syntaxhighlighter-pre
+``` 
 ${SCRIPTLER, scriptId="superscript.groovy"}
 ```
 
 **superscript.groovy**
 
-``` syntaxhighlighter-pre
+``` groovy
 def d = new Date()
 return "TODAY is: ${d.toString()} - build number is: ${build.number}"
 ```
