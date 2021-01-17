@@ -45,6 +45,15 @@
 		<url>https://github.com/jenkinsci/scriptler-plugin</url>
   	  <tag>HEAD</tag>
   </scm>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>commons-fileupload</groupId>
+				<artifactId>commons-fileupload</artifactId>
+				<version>1.4</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.jenkins-ci.plugins</groupId>
