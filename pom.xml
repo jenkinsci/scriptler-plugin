@@ -35,7 +35,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.javadoc.skip>true</maven.javadoc.skip>
-		<jenkins.version>2.80</jenkins.version>
+		<jenkins.version>2.282</jenkins.version>
 		<java.level>8</java.level>
 		<findbugs.failOnError>false</findbugs.failOnError>
 	</properties>
@@ -55,8 +55,7 @@
 		<dependency>
 			<groupId>org.jenkins-ci.modules</groupId>
 			<artifactId>sshd</artifactId>
-			<version>2.4</version>
-			<scope>provided</scope><!-- this is in the core -->
+			<version>3.0.1</version>
 		</dependency>
 
 		<dependency>
