@@ -25,7 +25,7 @@ THE SOFTWARE.
 
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
-	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:p="/lib/scriptler">
 	
 	<l:layout permission="${it.scriptlerConfigure}" norefresh="true">
 		<st:include page="sidepanel.jelly" />
@@ -52,22 +52,22 @@ THE SOFTWARE.
 					<f:checkbox name="onlyMaster" checked="${script.onlyMaster}" />
 				</f:entry>
 				<f:block>
-					<table>
+					<p:blockWrapper>
 						<f:optionalBlock name="defineParams" title="${%ParametersDescription}" checked="${!empty(script.parameters)}">
 							<f:entry title="${%Parameters}" field="parameters">
 								<f:repeatable var="param" items="${script.parameters}" name="parameters" noAddButton="true" minimum="1">
-									<table width="100%">
+									<p:blockWrapper style="width:100%">
 										<f:entry>
 											${%ParameterName} <input type="text" name="name" value="${param.name}" size="50"/>
 											${%ParameterDefaultValue} <input type="text" name="value" value="${param.value}" size="80"/>
 											<input type="button" name="delete_button" value="${%DeleteParameter}" class="repeatable-delete show-if-not-only" style="margin-left: 1em;" />
 											<input type="button" name="add_button" value="${%AddParameter}" class="repeatable-add show-if-last" />
 										</f:entry>
-									</table>
+									</p:blockWrapper>
 								</f:repeatable>
 							</f:entry>
 						</f:optionalBlock>
-					</table>
+					</p:blockWrapper>
 				</f:block>					
 				<f:entry title="${%Script}">
 					<textarea id="script" name="script" class="script">
