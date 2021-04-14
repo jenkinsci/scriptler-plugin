@@ -25,7 +25,7 @@ THE SOFTWARE.
 <!--Used for the build step popup "view selected script"-->
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
-	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:p="/lib/scriptler">
 	<script src="${it.pluginResourcePath}lib/codemirror.js"></script>
 	<link rel="stylesheet" href="${it.pluginResourcePath}lib/codemirror.css" ></link>
 	<script src="${it.pluginResourcePath}mode/clike/clike.js"></script>
@@ -55,20 +55,20 @@ THE SOFTWARE.
 						<f:textbox name="comment" value="${script.comment}" disabled="true"/>
 					</f:entry>
                     <f:block>
-	                    <table>
+	                    <p:blockWrapper>
 	                        <f:optionalBlock name="defineParams" title="${%ParamDefinition}" checked="${!empty(script.parameters)}" >
 	                            <f:entry title="${%Parameters}" field="parameters" disabled="true">
 	                                <f:repeatable var="param" items="${script.parameters}" name="parameters" noAddButton="true" minimum="1">
-	                                    <table width="100%">
+	                                    <p:blockWrapper style="width:100%">
 	                                        <f:entry>
 	                                            ${%ParameterName} <input type="text" name="name" value="${param.name}" size="50" disabled="true"/>
 	                                            ${%ParameterDefaultValue} <input type="text" name="value" value="${param.value}" size="80" disabled="true"/>
 	                                        </f:entry>
-	                                    </table>
+	                                    </p:blockWrapper>
 	                                </f:repeatable>
 	                            </f:entry>
 	                        </f:optionalBlock>
-	                    </table>
+	                    </p:blockWrapper>
 	                </f:block>					
 					<f:entry title="${%Script}">
 						<textarea id="script" name="script" style="width:100%; height:20em">
