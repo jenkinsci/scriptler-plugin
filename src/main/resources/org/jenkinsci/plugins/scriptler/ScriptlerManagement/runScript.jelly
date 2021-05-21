@@ -106,7 +106,7 @@ THE SOFTWARE.
 							${%ScriptNotFound}
 						</j:when>
 						<j:otherwise>
-							<j:out value="${script.script}" />
+							${script.script}
 						</j:otherwise>
 					</j:choose>
 				</textarea>
