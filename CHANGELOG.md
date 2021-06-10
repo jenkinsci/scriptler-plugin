@@ -1,24 +1,36 @@
 # CHANGELOG
 
+## Newer releases
+
+See [GitHub Releases](https://github.com/jenkinsci/scriptler-plugin/releases)
+
+## 3.1
+
+Release date: _Sep. 27, 2019_
+
+-   [PR #35](https://github.com/jenkinsci/scriptler-plugin/pull/35) Close
+    `FileReader` resources when reading in script from disk (thanks
+    [@pault1337](https://github.com/pault1337)!)
+
 ## 3.0-alpha 
 
 Release date: _Oct. 10, 2018_
 
 This release is available via the experimental update
-center: <https://jenkins.io/doc/developer/publishing/releasing-experimental-updates/>
+center: <https://jenkins.io/doc/developer/publishing/releasing-experimental-updates/>
 
--   [JENKINS-44242](https://issues.jenkins-ci.org/browse/JENKINS-44242) Persistent
+-   [JENKINS-44242](https://issues.jenkins-ci.org/browse/JENKINS-44242) Persistent
     cross-site scripting
--   [JENKINS-44243](https://issues.jenkins-ci.org/browse/JENKINS-44243)Script
+-   [JENKINS-44243](https://issues.jenkins-ci.org/browse/JENKINS-44243) Script
     management vulnerable to Cross-Site Request Forgery attacks
--   [JENKINS-44245](https://issues.jenkins-ci.org/browse/JENKINS-44245) Scriptler
+-   [JENKINS-44245](https://issues.jenkins-ci.org/browse/JENKINS-44245) Scriptler
     Plugin allows any Scriptler script to be executed as build step  
 
 ## 2.9
 
 Release date: _Oct. 28, 2015_
 
--   [JENKINS-29332](https://issues.jenkins-ci.org/browse/JENKINS-29332) disabled
+-   [JENKINS-29332](https://issues.jenkins-ci.org/browse/JENKINS-29332) disabled
     scritplerweb script catalog
 -   fix NPE when uploading a script [PR
     \#22](https://github.com/jenkinsci/scriptler-plugin/pull/22)
