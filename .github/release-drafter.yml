@@ -1,0 +1,2 @@
+_extends: .github
+tag-template: scriptler-$NEXT_MINOR_VERSION

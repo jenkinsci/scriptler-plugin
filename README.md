@@ -25,7 +25,6 @@ allows you to ease your daily work with the Jenkins script console.
 
 Scriptler adds a new link to the manage Jenkins page:
 
- 
 ![](docs/images/screen-capture-1.gif)
 
 From within the Scriptlers view, you can create ("Add a new Script") or
@@ -139,7 +138,7 @@ return "TODAY is: ${d.toString()} - build number is: ${build.number}"
 
 since version 1.7, one can also run a script using GET or POST to the
 URL */scriptler/run/\<your-script-id\>* with the optional
-parameters node, script (alternative script text), contentType, and the
+parameters node, script (alternative script text), contentType, and the
 parameters defined for your stored script.
 
 e.g.
