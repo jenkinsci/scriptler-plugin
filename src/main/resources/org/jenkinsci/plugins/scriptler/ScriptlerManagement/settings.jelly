@@ -28,13 +28,13 @@
 			<h1>
 				<img width="48" height="48" src="${imagesURL}/48x48/folder.gif" />
 				<img width="16" height="16" src="${imagesURL}/16x16/empty.gif" />
-				<j:out value="${%title}" />
+				${%title}
 			</h1>
 
-			<j:out value="${%intro}" />
+			${%intro}
 			<h4>${%Directories}</h4>
-			<j:out value="${%scriptlerdirectorytext}" /> <code><j:out value="${it.scriptlerHomeDirectory}" /></code><br />
-			<j:out value="${%scriptdirectorytext}" /> <code><j:out value="${it.scriptDirectory}" /></code>
+			${%scriptlerdirectorytext} <code>${it.scriptlerHomeDirectory}</code><br />
+			${%scriptdirectorytext} <code>${it.scriptDirectory}</code>
 			<p />
 			<f:form method="post" action="scriptlerSettings">
 				<j:jelly xmlns:j="jelly:core">

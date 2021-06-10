@@ -32,14 +32,14 @@ THE SOFTWARE.
 			<h1>
 				<img width="48" height="48" src="${imagesURL}/48x48/terminal.gif" />
 				<img width="16" height="16" src="${imagesURL}/16x16/empty.gif" />
-				<j:out value="${%title}" />
+				${%title}
 			</h1>
 
 			<p>
-				<j:out value="${%intro}" />
+				${%intro}
 				<j:if test="!canByPassScriptApproval">
 					<div class="warning">
-						<j:out value="${%modificationRequiredApproval}" />
+						${%modificationRequiredApproval}
 					</div>
 				</j:if>
 				<h2>
@@ -47,8 +47,7 @@ THE SOFTWARE.
 				</h2>
 			</p>
 			<p>
-				<j:out value="${app.markupFormatter.translate(script.comment)}"/>
-				<br />
+				<j:out value="${it.markupFormatter.translate(script.comment)}" />
 			</p>
 
 			<form action="triggerScript" method="post" name="triggerscript">
