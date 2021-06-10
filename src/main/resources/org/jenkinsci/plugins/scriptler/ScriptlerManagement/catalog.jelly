@@ -31,14 +31,14 @@
 			<h1>
 				<img width="48" height="48" src="${imagesURL}/48x48/folder.gif" />
 				<img width="16" height="16" src="${imagesURL}/16x16/empty.gif" />
-				<j:out value="${%title}" />
+				${%title}
 			</h1>
 
-			<j:out value="${%intro}" />
+			${%intro}
 			<br />
             <p />
             <j:if test="${message != null}">
-            <div class="warning"><j:out value="${message}" /></div>
+            <div class="warning">${message}</div>
             </j:if> 
             <j:set var="catalogName" value="${request.getParameter('catName') ?: 'gh'}" />			
 			<l:tabBar>
@@ -60,29 +60,29 @@
 									</form>
 								</td>
 								<td class="pane-header">
-									<j:out value="${t.name}" /> <j:if test="${!empty(c.info.scriptDetailUrl)}"> (<a target="_blank" href="${c.info.getReplacedDetailUrl(t.name, t.id)}">details</a>)</j:if>
+									${t.name} <j:if test="${!empty(c.info.scriptDetailUrl)}"> (<a target="_blank" href="${c.info.getReplacedDetailUrl(t.name, t.id)}">details</a>)</j:if>
 								</td>
 								<td class="pane-header">
-									<j:out value="${%by}" />: 
+									${%by}:
 									<j:forEach var="a" items="${t.authors}">
-									   <j:out value="${a.name} " />
+									   ${a.name}
 									</j:forEach>
 								</td>
 							</tr>
 							<tr>
 								<td colspan="2">
-								    <j:out value="${%required core}" />: <j:out value="${t.core}" />
+								    ${%required core}: ${t.core}
 								</td>
 								<td rowspan="2" valign="top">
-                                    <b><j:out value="${%Parameters}" />:</b><br /> 
+                                    <b>${%Parameters}:</b><br />
                                     <j:forEach var="p" items="${t.parameters}">
-                                       <j:out value="${p} " /><br />
+                                       ${p}<br />
                                     </j:forEach>
                                 </td>
 							</tr>
 							<tr>
 								<td colspan="2" style="white-space: normal;">
-									<j:out value="${t.comment}" />
+									<j:out value="${it.markupFormatter.translate(t.comment)}" />
 								</td>
 							</tr>
 						</j:forEach>

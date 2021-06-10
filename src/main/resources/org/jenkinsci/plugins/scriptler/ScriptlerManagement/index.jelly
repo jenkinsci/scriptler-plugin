@@ -17,19 +17,19 @@
 		<l:main-panel>
 			<h1>
 				<img src="${imagesURL}/48x48/${it.iconFileName}" alt="" />
-				<j:out value="${%title}" />
+				${%title}
 			</h1>
 
-			<j:out value="${%intro}" />
+			${%intro}
 			<h4>
-				<j:out value="${%scriptdirectorytext}" />
+				${%scriptdirectorytext}
 			</h4>
-			<j:out value="${it.scriptDirectory}" />
+			${it.scriptDirectory}
 
 			<div class="excerpt">
 				<j:if test="${it.configuration.scripts.size() == 0}">
 					<h3>
-						<j:out value="${%noScriptsAvailable}" />
+						${%noScriptsAvailable}
 					</h3>
 				</j:if>
 				<table class="pane">
@@ -82,19 +82,17 @@
 								<j:if test="${!empty(t.originScript)}">
 									Origin info:
 									<a target="_blank" href="${it.getCatalogInfoByName(t.originCatalog).getReplacedDetailUrl(t.id, t.originScript)}">
-										<j:out value="${t.originScript}" />
+										${t.originScript}
 									</a>
 									, import date:
-									<j:out value="${t.originDate}" />
+									${t.originDate}
 								</j:if>
 							</td>
 						</tr>
 						<tr valign="left">
-							<td class="pane">
-								<j:out value=" " />
-							</td>
+							<td class="pane" />
 							<td colspan="5" style="white-space: normal;">
-								${empty(t.comment) ? '-' : t.comment}
+								<j:out value="${it.markupFormatter.translate(empty(t.comment) ? '-' : t.comment)}" />
 							</td>
 						</tr>
 					</j:forEach>

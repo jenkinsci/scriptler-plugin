@@ -26,6 +26,8 @@ package org.jenkinsci.plugins.scriptler;
 import hudson.Extension;
 import hudson.PluginWrapper;
 import hudson.Util;
+import hudson.markup.MarkupFormatter;
+import hudson.markup.RawHtmlMarkupFormatter;
 import hudson.model.*;
 import hudson.security.Permission;
 import jenkins.model.Jenkins;
@@ -67,6 +69,8 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     private final static String MASTER = "(master)";
     private final static String ALL = "(all)";
     private final static String ALL_SLAVES = "(all slaves)";
+
+    private static final MarkupFormatter INSTANCE = RawHtmlMarkupFormatter.INSTANCE;
 
     // used in Jelly view
     public Permission getScriptlerRunScripts() {
@@ -133,6 +137,10 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     public ScriptlerConfiguration getConfiguration() {
         return ScriptlerConfiguration.getConfiguration();
+    }
+
+    public MarkupFormatter getMarkupFormatter() {
+        return INSTANCE;
     }
 
     public String getPluginResourcePath() {

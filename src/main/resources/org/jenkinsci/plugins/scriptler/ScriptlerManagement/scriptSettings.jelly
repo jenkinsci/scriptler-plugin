@@ -28,10 +28,10 @@
 			<h1>
 				<img width="48" height="48" src="${imagesURL}/48x48/notepad.gif" />
 				<img width="16" height="16" src="${imagesURL}/16x16/empty.gif" />
-				<j:out value="${%title}" />
+				${%title}
 			</h1>
 			<p>
-				<j:out value="${%intro}" />
+				${%intro}
 				<br />
 				${%Example}
 				<pre>println System.getenv("PATH")</pre>

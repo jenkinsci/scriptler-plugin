@@ -68,8 +68,8 @@
 				var all = new Array();
 	   			all = document.getElementsByName('scriptlerScriptId');
 				for(var i = 0; i &lt; all.length; i++) {
-				    all.item(i).disabled=<j:out value="${!h.hasPermission(it.build,descriptor.requiredPermission)}" />;
-					scriptler_initDetailLink('<j:out value="${rootURL}" />', all.item(i));
+				    all.item(i).disabled=${!h.hasPermission(it.build,descriptor.requiredPermission)};
+					scriptler_initDetailLink('${rootURL}', all.item(i));
 				    scriptler_showParams(all.item(i), all.item(i).value);
 				}
 				

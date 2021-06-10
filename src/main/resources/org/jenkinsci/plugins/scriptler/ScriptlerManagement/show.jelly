@@ -41,7 +41,7 @@ THE SOFTWARE.
 			<h1>
 				<img width="48" height="48" src="${imagesURL}/16x16/document_edit.gif" />
 				<img width="16" height="16" src="${imagesURL}/16x16/empty.gif" />
-				<j:out value="${%title}" />
+				${%title}
 			</h1>
 			<f:form>
 				<j:jelly xmlns:j="jelly:core">
