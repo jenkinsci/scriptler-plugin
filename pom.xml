@@ -19,6 +19,10 @@
 			<name>Dominik Bartholdi</name>
 			<email>-</email>
 		</developer>
+		<developer>
+			<id>mtughan</id>
+			<name>Michael Tughan</name>
+		</developer>
 	</developers>
 	<repositories>
 		<repository>
@@ -37,7 +41,7 @@
         <maven.javadoc.skip>true</maven.javadoc.skip>
 		<jenkins.version>2.121.3</jenkins.version>
 		<java.level>8</java.level>
-		<findbugs.failOnError>false</findbugs.failOnError>
+		<spotbugs.failOnError>false</spotbugs.failOnError>
 	</properties>
 	<scm>
 		<connection>scm:git:git://github.com/jenkinsci/scriptler-plugin.git</connection>
