@@ -27,7 +27,7 @@ function scriptler_descArguments(referenceTag, params){
 			   desc += j+": "+ params[j].name +" ";
 		   }
 		   var descriptionTag = document.getElementsByName('scriptlerParameters').item(i);
-		   descriptionTag.innerHTML = desc;
+		   descriptionTag.innerText = desc;
 	   }
     }	   
 }
