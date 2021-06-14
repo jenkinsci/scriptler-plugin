@@ -1,0 +1,38 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:f="/lib/form">
+    <l:layout title="">
+        <l:main-panel>
+            <h1>
+                <img src="${app.rootUrl}plugin/scriptler/images/Git-Icon-1788C.png" width="48" height="48"/>
+                Accessing Scriptler scripts
+            </h1>
+            <p>${%blurb}</p>
+            <pre>
+${%git_clone_command(it.httpCloneUrl)}
+<j:if test="${it.sshd.actualPort > 0}">${%git_clone_command(it.sshCloneUrl)}</j:if>
+            </pre>
+            <j:if test="${it.hasPushPermission()}">
+                <p>
+                    ${%reset}
+                    <f:form method="POST" action="${app.rootUrl}scriptler/hardResetGit">
+                        <f:submit value="${%Hard reset}"/>
+                    </f:form>
+                </p>
+            </j:if>
+
+            <!--
+            <f:section title="${%Log}">
+                <j:forEach items="${it.log}" var="log">
+                    <p>
+                        <strong>commit ${log.name}</strong><br/>
+                        <strong>Author:</strong> ${log.author}<br/>
+                        <strong>Committer:</strong> ${log.committer}<br/>
+                        <strong>Date:</strong> ${log.commitTime}<br/>
+                        ${log.msg}
+                    </p>
+                </j:forEach>
+            </f:section>
+            -->
+        </l:main-panel>
+    </l:layout>
+</j:jelly>

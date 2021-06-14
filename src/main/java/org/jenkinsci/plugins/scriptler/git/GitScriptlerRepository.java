@@ -7,9 +7,12 @@ import hudson.Extension;
 import hudson.model.RootAction;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -72,6 +75,20 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
      */
     public String getUrlName() {
         return REPOID;
+    }
+
+    public String getHttpCloneUrl() {
+        return Jenkins.get().getRootUrl() + REPOID;
+    }
+
+    public String getSshCloneUrl() throws MalformedURLException {
+        String hostname = new URL(Objects.requireNonNull(Jenkins.get().getRootUrl())).getHost();
+        int port = sshd.getActualPort();
+        return "ssh://" + hostname + ":" + port + "/" + REPOID;
+    }
+
+    public boolean hasPushPermission() {
+        return Jenkins.get().hasPermission(ScriptlerPluginImpl.CONFIGURE);
     }
 
     /**
@@ -169,14 +186,14 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
     }
 
     public static class LogInfo {
-        public final String name, author, commiter, msg;
-        public final Date committime;
+        public final String name, author, committer, msg;
+        public final Date commitTime;
 
-        public LogInfo(String name, String author, String commiter, Date committime, String msg) {
+        public LogInfo(String name, String author, String committer, Date commitTime, String msg) {
             this.name = name;
             this.author = author;
-            this.commiter = commiter;
-            this.committime = committime;
+            this.committer = committer;
+            this.commitTime = commitTime;
             this.msg = msg;
         }
     }
