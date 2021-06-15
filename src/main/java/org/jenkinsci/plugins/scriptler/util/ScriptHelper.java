@@ -1,13 +1,13 @@
 package org.jenkinsci.plugins.scriptler.util;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
+import hudson.FilePath;
 import hudson.model.Computer;
 import hudson.util.StreamTaskListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +20,6 @@ import javax.annotation.CheckForNull;
 import javax.servlet.ServletException;
 
 import jenkins.model.Jenkins;
-import jenkins.model.Jenkins.MasterComputer;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 
@@ -165,9 +164,9 @@ public class ScriptHelper {
         if (node != null && scriptTxt != null) {
 
             try {
-                Computer comp = Jenkins.getInstance().getComputer(node);
+                Computer comp = Jenkins.get().getComputer(node);
                 if (comp == null && "(master)".equals(node)) {
-                    output = MasterComputer.localChannel.call(new GroovyScript(scriptTxt, parameters, false, new StreamTaskListener(sos, StandardCharsets.UTF_8)));
+                    output = FilePath.localChannel.call(new GroovyScript(scriptTxt, parameters, false, new StreamTaskListener(sos, StandardCharsets.UTF_8)));
                 } else if (comp == null) {
                     output = Messages.node_not_found(node) + "\n";
                 } else {

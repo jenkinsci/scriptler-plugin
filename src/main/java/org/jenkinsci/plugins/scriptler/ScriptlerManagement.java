@@ -80,13 +80,13 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     }
     
     public boolean hasAtLeastOneScriptlerPermission(){
-        return Jenkins.getInstance().hasPermission(ScriptlerPluginImpl.RUN_SCRIPTS) || Jenkins.getInstance().hasPermission(ScriptlerPluginImpl.CONFIGURE);
+        return Jenkins.get().hasPermission(ScriptlerPluginImpl.RUN_SCRIPTS) || Jenkins.get().hasPermission(ScriptlerPluginImpl.CONFIGURE);
     }
     
     public void checkAtLeastOneScriptlerPermission(){
         // to be sure the user has either CONFIGURE or RUN_SCRIPTS permission
-        if(!Jenkins.getInstance().hasPermission(ScriptlerPluginImpl.RUN_SCRIPTS)){
-            Jenkins.getInstance().checkPermission(ScriptlerPluginImpl.CONFIGURE);
+        if(!Jenkins.get().hasPermission(ScriptlerPluginImpl.RUN_SCRIPTS)){
+            Jenkins.get().checkPermission(ScriptlerPluginImpl.CONFIGURE);
         }
     }
 
@@ -445,7 +445,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         if(script.script == null){
             req.setAttribute("scriptNotFound", true);
         }else{
-            boolean canByPassScriptApproval = Jenkins.getInstance().hasPermission(Jenkins.RUN_SCRIPTS);
+            boolean canByPassScriptApproval = Jenkins.get().hasPermission(Jenkins.RUN_SCRIPTS);
         
             // we do not want user with approval right to auto-approve script when landing on that page
             if(!ScriptHelper.isApproved(script.script, false)){
@@ -485,7 +485,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
         final Parameter[] parameters = UIHelper.extractParameters(req.getSubmittedForm());
 
-        boolean canByPassScriptApproval = Jenkins.getInstance().hasPermission(Jenkins.RUN_SCRIPTS);
+        boolean canByPassScriptApproval = Jenkins.get().hasPermission(Jenkins.RUN_SCRIPTS);
 
         // set the script info back to the request, to display it together with the output.
         Script originalScript = ScriptHelper.getScript(id, true);
@@ -660,7 +660,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         if(script.script == null){
             req.setAttribute("scriptNotFound", true);
         }else{
-            boolean canByPassScriptApproval = Jenkins.getInstance().hasPermission(Jenkins.RUN_SCRIPTS);
+            boolean canByPassScriptApproval = Jenkins.get().hasPermission(Jenkins.RUN_SCRIPTS);
         
             // we do not want user with approval right to auto-approve script when landing on that page
             if(!ScriptHelper.isApproved(script.script, false)){
@@ -703,7 +703,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     }
 
     private List<String> getSlaveNames() {
-        Computer[] computers = Jenkins.getInstance().getComputers();
+        Computer[] computers = Jenkins.get().getComputers();
         List<String> slaves = new ArrayList<String>();
         for (Computer c : computers) {
             slaves.add(c.getName());
@@ -754,11 +754,11 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     }
 
     public static File getScriptlerHomeDirectory() {
-        return new File(Jenkins.getInstance().getRootDir(), "scriptler");
+        return new File(Jenkins.get().getRootDir(), "scriptler");
     }
 
     private void checkPermission(Permission permission) {
-        Jenkins.getInstance().checkPermission(permission);
+        Jenkins.get().checkPermission(permission);
     }
 
     private String fixFileName(String catalogName, String name) {

@@ -97,7 +97,7 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
      */
     @Override
     protected void checkPushPermission() {
-        Jenkins.getInstance().checkPermission(ScriptlerPluginImpl.CONFIGURE);
+        Jenkins.get().checkPermission(ScriptlerPluginImpl.CONFIGURE);
     }
 
     @Override
