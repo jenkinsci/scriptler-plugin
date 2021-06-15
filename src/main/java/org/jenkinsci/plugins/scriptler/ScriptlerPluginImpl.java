@@ -33,10 +33,6 @@ import java.util.logging.Logger;
 
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
-import hudson.security.Permission;
-import hudson.security.PermissionGroup;
-import hudson.security.PermissionScope;
-import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.scriptler.config.Script;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
 import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
@@ -48,19 +44,6 @@ import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
 public class ScriptlerPluginImpl extends Plugin {
 
     private final static Logger LOGGER = Logger.getLogger(ScriptlerPluginImpl.class.getName());
-    
-    public static final PermissionGroup SCRIPTLER_PERMISSIONS = new PermissionGroup(ScriptlerManagement.class, Messages._permissons_title());
-
-    public static final Permission CONFIGURE = new Permission(
-            SCRIPTLER_PERMISSIONS, "Configure",
-            Messages._permissons_configure_description(), Jenkins.RUN_SCRIPTS,
-            PermissionScope.JENKINS
-    );
-    public static final Permission RUN_SCRIPTS = new Permission(
-            SCRIPTLER_PERMISSIONS, "RunScripts",
-            Messages._permissons_runScript_description(), Jenkins.RUN_SCRIPTS,
-            PermissionScope.JENKINS
-    );
     
     @Override
     public void start() throws Exception {

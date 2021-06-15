@@ -29,7 +29,7 @@ import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptler.Messages;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
-import org.jenkinsci.plugins.scriptler.ScriptlerPluginImpl;
+import org.jenkinsci.plugins.scriptler.ScriptlerPermissions;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.jenkinsci.plugins.scriptler.config.Script;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
@@ -356,7 +356,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {
-            return Jenkins.get().hasPermission(ScriptlerPluginImpl.RUN_SCRIPTS);
+            return Jenkins.get().hasPermission(ScriptlerPermissions.RUN_SCRIPTS);
         }
 
         @Override
@@ -366,7 +366,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
         // used by Jelly views
         public Permission getRequiredPermission() {
-            return ScriptlerPluginImpl.RUN_SCRIPTS;
+            return ScriptlerPermissions.RUN_SCRIPTS;
         }
 
         @Override

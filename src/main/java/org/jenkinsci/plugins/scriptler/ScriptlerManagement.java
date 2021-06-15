@@ -71,22 +71,22 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     // used in Jelly view
     public Permission getScriptlerRunScripts() {
-        return ScriptlerPluginImpl.RUN_SCRIPTS;
+        return ScriptlerPermissions.RUN_SCRIPTS;
     }
     
     // used in Jelly view
     public Permission getScriptlerConfigure() {
-        return ScriptlerPluginImpl.CONFIGURE;
+        return ScriptlerPermissions.CONFIGURE;
     }
     
     public boolean hasAtLeastOneScriptlerPermission(){
-        return Jenkins.get().hasPermission(ScriptlerPluginImpl.RUN_SCRIPTS) || Jenkins.get().hasPermission(ScriptlerPluginImpl.CONFIGURE);
+        return Jenkins.get().hasPermission(ScriptlerPermissions.RUN_SCRIPTS) || Jenkins.get().hasPermission(ScriptlerPermissions.CONFIGURE);
     }
     
     public void checkAtLeastOneScriptlerPermission(){
         // to be sure the user has either CONFIGURE or RUN_SCRIPTS permission
-        if(!Jenkins.get().hasPermission(ScriptlerPluginImpl.RUN_SCRIPTS)){
-            Jenkins.get().checkPermission(ScriptlerPluginImpl.CONFIGURE);
+        if(!Jenkins.get().hasPermission(ScriptlerPermissions.RUN_SCRIPTS)){
+            Jenkins.get().checkPermission(ScriptlerPermissions.CONFIGURE);
         }
     }
 
@@ -151,7 +151,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      */
     @RequirePOST
     public HttpResponse doScriptlerSettings(StaplerRequest res, StaplerResponse rsp, @QueryParameter("disableRemoteCatalog") boolean disableRemoteCatalog) throws IOException {
-        checkPermission(ScriptlerPluginImpl.CONFIGURE);
+        checkPermission(ScriptlerPermissions.CONFIGURE);
 
         ScriptlerConfiguration cfg = getConfiguration();
         cfg.setDisbableRemoteCatalog(disableRemoteCatalog);
@@ -177,7 +177,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      */
     @RequirePOST
     public HttpResponse doDownloadScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("catalog") String catalogName) throws IOException, ServletException {
-        checkPermission(ScriptlerPluginImpl.CONFIGURE);
+        checkPermission(ScriptlerPermissions.CONFIGURE);
 
         ScriptlerConfiguration c = getConfiguration();
         if (c.isDisbableRemoteCatalog()) {
@@ -236,7 +236,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     public HttpResponse doScriptAdd(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("name") String name, @QueryParameter("comment") String comment, @QueryParameter("script") String script,
             @QueryParameter("nonAdministerUsing") boolean nonAdministerUsing, @QueryParameter("onlyMaster") boolean onlyMaster, String originCatalogName, String originId) throws IOException, ServletException {
 
-        checkPermission(ScriptlerPluginImpl.CONFIGURE);
+        checkPermission(ScriptlerPermissions.CONFIGURE);
 
         Parameter[] parameters = UIHelper.extractParameters(req.getSubmittedForm());
 
@@ -311,7 +311,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      */
     @RequirePOST
     public HttpResponse doHardResetGit() throws IOException {
-        checkPermission(ScriptlerPluginImpl.CONFIGURE);
+        checkPermission(ScriptlerPermissions.CONFIGURE);
         getGitRepo().hardReset();
         return new HttpRedirect("../scriptler.git");
     }
@@ -330,7 +330,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      */
     @RequirePOST
     public HttpResponse doRemoveScript(StaplerRequest res, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException {
-        checkPermission(ScriptlerPluginImpl.CONFIGURE);
+        checkPermission(ScriptlerPermissions.CONFIGURE);
 
         // remove the file
         File oldScript = new File(getScriptDirectory(), id);
@@ -364,7 +364,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      */
     @RequirePOST
     public HttpResponse doUploadScript(StaplerRequest req) throws IOException, ServletException {
-        checkPermission(ScriptlerPluginImpl.CONFIGURE);
+        checkPermission(ScriptlerPermissions.CONFIGURE);
         try {
             
 
@@ -435,7 +435,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws ServletException
      */
     public void doRunScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException, ServletException {
-        checkPermission(ScriptlerPluginImpl.RUN_SCRIPTS);
+        checkPermission(ScriptlerPermissions.RUN_SCRIPTS);
 
         Script script = ScriptHelper.getScript(id, true);
         if(script == null) {
@@ -481,7 +481,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      */
     @RequirePOST
     public void doTriggerScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("script") String scriptSrc, @QueryParameter("node") String node) throws IOException, ServletException {
-        checkPermission(ScriptlerPluginImpl.RUN_SCRIPTS);
+        checkPermission(ScriptlerPermissions.RUN_SCRIPTS);
 
         final Parameter[] parameters = UIHelper.extractParameters(req.getSubmittedForm());
 
@@ -544,7 +544,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             @QueryParameter(fixEmpty = true) String node, @QueryParameter(fixEmpty = true) String contentType)
             throws IOException, ServletException {
 
-        checkPermission(ScriptlerPluginImpl.RUN_SCRIPTS);
+        checkPermission(ScriptlerPermissions.RUN_SCRIPTS);
 
         String id = req.getRestOfPath();
         if (id.startsWith("/")) {
@@ -654,7 +654,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws ServletException
      */
     public void doEditScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException, ServletException {
-        checkPermission(ScriptlerPluginImpl.CONFIGURE);
+        checkPermission(ScriptlerPermissions.CONFIGURE);
     
         Script script = ScriptHelper.getScript(id, true);
         if(script.script == null){
