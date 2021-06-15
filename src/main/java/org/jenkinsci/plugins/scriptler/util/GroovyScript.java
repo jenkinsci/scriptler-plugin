@@ -76,7 +76,7 @@ public class GroovyScript extends MasterToSlaveCallable<Object, RuntimeException
     }
 
     public ClassLoader getClassLoader() {
-        return Jenkins.getInstance().getPluginManager().uberClassLoader;
+        return Jenkins.get().getPluginManager().uberClassLoader;
     }
 
     public Object call() throws RuntimeException {

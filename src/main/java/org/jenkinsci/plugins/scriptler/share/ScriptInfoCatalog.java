@@ -11,7 +11,7 @@ import org.apache.tools.ant.ExtensionPoint;
 public abstract class ScriptInfoCatalog<T extends ScriptInfo> extends ExtensionPoint {
 
     public static ExtensionList<ScriptInfoCatalog> all() {
-        return Jenkins.getInstance().getExtensionList(ScriptInfoCatalog.class);
+        return Jenkins.get().getExtensionList(ScriptInfoCatalog.class);
     }
 
     public abstract T getEntryById(String id);

@@ -96,13 +96,13 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
      */
     @Override
     protected void checkPushPermission() {
-        Jenkins.getInstance().checkPermission(ScriptlerPluginImpl.CONFIGURE);
+        Jenkins.get().checkPermission(ScriptlerPluginImpl.CONFIGURE);
     }
 
     @Override
     protected void updateWorkspace(Repository repo) throws IOException, GitAPIException {
         super.updateWorkspace(repo);
-        final ScriptlerConfiguration cfg = Jenkins.getInstance().getExtensionList(ScriptlerManagement.class).get(0).getConfiguration();
+        final ScriptlerConfiguration cfg = Jenkins.get().getExtensionList(ScriptlerManagement.class).get(0).getConfiguration();
         SyncUtil.syncDirWithCfg(ScriptlerManagement.getScriptDirectory(), cfg);
         cfg.save();
     }

@@ -160,7 +160,7 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
     @Restricted(DoNotUse.class) // for Jelly view
     public List<ScriptAndApproved> getSortedScripts(){
         List<Script> sortedScripts;
-        if(Jenkins.getInstance().hasPermission(ScriptlerPluginImpl.CONFIGURE)){
+        if(Jenkins.get().hasPermission(ScriptlerPluginImpl.CONFIGURE)){
             sortedScripts = new ArrayList<Script>(this.getScripts());
         }else{
             sortedScripts = new ArrayList<Script>(this.getUserScripts());

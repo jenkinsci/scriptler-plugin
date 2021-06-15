@@ -1,12 +1,13 @@
 package org.jenkinsci.plugins.scriptler.share.gh;
 
 import hudson.Extension;
-import hudson.Util;
 import hudson.ProxyConfiguration;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfoCatalog;
@@ -82,10 +84,11 @@ public class GHCatalog extends ScriptInfoCatalog<ScriptInfo> {
         try {
 
             final String scriptUrl = CATALOG_INFO.getReplacedDownloadUrl(scriptInfo.getName(), scriptInfo.getId());
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            Util.copyStreamAndClose(ProxyConfiguration.open(new URL(scriptUrl)).getInputStream(), out);
-            return out.toString("UTF-8");
-
+            URLConnection proxyConnection = ProxyConfiguration.open(new URL(scriptUrl));
+            try (InputStream is = proxyConnection.getInputStream(); ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                IOUtils.copy(is, os);
+                return os.toString("UTF-8");
+            }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "not abe to load script sources from GH for: " + scriptInfo, e);
         }
