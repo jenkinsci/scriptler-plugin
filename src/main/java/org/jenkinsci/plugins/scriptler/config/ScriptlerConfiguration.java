@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
-import org.jenkinsci.plugins.scriptler.ScriptlerPluginImpl;
+import org.jenkinsci.plugins.scriptler.ScriptlerPermissions;
 import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
 import org.jenkinsci.plugins.scriptler.util.ByIdSorter;
 
@@ -160,7 +160,7 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
     @Restricted(DoNotUse.class) // for Jelly view
     public List<ScriptAndApproved> getSortedScripts(){
         List<Script> sortedScripts;
-        if(Jenkins.get().hasPermission(ScriptlerPluginImpl.CONFIGURE)){
+        if(Jenkins.get().hasPermission(ScriptlerPermissions.CONFIGURE)){
             sortedScripts = new ArrayList<Script>(this.getScripts());
         }else{
             sortedScripts = new ArrayList<Script>(this.getUserScripts());
