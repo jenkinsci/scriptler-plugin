@@ -24,7 +24,6 @@
 package org.jenkinsci.plugins.scriptler;
 
 import hudson.Extension;
-import hudson.PluginWrapper;
 import hudson.Util;
 import hudson.markup.MarkupFormatter;
 import hudson.markup.RawHtmlMarkupFormatter;
@@ -141,11 +140,6 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     public MarkupFormatter getMarkupFormatter() {
         return INSTANCE;
-    }
-
-    public String getPluginResourcePath() {
-        PluginWrapper wrapper = Jenkins.get().getPluginManager().getPlugin(ScriptlerPluginImpl.class);
-        return Jenkins.get().getRootUrl() + "plugin/" + wrapper.getShortName() + "/";
     }
 
     /**
