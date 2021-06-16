@@ -113,10 +113,8 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
      * 
      * @param fileName
      *            must be relative to repo root dir
-     * @throws Exception
-     *             if an exception occurred
      */
-    public void addSingleFileToRepo(String fileName) throws Exception {
+    public void addSingleFileToRepo(String fileName) {
         try {
             Git git = new Git(this.openRepository());
             AddCommand cmd = git.add();

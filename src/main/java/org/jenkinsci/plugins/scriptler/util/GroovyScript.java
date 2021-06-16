@@ -79,7 +79,7 @@ public class GroovyScript extends MasterToSlaveCallable<Object, RuntimeException
         return Jenkins.get().getPluginManager().uberClassLoader;
     }
 
-    public Object call() throws RuntimeException {
+    public Object call() {
         // if we run locally, cl!=null. Otherwise the delegating classloader will be available as context classloader.
         if (cl == null) {
             cl = Thread.currentThread().getContextClassLoader();

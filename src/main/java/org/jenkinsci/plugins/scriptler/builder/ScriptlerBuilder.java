@@ -340,12 +340,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
             if (StringUtils.isNotBlank(id)) {
                 boolean inPropagateParams = formData.getBoolean("propagateParams");
-                Parameter[] params = null;
-                try {
-                    params = UIHelper.extractParameters(formData);
-                } catch (ServletException e) {
-                    throw new FormException(Messages.parameterExtractionFailed(), "parameters");
-                }
+                Parameter[] params = UIHelper.extractParameters(formData);
                 builder = new ScriptlerBuilder(builderId, id, inPropagateParams, params);
             }
 
