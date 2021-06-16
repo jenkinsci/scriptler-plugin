@@ -52,7 +52,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -236,9 +235,9 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             final Object output;
             if (script.onlyMaster) {
                 // When run on master, make build, launcher, listener available to script
-                output = FilePath.localChannel.call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, listener, launcher, build));
+                output = FilePath.localChannel.call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[0]), true, listener, launcher, build));
             } else {
-                output = launcher.getChannel().call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, listener));
+                output = launcher.getChannel().call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[0]), true, listener));
             }
             if (output instanceof Boolean && Boolean.FALSE.equals(output)) {
                 isOk = false;
@@ -410,7 +409,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                     scriptsForBuilder.add(script);
                 }
             }
-            Collections.sort(scriptsForBuilder, Script.COMPARATOR_BY_NAME);
+            scriptsForBuilder.sort(Script.COMPARATOR_BY_NAME);
             return scriptsForBuilder;
         }
 
