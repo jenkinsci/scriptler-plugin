@@ -173,10 +173,9 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      *            the catalog to download the file from
      * @return same forward as from <code>doScriptAdd</code>
      * @throws IOException
-     * @throws ServletException
      */
     @RequirePOST
-    public HttpResponse doDownloadScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("catalog") String catalogName) throws IOException, ServletException {
+    public HttpResponse doDownloadScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("catalog") String catalogName) throws IOException {
         checkPermission(ScriptlerPermissions.CONFIGURE);
 
         ScriptlerConfiguration c = getConfiguration();
@@ -290,14 +289,9 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * adds/commits the given file to the local git repo - file must be written to scripts directory!
      * 
      * @param finalFileName
-     * @throws IOException
      */
-    private void commitFileToGitRepo(final String finalFileName) throws IOException {
-        try {
-            getGitRepo().addSingleFileToRepo(finalFileName);
-        } catch (Exception e) {
-            throw new IOException("failed to update git repo", e);
-        }
+    private void commitFileToGitRepo(final String finalFileName) {
+        getGitRepo().addSingleFileToRepo(finalFileName);
     }
 
     private GitScriptlerRepository getGitRepo() {
@@ -387,7 +381,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     /**
      * Protected only for testing
      */
-    /*private*/ void saveScript(FileItem fileItem, boolean nonAdministerUsing, String fileName) throws Exception, IOException {
+    /*private*/ void saveScript(FileItem fileItem, boolean nonAdministerUsing, String fileName) throws Exception {
         // upload can only be to/from local catalog
         String fixedFileName = fixFileName(null, fileName);
 

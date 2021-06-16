@@ -1,7 +1,5 @@
 package org.jenkinsci.plugins.scriptler.util;
 
-import javax.servlet.ServletException;
-
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -15,9 +13,8 @@ public class UIHelper {
      * @param req
      *            the request potentially containing parameters
      * @return parameters - might be an empty array, but never <code>null</code>.
-     * @throws ServletException
      */
-    public static Parameter[] extractParameters(JSONObject json) throws ServletException {
+    public static Parameter[] extractParameters(JSONObject json) {
         Parameter[] parameters = new Parameter[0];
         final JSONObject defineParams = json.optJSONObject("defineParams");
         if (defineParams != null && !defineParams.isNullObject()) {

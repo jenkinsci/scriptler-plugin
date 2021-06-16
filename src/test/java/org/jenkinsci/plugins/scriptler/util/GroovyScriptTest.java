@@ -60,7 +60,7 @@ public class GroovyScriptTest {
     }
 
     @Test
-    public void threadSafety() throws Exception {
+    public void threadSafety() throws InterruptedException {
         ArrayBlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(100);
         ThreadPoolExecutor tpe = new ThreadPoolExecutor(5, 5, 10, SECONDS, workQueue);
 

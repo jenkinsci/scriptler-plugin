@@ -332,19 +332,14 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         }
 
         @Override
-        public ScriptlerBuilder newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+        public ScriptlerBuilder newInstance(StaplerRequest req, JSONObject formData) {
             ScriptlerBuilder builder = null;
             String builderId = formData.optString("builderId");
             String id = formData.optString("scriptlerScriptId");
 
             if (StringUtils.isNotBlank(id)) {
                 boolean inPropagateParams = formData.getBoolean("propagateParams");
-                Parameter[] params = null;
-                try {
-                    params = UIHelper.extractParameters(formData);
-                } catch (ServletException e) {
-                    throw new FormException(Messages.parameterExtractionFailed(), "parameters");
-                }
+                Parameter[] params = UIHelper.extractParameters(formData);
                 builder = new ScriptlerBuilder(builderId, id, inPropagateParams, params);
             }
 

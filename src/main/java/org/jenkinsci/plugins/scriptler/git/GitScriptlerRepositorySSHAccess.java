@@ -29,7 +29,7 @@ public class GitScriptlerRepositorySSHAccess extends RepositoryResolver {
      * @see org.jenkinsci.plugins.gitserver.RepositoryResolver#createReceivePack(java.lang.String)
      */
     @Override
-    public ReceivePack createReceivePack(String fullRepositoryName) throws IOException, InterruptedException {
+    public ReceivePack createReceivePack(String fullRepositoryName) throws IOException {
         if (isMine(fullRepositoryName))
             return repo.createReceivePack(repo.openRepository());
         return null;
@@ -39,7 +39,7 @@ public class GitScriptlerRepositorySSHAccess extends RepositoryResolver {
      * @see org.jenkinsci.plugins.gitserver.RepositoryResolver#createUploadPack(java.lang.String)
      */
     @Override
-    public UploadPack createUploadPack(String fullRepositoryName) throws IOException, InterruptedException {
+    public UploadPack createUploadPack(String fullRepositoryName) throws IOException {
         if (isMine(fullRepositoryName))
             return new UploadPack(repo.openRepository());
         return null;

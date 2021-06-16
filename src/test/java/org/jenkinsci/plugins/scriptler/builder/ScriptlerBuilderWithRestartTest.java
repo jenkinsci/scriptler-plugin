@@ -69,7 +69,7 @@ public class ScriptlerBuilderWithRestartTest {
     private static final String SCRIPT_NOT_USABLE = "not_usable.groovy";
 
     @Test
-    public void configRoundtrip() throws Exception {
+    public void configRoundtrip() {
         r.addStep(new Statement() {
             @Override public void evaluate() throws Throwable {
                 r.j.jenkins.setCrumbIssuer(null);
@@ -156,7 +156,7 @@ public class ScriptlerBuilderWithRestartTest {
     }
 
     @Test
-    public void configRoundtripConfigXml() throws Exception {
+    public void configRoundtripConfigXml() {
         r.addStep(new Statement() {
             @Override public void evaluate() throws Throwable {
                 r.j.jenkins.setCrumbIssuer(null);

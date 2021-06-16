@@ -78,7 +78,7 @@ public class SyncUtil {
     /**
      * search into the declared backup directory for backup archives
      */
-    private static List<File> getAvailableScripts(File scriptDirectory) throws IOException {
+    private static List<File> getAvailableScripts(File scriptDirectory) {
         LOGGER.log(Level.FINE, "Listing files of {0}", scriptDirectory.getAbsoluteFile());
 
         File[] scriptFiles = scriptDirectory.listFiles(new FilenameFilter() {
