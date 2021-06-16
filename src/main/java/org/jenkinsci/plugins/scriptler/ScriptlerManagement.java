@@ -24,6 +24,7 @@
 package org.jenkinsci.plugins.scriptler;
 
 import hudson.Extension;
+import hudson.ExtensionList;
 import hudson.Util;
 import hudson.markup.MarkupFormatter;
 import hudson.markup.RawHtmlMarkupFormatter;
@@ -300,7 +301,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     }
 
     private GitScriptlerRepository getGitRepo() {
-        return Jenkins.getInstance().getExtensionList(GitScriptlerRepository.class).get(GitScriptlerRepository.class);
+        return ExtensionList.lookupSingleton(GitScriptlerRepository.class);
     }
 
     /**
@@ -338,9 +339,9 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         }
 
         try {
-            final GitScriptlerRepository gitRepo = Jenkins.getInstance().getExtensionList(GitScriptlerRepository.class).get(GitScriptlerRepository.class);
+            final GitScriptlerRepository gitRepo = ExtensionList.lookupSingleton(GitScriptlerRepository.class);
             gitRepo.rmSingleFileToRepo(id);
-        } catch (Exception e) {
+        } catch (IllegalStateException e) {
             throw new IOException("failed to update git repo", e);
         }
 

@@ -4,6 +4,7 @@
 package org.jenkinsci.plugins.scriptler.git;
 
 import hudson.Extension;
+import hudson.ExtensionList;
 import hudson.model.RootAction;
 
 import java.io.IOException;
@@ -102,7 +103,7 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
     @Override
     protected void updateWorkspace(Repository repo) throws IOException, GitAPIException {
         super.updateWorkspace(repo);
-        final ScriptlerConfiguration cfg = Jenkins.getInstance().getExtensionList(ScriptlerManagement.class).get(0).getConfiguration();
+        final ScriptlerConfiguration cfg = ExtensionList.lookupSingleton(ScriptlerManagement.class).getConfiguration();
         SyncUtil.syncDirWithCfg(ScriptlerManagement.getScriptDirectory(), cfg);
         cfg.save();
     }
@@ -136,10 +137,8 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
      * 
      * @param fileName
      *            must be relative to repo root dir
-     * @throws Exception
-     *             if an exception occurred
      */
-    public void rmSingleFileToRepo(String fileName) throws Exception {
+    public void rmSingleFileToRepo(String fileName) {
         try {
             Git git = new Git(this.openRepository());
             RmCommand cmd = git.rm();

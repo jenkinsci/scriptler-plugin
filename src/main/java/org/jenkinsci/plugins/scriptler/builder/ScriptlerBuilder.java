@@ -7,6 +7,7 @@ import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import hudson.Extension;
+import hudson.ExtensionList;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -23,7 +24,6 @@ import hudson.util.FormApply;
 import hudson.util.VersionNumber;
 import hudson.util.XStream2;
 import jenkins.model.Jenkins;
-import jenkins.model.Jenkins.MasterComputer;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
@@ -416,7 +416,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         }
 
         private ScriptlerManagement getScriptler() {
-            return Jenkins.getInstance().getExtensionList(ScriptlerManagement.class).get(0);
+            return ExtensionList.lookupSingleton(ScriptlerManagement.class);
         }
 
         private ScriptlerConfiguration getConfig() {

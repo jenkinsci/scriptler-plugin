@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.scriptler.tokenmacro;
 
+import hudson.ExtensionList;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FileParameterValue.FileItemImpl;
 import hudson.model.FreeStyleProject;
@@ -25,7 +26,7 @@ public class ScriptlerTokenMacroTest {
     @Test
     public void testExecutesScript() throws Exception {
 
-        final ScriptlerManagement scriptler = j.getInstance().getExtensionList(ScriptlerManagement.class).get(0);
+        final ScriptlerManagement scriptler = ExtensionList.lookupSingleton(ScriptlerManagement.class);
         ScriptlerManagementHelper helper = new ScriptlerManagementHelper(scriptler);
         File f = new File("dummy.groovy");
         FileUtils.writeStringToFile(f, "return \"hello world ${build.number}\"");

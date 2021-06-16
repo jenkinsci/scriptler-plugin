@@ -1,17 +1,14 @@
 package org.jenkinsci.plugins.scriptler.share;
 
 import hudson.ExtensionList;
+import hudson.ExtensionPoint;
 
 import java.util.List;
 
-import jenkins.model.Jenkins;
-
-import org.apache.tools.ant.ExtensionPoint;
-
-public abstract class ScriptInfoCatalog<T extends ScriptInfo> extends ExtensionPoint {
+public abstract class ScriptInfoCatalog<T extends ScriptInfo> implements ExtensionPoint {
 
     public static ExtensionList<ScriptInfoCatalog> all() {
-        return Jenkins.getInstance().getExtensionList(ScriptInfoCatalog.class);
+        return ExtensionList.lookup(ScriptInfoCatalog.class);
     }
 
     public abstract T getEntryById(String id);
