@@ -57,7 +57,7 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
 
     // keep to avoid loading issues with older version
     @Deprecated
-    private transient List<CatalogInfo> catalogInfos = new ArrayList<CatalogInfo>();
+    private transient List<CatalogInfo> catalogInfos = new ArrayList<>();
 
     private boolean disbableRemoteCatalog = false;
 
@@ -100,12 +100,12 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
             // As it might be that we have an unsorted set, we ensure the
             // sorting at load time.
             ScriptlerConfiguration sc = (ScriptlerConfiguration) f.read();
-            SortedSet<Script> sorted = new TreeSet<Script>(new ByIdSorter());
+            SortedSet<Script> sorted = new TreeSet<>(new ByIdSorter());
             sorted.addAll(sc.getScripts());
             sc.setScripts(sorted);
             return sc;
         } else {
-            return new ScriptlerConfiguration(new TreeSet<Script>(new ByIdSorter()));
+            return new ScriptlerConfiguration(new TreeSet<>(new ByIdSorter()));
         }
     }
 
@@ -161,14 +161,14 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
     public List<ScriptAndApproved> getSortedScripts(){
         List<Script> sortedScripts;
         if(Jenkins.get().hasPermission(ScriptlerPermissions.CONFIGURE)){
-            sortedScripts = new ArrayList<Script>(this.getScripts());
+            sortedScripts = new ArrayList<>(this.getScripts());
         }else{
-            sortedScripts = new ArrayList<Script>(this.getUserScripts());
+            sortedScripts = new ArrayList<>(this.getUserScripts());
         }
 
         Collections.sort(sortedScripts, Script.COMPARATOR_BY_NAME);
 
-        List<ScriptAndApproved> result = new ArrayList<ScriptAndApproved>(sortedScripts.size());
+        List<ScriptAndApproved> result = new ArrayList<>(sortedScripts.size());
         for (Script script : sortedScripts) {
             Script scriptWithSrc = ScriptHelper.getScript(script.getId(), true);
             Boolean approved = null;

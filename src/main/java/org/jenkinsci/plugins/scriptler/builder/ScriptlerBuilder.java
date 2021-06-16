@@ -88,7 +88,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
     }
 
     private @Nonnull Map<String, String> checkGenericData() {
-        Map<String, String> errors = new HashMap<String, String>();
+        Map<String, String> errors = new HashMap<>();
 
         Script script = ScriptHelper.getScript(scriptId, true);
         if (script != null) {
@@ -217,7 +217,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         try {
 
             // expand the parameters before passing these to the execution, this is to allow any token macro to resolve parameter values
-            List<Parameter> expandedParams = new LinkedList<Parameter>();
+            List<Parameter> expandedParams = new LinkedList<>();
 
             if (propagateParams) {
                 final ParametersAction paramsAction = build.getAction(ParametersAction.class);
@@ -405,7 +405,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         public List<Script> getScripts() {
             // TODO currently only script for RUN_SCRIPT permissions are returned?
             Set<Script> scripts = getConfig().getScripts();
-            List<Script> scriptsForBuilder = new ArrayList<Script>();
+            List<Script> scriptsForBuilder = new ArrayList<>();
             for (Script script : scripts) {
                 if (script.nonAdministerUsing) {
                     scriptsForBuilder.add(script);
@@ -444,14 +444,14 @@ public class ScriptlerBuilder extends Builder implements Serializable {
      * Notify the user with multiple message about the validation that failed
      */
     private static class MultipleErrorFormValidation extends RuntimeException implements HttpResponse {
-        private Map<String, String> fieldToMessage = new HashMap<String, String>();
+        private Map<String, String> fieldToMessage = new HashMap<>();
 
         public MultipleErrorFormValidation(Map<String, String> fieldToMessage) {
             this.fieldToMessage = fieldToMessage;
         }
 
         private String getAggregatedMessage(){
-            List<String> errorMessageList = new ArrayList<String>();
+            List<String> errorMessageList = new ArrayList<>();
             for (Map.Entry<String, String> error : fieldToMessage.entrySet()) {
                 errorMessageList.add(buildMessageForField(error.getKey(), error.getValue()));
             }
