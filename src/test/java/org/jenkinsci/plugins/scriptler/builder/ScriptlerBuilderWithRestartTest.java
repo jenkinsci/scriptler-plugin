@@ -46,6 +46,8 @@ import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -89,20 +91,20 @@ public class ScriptlerBuilderWithRestartTest {
 
                 final String projectName = project.getName();
                 request.setRequestParameters(Arrays.asList(new NameValuePair("json", JSONObject.fromObject(
-                        new HashMap() {{
+                        new HashMap<String, Object>() {{
                             put("name", projectName);
-                            put("builder", new HashMap() {{
+                            put("builder", new HashMap<String, Object>() {{
                                 put("kind", ScriptlerBuilder.class.getName());
                                 put("builderId", "");
                                 put("scriptlerScriptId", SCRIPT_USABLE_1);
                                 put("propagateParams", true);
-                                put("defineParams", new HashMap() {{
+                                put("defineParams", new HashMap<String, List<Map<String, String>>>() {{
                                     put("parameters", Arrays.asList(
-                                            new HashMap() {{
+                                            new HashMap<String, String>() {{
                                                 put("name", "param1");
                                                 put("value", "value1");
                                             }},
-                                            new HashMap() {{
+                                            new HashMap<String, String>() {{
                                                 put("name", "param2");
                                                 put("value", "value2");
                                             }}
