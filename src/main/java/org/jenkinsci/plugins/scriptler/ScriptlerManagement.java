@@ -24,6 +24,7 @@
 package org.jenkinsci.plugins.scriptler;
 
 import hudson.Extension;
+import hudson.ExtensionList;
 import hudson.Util;
 import hudson.markup.MarkupFormatter;
 import hudson.markup.RawHtmlMarkupFormatter;
@@ -308,7 +309,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     }
 
     private GitScriptlerRepository getGitRepo() {
-        return Jenkins.get().getExtensionList(GitScriptlerRepository.class).get(GitScriptlerRepository.class);
+        return ExtensionList.lookupSingleton(GitScriptlerRepository.class);
     }
 
     /**
@@ -346,9 +347,9 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         }
 
         try {
-            final GitScriptlerRepository gitRepo = Jenkins.get().getExtensionList(GitScriptlerRepository.class).get(GitScriptlerRepository.class);
+            final GitScriptlerRepository gitRepo = ExtensionList.lookupSingleton(GitScriptlerRepository.class);
             gitRepo.rmSingleFileToRepo(id);
-        } catch (Exception e) {
+        } catch (IllegalStateException e) {
             throw new IOException("failed to update git repo", e);
         }
 
@@ -664,7 +665,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         checkPermission(ScriptlerPermissions.CONFIGURE);
     
         Script script = ScriptHelper.getScript(id, true);
-        if(script.script == null){
+        if(script == null || script.script == null){
             req.setAttribute("scriptNotFound", true);
         }else{
             boolean canByPassScriptApproval = Jenkins.get().hasPermission(Jenkins.RUN_SCRIPTS);

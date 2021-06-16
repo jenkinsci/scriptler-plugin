@@ -28,6 +28,7 @@ import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
 import com.gargoylesoftware.htmlunit.xml.XmlPage;
+import hudson.ExtensionList;
 import hudson.model.FileParameterValue;
 import hudson.model.FreeStyleProject;
 import net.sf.json.JSONObject;
@@ -71,7 +72,7 @@ public class ScriptlerBuilderWithRestartTest {
             @Override public void evaluate() throws Throwable {
                 r.j.jenkins.setCrumbIssuer(null);
 
-                ScriptlerManagement scriptler = r.j.jenkins.getExtensionList(ScriptlerManagement.class).get(0);
+                ScriptlerManagement scriptler = ExtensionList.lookupSingleton(ScriptlerManagement.class);
                 ScriptlerManagementHelper helper = new ScriptlerManagementHelper(scriptler);
 
                 setupScript(helper, SCRIPT_USABLE_1, true);
@@ -158,7 +159,7 @@ public class ScriptlerBuilderWithRestartTest {
             @Override public void evaluate() throws Throwable {
                 r.j.jenkins.setCrumbIssuer(null);
 
-                ScriptlerManagement scriptler = r.j.jenkins.getExtensionList(ScriptlerManagement.class).get(0);
+                ScriptlerManagement scriptler = ExtensionList.lookupSingleton(ScriptlerManagement.class);
                 ScriptlerManagementHelper helper = new ScriptlerManagementHelper(scriptler);
 
                 setupScript(helper, SCRIPT_USABLE_1, true);

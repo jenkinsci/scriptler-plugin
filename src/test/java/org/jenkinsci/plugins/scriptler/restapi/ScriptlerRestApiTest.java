@@ -5,6 +5,7 @@ import static org.junit.Assert.fail;
 
 import com.gargoylesoftware.htmlunit.html.*;
 //import com.gargoylesoftware.htmlunit.javascript.host.URL;
+import hudson.ExtensionList;
 import hudson.Functions;
 import hudson.model.FileParameterValue.FileItemImpl;
 
@@ -36,7 +37,7 @@ public class ScriptlerRestApiTest {
 
     @Before
     public void setup() throws Exception {
-        final ScriptlerManagement scriptler = j.getInstance().getExtensionList(ScriptlerManagement.class).get(0);
+        final ScriptlerManagement scriptler = ExtensionList.lookupSingleton(ScriptlerManagement.class);
         ScriptlerManagementHelper helper = new ScriptlerManagementHelper(scriptler);
         saveFile(helper, SCRIPT_ID, "print \"hello $arg1, this is $arg2.\"");
 
@@ -54,7 +55,7 @@ public class ScriptlerRestApiTest {
     @Test
     @Issue("SECURITY-691")
     public void fixFolderTraversalThroughScriptId() throws Exception{
-        ScriptlerManagement scriptler = j.getInstance().getExtensionList(ScriptlerManagement.class).get(0);
+        ScriptlerManagement scriptler = ExtensionList.lookupSingleton(ScriptlerManagement.class);
         ScriptlerManagementHelper helper = new ScriptlerManagementHelper(scriptler);
         
         String maliciousCode = "print 'hello'";
