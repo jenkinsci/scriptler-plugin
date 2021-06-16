@@ -109,7 +109,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             return;
         }
 
-        Project project = retrieveProjectUsingCurrentRequest();
+        Project<?, ?> project = retrieveProjectUsingCurrentRequest();
         if(project != null){
             if(!hasSameScriptlerBuilderInProject(project, this)){
                 if(StringUtils.isBlank(builderId)){
@@ -135,7 +135,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         return this;
     }
 
-    private boolean hasSameScriptlerBuilderInProject(@Nonnull Project project, @Nonnull ScriptlerBuilder targetBuilder){
+    private boolean hasSameScriptlerBuilderInProject(@Nonnull Project<?, ?> project, @Nonnull ScriptlerBuilder targetBuilder){
         List<ScriptlerBuilder> allScriptlerBuilders = _getAllScriptlerBuildersFromProject(project);
         for (ScriptlerBuilder builder : allScriptlerBuilders) {
             if(targetBuilder.equals(builder)){
@@ -146,15 +146,14 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         return false;
     }
 
-    @SuppressWarnings("unchecked")
-    private @Nonnull List<ScriptlerBuilder> _getAllScriptlerBuildersFromProject(@Nonnull Project project){
+    private @Nonnull List<ScriptlerBuilder> _getAllScriptlerBuildersFromProject(@Nonnull Project<?, ?> project){
         return project.getBuildersList().getAll(ScriptlerBuilder.class);
     }
 
     private @CheckForNull Project<?, ?> retrieveProjectUsingCurrentRequest(){
         StaplerRequest currentRequest = Stapler.getCurrentRequest();
         if(currentRequest != null) {
-            Project project = Stapler.getCurrentRequest().findAncestorObject(Project.class);
+            Project<?, ?> project = Stapler.getCurrentRequest().findAncestorObject(Project.class);
             if (project != null) {
                 return project;
             }

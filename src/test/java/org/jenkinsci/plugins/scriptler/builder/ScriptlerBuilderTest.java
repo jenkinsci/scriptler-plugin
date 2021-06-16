@@ -112,20 +112,20 @@ public class ScriptlerBuilderTest {
 
         final String projectName = project.getName();
         request.setRequestParameters(Arrays.asList(new NameValuePair("json", JSONObject.fromObject(
-                new HashMap() {{
+                new HashMap<String, Object>() {{
                     put("name", projectName);
-                    put("builder", new HashMap() {{
+                    put("builder", new HashMap<String, Object>() {{
                         put("kind", ScriptlerBuilder.class.getName());
                         put("builderId", "");
                         put("scriptlerScriptId", SCRIPT_USABLE_1);
                         put("propagateParams", true);
-                        put("defineParams", new HashMap() {{
+                        put("defineParams", new HashMap<String, List<Map<String, String>>>() {{
                             put("parameters", Arrays.asList(
-                                    new HashMap() {{
+                                    new HashMap<String, String>() {{
                                         put("name", "param1");
                                         put("value", "value1");
                                     }},
-                                    new HashMap() {{
+                                    new HashMap<String, String>() {{
                                         put("name", "param2");
                                         put("value", "value2");
                                     }}
@@ -473,10 +473,10 @@ public class ScriptlerBuilderTest {
     ) throws Exception {
         assertTrue(builderScriptAlternateId.length % 2 == 0);
 
-        final List builders = new ArrayList();
+        final List<Map<String, Object>> builders = new ArrayList<>();
         for (int i = 0; i < builderScriptAlternateId.length; i += 2) {
             final int fi = i;
-            builders.add(new HashMap() {{
+            builders.add(new HashMap<String, Object>() {{
                 put("kind", ScriptlerBuilder.class.getName());
                 put("builderId", builderScriptAlternateId[fi]);
                 put("scriptlerScriptId", builderScriptAlternateId[fi + 1]);
@@ -490,7 +490,7 @@ public class ScriptlerBuilderTest {
         request.setRequestParameters(Arrays.asList(
                 new NameValuePair("description", description),
                 new NameValuePair("json", JSONObject.fromObject(
-                        new HashMap() {{
+                        new HashMap<String, Object>() {{
                             put("name", project.getName());
                             put("description", description);
                             put("builder", builders);
@@ -545,13 +545,13 @@ public class ScriptlerBuilderTest {
         }
     }
 
-    private String retrieveXmlConfigForProject(JenkinsRule.WebClient wc, Project p) throws Exception {
+    private String retrieveXmlConfigForProject(JenkinsRule.WebClient wc, Project<?, ?> p) throws Exception {
         XmlPage xmlPage = wc.goToXml(p.getShortUrl() + "config.xml");
         j.assertGoodStatus(xmlPage);
         return xmlPage.getWebResponse().getContentAsString();
     }
 
-    private HtmlPage postXmlConfigForProject(JenkinsRule.WebClient wc, Project p, String xml) throws Exception {
+    private HtmlPage postXmlConfigForProject(JenkinsRule.WebClient wc, Project<?, ?> p, String xml) throws Exception {
         WebRequest request = new WebRequest(new URL(p.getAbsoluteUrl() + "config.xml"), HttpMethod.POST);
         request.setRequestBody(xml);
         request.setEncodingType(null);
@@ -638,7 +638,7 @@ public class ScriptlerBuilderTest {
         assertEquals(countAfter, countBefore);
     }
 
-    private int getNumberOfScriptlerBuilder(Project project) {
+    private int getNumberOfScriptlerBuilder(Project<?, ?> project) {
         return project.getBuildersList().getAll(ScriptlerBuilder.class).size();
     }
 

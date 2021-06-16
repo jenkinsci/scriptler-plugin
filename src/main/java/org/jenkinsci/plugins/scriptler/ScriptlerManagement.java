@@ -184,10 +184,10 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             return new HttpRedirect("index");
         }
 
-        for (ScriptInfoCatalog scriptInfoCatalog : ScriptInfoCatalog.all()) {
+        for (ScriptInfoCatalog<ScriptInfo> scriptInfoCatalog : getCatalogs()) {
             if (catalogName.equals(scriptInfoCatalog.getInfo().name)) {
                 final ScriptInfo info = scriptInfoCatalog.getEntryById(id);
-                final String source = scriptInfoCatalog.getScriptSource(info);
+                final String source = scriptInfoCatalog.getScriptSource(scriptInfoCatalog.getEntryById(id));
                 final List<Parameter> paramList = new ArrayList<>();
                 for (String paramName : info.getParameters()) {
                     paramList.add(new Parameter(paramName, null));
@@ -716,13 +716,13 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * 
      * @return the catalog
      */
-    public List<ScriptInfoCatalog> getCatalogs() {
+    public List<? extends ScriptInfoCatalog<ScriptInfo>> getCatalogs() {
         return ScriptInfoCatalog.all();
     }
 
     public ScriptInfoCatalog<? extends ScriptInfo> getCatalogByName(String catalogName) {
         if (StringUtils.isNotBlank(catalogName)) {
-            for (ScriptInfoCatalog<? extends ScriptInfo> sic : getCatalogs()) {
+            for (ScriptInfoCatalog<ScriptInfo> sic : getCatalogs()) {
                 final CatalogInfo info = sic.getInfo();
                 if (catalogName.equals(info.name)) {
                     return sic;
@@ -734,7 +734,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     public CatalogInfo getCatalogInfoByName(String catalogName) {
         if (StringUtils.isNotBlank(catalogName)) {
-            for (ScriptInfoCatalog<? extends ScriptInfo> sic : getCatalogs()) {
+            for (ScriptInfoCatalog<ScriptInfo> sic : getCatalogs()) {
                 final CatalogInfo info = sic.getInfo();
                 if (catalogName.equals(info.name)) {
                     return info;
