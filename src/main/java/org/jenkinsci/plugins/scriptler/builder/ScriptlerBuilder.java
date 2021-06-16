@@ -3,7 +3,6 @@
  */
 package org.jenkinsci.plugins.scriptler.builder;
 
-import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import hudson.Extension;
@@ -21,9 +20,9 @@ import hudson.security.Permission;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormApply;
-import hudson.util.VersionNumber;
 import hudson.util.XStream2;
 import jenkins.model.Jenkins;
+import jenkins.util.xstream.CriticalXStreamException;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
@@ -48,8 +47,6 @@ import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -65,7 +62,7 @@ import static hudson.util.QuotedStringTokenizer.quote;
 
 /**
  * @author Dominik Bartholdi (imod)
- * 
+ *
  */
 public class ScriptlerBuilder extends Builder implements Serializable {
     private static final AtomicInteger CURRENT_ID = new AtomicInteger();
@@ -181,7 +178,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
         final Script script = ScriptHelper.getScript(scriptId, true);
-    
+
         if (script == null) {
             if (StringUtils.isBlank(scriptId)) {
                 LOGGER.log(Level.WARNING, "The script id was blank for the build {0}:{1}", new Object[]{build.getProject().getName(), build.getDisplayName()});
@@ -193,25 +190,25 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                 listener.getLogger().println(Messages.scriptNotFound(scriptId));
             }
             return false;
-        } 
-        
+        }
+
         boolean isOk = false;
         if (!script.nonAdministerUsing) {
             listener.getLogger().println(Messages.scriptNotUsableInBuildStep(script.getName()));
-            LOGGER.log(Level.WARNING, "The script [{0} ({1})] is not allowed to be executed in a build, check its configuration. It concerns the build [{2}:{3}]", 
+            LOGGER.log(Level.WARNING, "The script [{0} ({1})] is not allowed to be executed in a build, check its configuration. It concerns the build [{2}:{3}]",
                     new Object[]{script.getName(), script.getId(), build.getProject().getName(), build.getDisplayName()}
                     );
             return false;
         }
-        
+
         if(!ScriptHelper.isApproved(script.script)){
             listener.getLogger().println(Messages.scriptNotApprovedYet(script.getName()));
-            LOGGER.log(Level.WARNING, "The script [{0} ({1})] is not approved yet, consider asking your administrator to approve it. It concerns the build [{2}:{3}]", 
+            LOGGER.log(Level.WARNING, "The script [{0} ({1})] is not approved yet, consider asking your administrator to approve it. It concerns the build [{2}:{3}]",
                     new Object[]{script.getName(), script.getId(), build.getProject().getName(), build.getDisplayName()}
                     );
             return false;
         }
-        
+
         try {
 
             // expand the parameters before passing these to the execution, this is to allow any token macro to resolve parameter values
@@ -294,14 +291,10 @@ public class ScriptlerBuilder extends Builder implements Serializable {
      * Automatically registered by {@link XStream2.AssociatedConverterImpl#findConverter(Class)}
      * Process the class regularly but add a check after that
      */
+    @SuppressWarnings("unused") // discovered dynamically
     public static final class ConverterImpl extends XStream2.PassthruConverter<ScriptlerBuilder>{
         public ConverterImpl(XStream2 xstream) {
             super(xstream);
-        }
-
-        @Override
-        public boolean canConvert(Class type) {
-            return super.canConvert(type);
         }
 
         @Override
@@ -314,37 +307,8 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                     conversionException.add(error.getKey(), error.getValue());
                 }
 
-                //TODO when upgrading to 1.625+, we could remove this code
-                if(!Jenkins.getVersion().isOlderThan(new VersionNumber("1.625"))){
-                    XStreamException criticalXStreamException = buildCriticalXStreamException(conversionException);
-                    throw criticalXStreamException;
-                }
-
-                // go directly to XmlFile#unmarshal catch
-                throw new Error(conversionException);
+                throw new CriticalXStreamException(conversionException);
             }
-        }
-
-        @SuppressWarnings("unchecked")
-        private @CheckForNull XStreamException buildCriticalXStreamException(ConversionException conversionException){
-            XStreamException xStreamException = null;
-            try {
-                Class<? extends XStreamException> criticalXStreamExceptionClass = (Class<? extends XStreamException>) this.getClass().getClassLoader().loadClass("jenkins.util.xstream.CriticalXStreamException");
-                Constructor<? extends XStreamException> constructor = criticalXStreamExceptionClass.getConstructor(XStreamException.class);
-                xStreamException = constructor.newInstance(conversionException);
-            } catch (ClassNotFoundException e) {
-                LOGGER.log(Level.SEVERE, "The CriticalXStreamException was not found using jenkins.util.xstream.CriticalXStreamException", e);
-            } catch (NoSuchMethodException e) {
-                LOGGER.log(Level.SEVERE, "The CriticalXStreamException does not have the expected constructor accepting only XStreamException as parameter", e);
-            } catch (IllegalAccessException e) {
-                LOGGER.log(Level.SEVERE, "Problem during invocation of constructor", e);
-            } catch (InstantiationException e) {
-                LOGGER.log(Level.SEVERE, "Problem during invocation of constructor", e);
-            } catch (InvocationTargetException e) {
-                LOGGER.log(Level.SEVERE, "Problem during invocation of constructor", e);
-            }
-
-            return xStreamException;
         }
     }
 
@@ -423,7 +387,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
         /**
          * gets the argument description to be displayed on the screen when selecting a config in the dropdown
-         * 
+         *
          * @param scriptlerScriptId
          *            the config id to get the arguments description for
          * @return the description
