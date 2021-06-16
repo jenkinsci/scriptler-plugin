@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
@@ -68,7 +67,7 @@ public class GHCatalog implements ScriptInfoCatalog<ScriptInfo> {
         List<ScriptInfo> sortedScriptInfoList = Arrays.asList(scriptInfoArray);
 
         if(comparator != null)
-            Collections.sort(sortedScriptInfoList, comparator);
+            sortedScriptInfoList.sort(comparator);
     
         return sortedScriptInfoList;
     }

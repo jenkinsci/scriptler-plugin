@@ -196,7 +196,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
                     paramList.add(new Parameter(paramName, null));
                 }
 
-                Parameter[] parameters = paramList.toArray(new Parameter[paramList.size()]);
+                Parameter[] parameters = paramList.toArray(new Parameter[0]);
 
                 final String finalName = saveScriptAndForward(id, info.getName(), info.getComment(), source, false, false, catalogName, id, parameters);
                 return new HttpRedirect("editScript?id=" + finalName);
@@ -607,7 +607,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
                 params.put(param.getKey(), new Parameter(param.getKey(), param.getValue()[0]));
             }
         }
-        Parameter[] paramArray = params.values().toArray(new Parameter[params.size()]);
+        Parameter[] paramArray = params.values().toArray(new Parameter[0]);
         return paramArray;
     }
 
@@ -625,9 +625,9 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
                 slaves.remove(MASTER);
             }
         } else {
-            slaves = Arrays.asList(nameAlias);
+            slaves = Collections.singletonList(nameAlias);
         }
-        return slaves.toArray(new String[slaves.size()]);
+        return slaves.toArray(new String[0]);
     }
 
     /**

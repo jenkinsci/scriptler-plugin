@@ -31,7 +31,10 @@ import hudson.util.XStream2;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -68,7 +71,7 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
      */
     @Deprecated
     private boolean allowRunScriptPermission = false;
-    
+
     /**
      * /!\ keep to avoid loading issues with older version
      * The regular permission required is Scriptler/Configure now
@@ -166,7 +169,7 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
             sortedScripts = new ArrayList<>(this.getUserScripts());
         }
 
-        Collections.sort(sortedScripts, Script.COMPARATOR_BY_NAME);
+        sortedScripts.sort(Script.COMPARATOR_BY_NAME);
 
         List<ScriptAndApproved> result = new ArrayList<>(sortedScripts.size());
         for (Script script : sortedScripts) {
@@ -179,21 +182,21 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
         }
         return result;
     }
-    
+
     @Restricted(NoExternalUse.class) // for Jelly view
     public static class ScriptAndApproved {
         private Script script;
         private Boolean approved;
-    
+
         private ScriptAndApproved(Script script, Boolean approved) {
             this.script = script;
             this.approved = approved;
         }
-    
+
         public Script getScript() {
             return script;
         }
-    
+
         public Boolean getApproved() {
             return approved;
         }
