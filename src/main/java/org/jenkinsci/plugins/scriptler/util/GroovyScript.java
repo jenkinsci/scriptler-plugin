@@ -37,7 +37,7 @@ public class GroovyScript extends MasterToSlaveCallable<Object, RuntimeException
     @SuppressWarnings("unchecked")
     private static Map<String, ConcurrentLinkedQueue<Script>> cache = Collections.synchronizedMap(new LRUMap(10));
 
-    private static final Set<String> DEFAULT_VARIABLES = new HashSet<String>();
+    private static final Set<String> DEFAULT_VARIABLES = new HashSet<>();
     static {
         DEFAULT_VARIABLES.add("out");
         DEFAULT_VARIABLES.add("build");
@@ -106,7 +106,7 @@ public class GroovyScript extends MasterToSlaveCallable<Object, RuntimeException
 
         ConcurrentLinkedQueue<Script> scriptPool = cache.get(script);
         if (scriptPool == null) {
-            scriptPool = new ConcurrentLinkedQueue<Script>();
+            scriptPool = new ConcurrentLinkedQueue<>();
             cache.put(script, scriptPool);
             scriptPool = cache.get(script);
         }

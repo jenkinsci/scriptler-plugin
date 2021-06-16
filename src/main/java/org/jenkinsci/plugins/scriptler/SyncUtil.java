@@ -56,7 +56,7 @@ public class SyncUtil {
 
         // check if all scripts in the configuration are physically available
         // if not, mark it as missing
-        Set<Script> unavailableScripts = new HashSet<Script>();
+        Set<Script> unavailableScripts = new HashSet<>();
         for (Script s : cfg.getScripts()) {
             // only check the scripts belonging to this repodir
             if ((new File(scriptDirectory, s.getScriptPath()).exists())) {
@@ -89,7 +89,7 @@ public class SyncUtil {
 
         List<File> fileList;
         if (scriptFiles == null) {
-            fileList = new ArrayList<File>();
+            fileList = new ArrayList<>();
         } else {
             fileList = Arrays.asList(scriptFiles);
         }

@@ -24,13 +24,13 @@ public class ScriptInfo implements NamedResource {
 
     public void addAuthor(Author author) {
         if (authors == null) {
-            authors = new ArrayList<ScriptInfo.Author>();
+            authors = new ArrayList<>();
         }
         authors.add(author);
     }
 
     public List<String> getParameters() {
-        return parameters == null ? new ArrayList<String>() : parameters;
+        return parameters == null ? new ArrayList<>() : parameters;
     }
 
     public void setParameters(List<String> parameters) {
@@ -42,7 +42,7 @@ public class ScriptInfo implements NamedResource {
     }
 
     public List<Author> getAuthors() {
-        return authors == null ? new ArrayList<ScriptInfo.Author>() : authors;
+        return authors == null ? new ArrayList<>() : authors;
     }
 
     @Override

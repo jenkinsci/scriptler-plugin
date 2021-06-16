@@ -170,7 +170,7 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
     }
 
     public Collection<LogInfo> getLog() throws IOException {
-        Collection<LogInfo> msgs = new ArrayList<LogInfo>();
+        Collection<LogInfo> msgs = new ArrayList<>();
         try {
             // TODO find a way to limit the number of log entries - e.g. ..log().addRange(...).call()
             for (RevCommit c : new Git(this.openRepository()).log().call()) {

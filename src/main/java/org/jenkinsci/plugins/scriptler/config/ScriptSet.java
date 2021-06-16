@@ -38,7 +38,7 @@ public class ScriptSet {
     private static final Logger LOGGER = Logger.getLogger(ScriptSet.class.getName());
 
     // have it sorted
-    protected Set<Script> scriptSet = new TreeSet<Script>();
+    protected Set<Script> scriptSet = new TreeSet<>();
 
     public Script getScriptById(String id) {
         for (Script scr : scriptSet) {
@@ -81,7 +81,7 @@ public class ScriptSet {
     }
 
     public final Set<Script> getUserScripts() {
-        Set<Script> userScripts = new TreeSet<Script>();
+        Set<Script> userScripts = new TreeSet<>();
         for (Script script : scriptSet) {
             if (script.nonAdministerUsing) {
                 userScripts.add(script);

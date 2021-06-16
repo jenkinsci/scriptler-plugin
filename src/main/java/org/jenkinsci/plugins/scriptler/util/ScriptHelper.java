@@ -47,7 +47,7 @@ public class ScriptHelper {
     private final static Logger LOGGER = Logger.getLogger(ScriptHelper.class.getName());
 
     private static final Pattern SCRIPT_META_PATTERN = Pattern.compile(".*BEGIN META(.+?)END META.*", Pattern.DOTALL);
-    private static final Map<String, Class<?>> JSON_CLASS_MAPPING = new HashMap<String, Class<?>>();
+    private static final Map<String, Class<?>> JSON_CLASS_MAPPING = new HashMap<>();
     static {
         JSON_CLASS_MAPPING.put("authors", Author.class);
         JSON_CLASS_MAPPING.put("parameters", Parameter.class);

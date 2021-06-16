@@ -61,7 +61,7 @@ public class GroovyScriptTest {
 
     @Test
     public void threadSafety() throws Exception {
-        ArrayBlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<Runnable>(100);
+        ArrayBlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(100);
         ThreadPoolExecutor tpe = new ThreadPoolExecutor(5, 5, 10, SECONDS, workQueue);
 
         for (int i = 0; i < 100; i++) {

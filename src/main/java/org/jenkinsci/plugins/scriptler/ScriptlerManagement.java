@@ -188,7 +188,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             if (catalogName.equals(scriptInfoCatalog.getInfo().name)) {
                 final ScriptInfo info = scriptInfoCatalog.getEntryById(id);
                 final String source = scriptInfoCatalog.getScriptSource(info);
-                final List<Parameter> paramList = new ArrayList<Parameter>();
+                final List<Parameter> paramList = new ArrayList<>();
                 for (String paramName : info.getParameters()) {
                     paramList.add(new Parameter(paramName, null));
                 }
@@ -588,13 +588,13 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     @SuppressWarnings("unchecked")
     private Parameter[] prepareParameters(StaplerRequest req, Script tempScript) {
         // retain default parameter values
-        Map<String, Parameter> params = new HashMap<String, Parameter>();
+        Map<String, Parameter> params = new HashMap<>();
         for (Parameter param : tempScript.getParameters()) {
             params.put(param.getName(), param);
         }
 
         // overwrite parameters that are passed as parameters
-        for (Map.Entry<String, String[]> param : (Set<Map.Entry<String, String[]>>) req.getParameterMap().entrySet()) {
+        for (Map.Entry<String, String[]> param : req.getParameterMap().entrySet()) {
             if (params.containsKey(param.getKey())) {
                 params.put(param.getKey(), new Parameter(param.getKey(), param.getValue()[0]));
             }
@@ -682,7 +682,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     public List<String> getSlaveAlias(Script script) {
 
         if (script.onlyMaster) {
-            List<String> slaveNames = new ArrayList<String>();
+            List<String> slaveNames = new ArrayList<>();
             slaveNames.add(MASTER);
             return slaveNames;
         }
@@ -704,7 +704,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     private List<String> getSlaveNames() {
         Computer[] computers = Jenkins.get().getComputers();
-        List<String> slaves = new ArrayList<String>();
+        List<String> slaves = new ArrayList<>();
         for (Computer c : computers) {
             slaves.add(c.getName());
         }
