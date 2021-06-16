@@ -5,19 +5,19 @@ import hudson.ExtensionPoint;
 
 import java.util.List;
 
-public abstract class ScriptInfoCatalog<T extends ScriptInfo> implements ExtensionPoint {
+public interface ScriptInfoCatalog<T extends ScriptInfo> extends ExtensionPoint {
 
-    public static ExtensionList<ScriptInfoCatalog> all() {
+    static ExtensionList<ScriptInfoCatalog> all() {
         return ExtensionList.lookup(ScriptInfoCatalog.class);
     }
 
-    public abstract T getEntryById(String id);
+    T getEntryById(String id);
 
-    public abstract CatalogInfo getInfo();
+    CatalogInfo getInfo();
 
-    public abstract List<T> getEntries();
+    List<T> getEntries();
 
-    public abstract String getScriptSource(T scriptInfo);
+    String getScriptSource(T scriptInfo);
 
-    public abstract String getDisplayName();
+    String getDisplayName();
 }
