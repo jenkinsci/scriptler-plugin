@@ -28,7 +28,7 @@ import javax.annotation.CheckForNull;
  * 
  */
 @Extension(ordinal = 10)
-public class GHCatalog extends ScriptInfoCatalog<ScriptInfo> {
+public class GHCatalog implements ScriptInfoCatalog<ScriptInfo> {
 
     private final static Logger LOGGER = Logger.getLogger(GHCatalog.class.getName());
 
