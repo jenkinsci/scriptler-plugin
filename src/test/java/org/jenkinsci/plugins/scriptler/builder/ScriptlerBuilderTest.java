@@ -36,6 +36,7 @@ import hudson.model.Item;
 import hudson.model.Project;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
@@ -100,6 +101,11 @@ public class ScriptlerBuilderTest {
         FileItem fi = new FileParameterValue.FileItemImpl(f);
         helper.saveScript(fi, nonAdministerUsing, scriptId);
         f.delete();
+    }
+
+    @Test
+    public void equalsContract() {
+        EqualsVerifier.forClass(ScriptlerBuilder.class).usingGetClass().verify();
     }
 
     @Test

@@ -48,13 +48,7 @@ import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -72,10 +66,10 @@ public class ScriptlerBuilder extends Builder implements Serializable {
     private final static Logger LOGGER = Logger.getLogger(ScriptlerBuilder.class.getName());
 
     // this is only used to identify the builder if a user without privileges modifies the job.
-    private String builderId;
-    private String scriptId;
-    private boolean propagateParams = false;
-    private Parameter[] parameters;
+    private final String builderId;
+    private final String scriptId;
+    private final boolean propagateParams;
+    private final Parameter[] parameters;
 
     public ScriptlerBuilder(String builderId, String scriptId, boolean propagateParams, Parameter[] parameters) {
         this.builderId = builderId;
@@ -90,7 +84,6 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         Script script = ScriptHelper.getScript(scriptId, true);
         if (script != null) {
             if (!script.nonAdministerUsing) {
-                this.scriptId = null;
                 errors.put("scriptId", "The script is not allowed to be executed in a build, check its configuration!");
             }
         }
@@ -122,10 +115,11 @@ public class ScriptlerBuilder extends Builder implements Serializable {
     /**
      * Must not be called inside XML processing since the modified data are not stored
      */
-    private void generateBuilderIdIfRequired(){
-        if(StringUtils.isBlank(builderId)){
-            builderId = generateBuilderId();
+    private ScriptlerBuilder recreateBuilderWithBuilderIdIfRequired() {
+        if (StringUtils.isBlank(builderId)) {
+            return new ScriptlerBuilder(generateBuilderId(), scriptId, propagateParams, parameters);
         }
+        return this;
     }
 
     private Object readResolve() {
@@ -269,23 +263,15 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
         ScriptlerBuilder that = (ScriptlerBuilder) o;
 
-        if (propagateParams != that.propagateParams)
-            return false;
-        if (builderId != null ? !builderId.equals(that.builderId) : that.builderId != null)
-            return false;
-        if (scriptId != null ? !scriptId.equals(that.scriptId) : that.scriptId != null)
-            return false;
-
-        return Arrays.equals(parameters, that.parameters);
+        return Objects.equals(propagateParams, that.propagateParams) &&
+                Objects.equals(builderId, that.builderId) &&
+                Objects.equals(scriptId, that.scriptId) &&
+                Arrays.equals(parameters, that.parameters);
     }
 
     @Override
     public int hashCode() {
-        int result = builderId != null ? builderId.hashCode() : 0;
-        result = 31 * result + (scriptId != null ? scriptId.hashCode() : 0);
-        result = 31 * result + (propagateParams ? 1 : 0);
-        result = 31 * result + Arrays.hashCode(parameters);
-        return result;
+        return Objects.hash(propagateParams, builderId, scriptId, Arrays.hashCode(parameters));
     }
 
     // Overridden for better type safety.
@@ -361,9 +347,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                 builder = new ScriptlerBuilder(builderId, null, false, null);
             }
 
-            builder.generateBuilderIdIfRequired();
-
-            return builder;
+            return builder.recreateBuilderWithBuilderIdIfRequired();
         }
 
         public List<Script> getScripts() {
