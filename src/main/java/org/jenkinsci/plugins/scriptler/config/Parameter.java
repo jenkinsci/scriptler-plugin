@@ -3,10 +3,7 @@ package org.jenkinsci.plugins.scriptler.config;
 import net.sf.json.JSONObject;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class Parameter implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -54,17 +51,12 @@ public class Parameter implements Serializable {
             return false;
 
         Parameter parameter = (Parameter) o;
-
-        if (name != null ? !name.equals(parameter.name) : parameter.name != null)
-            return false;
-
-        return value != null ? value.equals(parameter.value) : parameter.value == null;
+        return Objects.equals(name, parameter.name) &&
+                Objects.equals(value, parameter.value);
     }
 
     @Override
     public int hashCode() {
-        int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (value != null ? value.hashCode() : 0);
-        return result;
+        return Objects.hash(name, value);
     }
 }
