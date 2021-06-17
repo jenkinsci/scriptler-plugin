@@ -5,6 +5,10 @@ import net.sf.json.JSONObject;
 
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+
 public class UIHelper {
 
     /**
@@ -22,13 +26,22 @@ public class UIHelper {
             if (argsObj == null) {
                 JSONArray argsArrayObj = defineParams.optJSONArray("parameters");
                 if (argsArrayObj != null) {
-                    parameters = (Parameter[]) JSONArray.toArray(argsArrayObj, Parameter.class);
+                    parameters = mapJsonArray(argsArrayObj, Parameter::new).toArray(new Parameter[0]);
                 }
             } else {
-                Parameter param = (Parameter) JSONObject.toBean(argsObj, Parameter.class);
+                Parameter param = new Parameter(argsObj);
                 parameters = new Parameter[] { param };
             }
         }
         return parameters;
+    }
+
+    private static <T> List<T> mapJsonArray(JSONArray array, Function<JSONObject, T> mapper) {
+        List<T> list = new ArrayList<>(array.size());
+        for (Object value : array) {
+            assert JSONObject.class.isAssignableFrom(value.getClass());
+            list.add(mapper.apply((JSONObject) value));
+        }
+        return list;
     }
 }

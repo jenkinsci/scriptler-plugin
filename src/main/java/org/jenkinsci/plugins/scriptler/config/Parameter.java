@@ -1,14 +1,31 @@
 package org.jenkinsci.plugins.scriptler.config;
 
+import net.sf.json.JSONObject;
+
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Parameter implements Serializable {
     private static final long serialVersionUID = 1L;
-    private String name;
-    private String value;
-    
-    public Parameter() {
-        super();
+    private static final String NAME = "name";
+    private static final String VALUE = "value";
+    private static final Set<String> PROPERTY_NAMES =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(NAME, VALUE)));
+
+    private final String name;
+    private final String value;
+
+    @SuppressWarnings("unchecked") // older untyped API
+    public Parameter(JSONObject object) {
+        Set<String> keys = object.keySet();
+        if (!PROPERTY_NAMES.equals(keys)) {
+            throw new IllegalArgumentException("Provided JSONObject does not appear to be a Parameter");
+        }
+        name = object.getString(NAME);
+        value = object.getString(VALUE);
     }
 
     public Parameter(String name, String value) {
@@ -22,14 +39,6 @@ public class Parameter implements Serializable {
 
     public String getValue() {
         return value;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
     }
 
     @Override
