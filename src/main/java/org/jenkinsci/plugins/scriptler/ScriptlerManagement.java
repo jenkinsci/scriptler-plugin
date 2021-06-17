@@ -651,7 +651,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         checkPermission(ScriptlerPermissions.CONFIGURE);
     
         Script script = ScriptHelper.getScript(id, true);
-        if(script.script == null){
+        if(script == null || script.script == null){
             req.setAttribute("scriptNotFound", true);
         }else{
             boolean canByPassScriptApproval = Jenkins.get().hasPermission(Jenkins.RUN_SCRIPTS);

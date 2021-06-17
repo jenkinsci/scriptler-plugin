@@ -16,6 +16,7 @@ import hudson.model.Failure;
 import hudson.model.ParameterValue;
 import hudson.model.ParametersAction;
 import hudson.model.Project;
+import hudson.remoting.VirtualChannel;
 import hudson.security.Permission;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
@@ -234,7 +235,13 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                 // When run on master, make build, launcher, listener available to script
                 output = FilePath.localChannel.call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[0]), true, listener, launcher, build));
             } else {
-                output = launcher.getChannel().call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[0]), true, listener));
+                VirtualChannel channel = launcher.getChannel();
+                if (channel == null) {
+                    output = null;
+                    listener.getLogger().println(Messages.scriptExecutionFailed(scriptId) + " - " + Messages.agent_no_channel());
+                } else {
+                    output = channel.call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[0]), true, listener));
+                }
             }
             if (output instanceof Boolean && Boolean.FALSE.equals(output)) {
                 isOk = false;
