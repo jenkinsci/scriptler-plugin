@@ -3,10 +3,11 @@
  */
 package org.jenkinsci.plugins.scriptler.builder;
 
-import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
+import hudson.ExtensionList;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -16,26 +17,27 @@ import hudson.model.Failure;
 import hudson.model.ParameterValue;
 import hudson.model.ParametersAction;
 import hudson.model.Project;
+import hudson.remoting.VirtualChannel;
 import hudson.security.Permission;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormApply;
-import hudson.util.VersionNumber;
 import hudson.util.XStream2;
 import jenkins.model.Jenkins;
-import jenkins.model.Jenkins.MasterComputer;
+import jenkins.util.xstream.CriticalXStreamException;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptler.Messages;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
-import org.jenkinsci.plugins.scriptler.ScriptlerPluginImpl;
+import org.jenkinsci.plugins.scriptler.ScriptlerPermissions;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.jenkinsci.plugins.scriptler.config.Script;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
 import org.jenkinsci.plugins.scriptler.util.GroovyScript;
 import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
 import org.jenkinsci.plugins.scriptler.util.UIHelper;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.Stapler;
@@ -48,16 +50,7 @@ import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -66,7 +59,7 @@ import static hudson.util.QuotedStringTokenizer.quote;
 
 /**
  * @author Dominik Bartholdi (imod)
- * 
+ *
  */
 public class ScriptlerBuilder extends Builder implements Serializable {
     private static final AtomicInteger CURRENT_ID = new AtomicInteger();
@@ -75,25 +68,25 @@ public class ScriptlerBuilder extends Builder implements Serializable {
     private final static Logger LOGGER = Logger.getLogger(ScriptlerBuilder.class.getName());
 
     // this is only used to identify the builder if a user without privileges modifies the job.
-    private String builderId;
-    private String scriptId;
-    private boolean propagateParams = false;
-    private Parameter[] parameters;
+    private final String builderId;
+    private final String scriptId;
+    private final boolean propagateParams;
+    @NonNull
+    private final List<Parameter> parameters;
 
-    public ScriptlerBuilder(String builderId, String scriptId, boolean propagateParams, Parameter[] parameters) {
+    public ScriptlerBuilder(String builderId, String scriptId, boolean propagateParams, @NonNull List<Parameter> parameters) {
         this.builderId = builderId;
         this.scriptId = scriptId;
-        this.parameters = parameters;
+        this.parameters = new ArrayList<>(parameters);
         this.propagateParams = propagateParams;
     }
 
     private @Nonnull Map<String, String> checkGenericData() {
-        Map<String, String> errors = new HashMap<String, String>();
+        Map<String, String> errors = new HashMap<>();
 
         Script script = ScriptHelper.getScript(scriptId, true);
         if (script != null) {
             if (!script.nonAdministerUsing) {
-                this.scriptId = null;
                 errors.put("scriptId", "The script is not allowed to be executed in a build, check its configuration!");
             }
         }
@@ -104,12 +97,12 @@ public class ScriptlerBuilder extends Builder implements Serializable {
     }
 
     private void checkPermission(@Nonnull Map<String, String> errors){
-        if(Jenkins.getInstance().hasPermission(Jenkins.RUN_SCRIPTS)){
+        if(Jenkins.get().hasPermission(Jenkins.RUN_SCRIPTS)){
             // user has right to add / edit Scripler steps
             return;
         }
 
-        Project project = retrieveProjectUsingCurrentRequest();
+        Project<?, ?> project = retrieveProjectUsingCurrentRequest();
         if(project != null){
             if(!hasSameScriptlerBuilderInProject(project, this)){
                 if(StringUtils.isBlank(builderId)){
@@ -125,17 +118,18 @@ public class ScriptlerBuilder extends Builder implements Serializable {
     /**
      * Must not be called inside XML processing since the modified data are not stored
      */
-    private void generateBuilderIdIfRequired(){
-        if(StringUtils.isBlank(builderId)){
-            builderId = generateBuilderId();
+    private ScriptlerBuilder recreateBuilderWithBuilderIdIfRequired() {
+        if (StringUtils.isBlank(builderId)) {
+            return new ScriptlerBuilder(generateBuilderId(), scriptId, propagateParams, parameters);
         }
+        return this;
     }
 
     private Object readResolve() {
         return this;
     }
 
-    private boolean hasSameScriptlerBuilderInProject(@Nonnull Project project, @Nonnull ScriptlerBuilder targetBuilder){
+    private boolean hasSameScriptlerBuilderInProject(@Nonnull Project<?, ?> project, @Nonnull ScriptlerBuilder targetBuilder){
         List<ScriptlerBuilder> allScriptlerBuilders = _getAllScriptlerBuildersFromProject(project);
         for (ScriptlerBuilder builder : allScriptlerBuilders) {
             if(targetBuilder.equals(builder)){
@@ -147,14 +141,14 @@ public class ScriptlerBuilder extends Builder implements Serializable {
     }
 
     @SuppressWarnings("unchecked")
-    private @Nonnull List<ScriptlerBuilder> _getAllScriptlerBuildersFromProject(@Nonnull Project project){
+    private @Nonnull List<ScriptlerBuilder> _getAllScriptlerBuildersFromProject(@Nonnull Project<?, ?> project){
         return project.getBuildersList().getAll(ScriptlerBuilder.class);
     }
 
     private @CheckForNull Project<?, ?> retrieveProjectUsingCurrentRequest(){
         StaplerRequest currentRequest = Stapler.getCurrentRequest();
         if(currentRequest != null) {
-            Project project = Stapler.getCurrentRequest().findAncestorObject(Project.class);
+            Project<?, ?> project = Stapler.getCurrentRequest().findAncestorObject(Project.class);
             if (project != null) {
                 return project;
             }
@@ -168,8 +162,9 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         return scriptId;
     }
 
-    public Parameter[] getParameters() {
-        return parameters;
+    @NonNull
+    public List<Parameter> getParameters() {
+        return Collections.unmodifiableList(parameters);
     }
 
     public String getBuilderId() {
@@ -183,7 +178,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
         final Script script = ScriptHelper.getScript(scriptId, true);
-    
+
         if (script == null) {
             if (StringUtils.isBlank(scriptId)) {
                 LOGGER.log(Level.WARNING, "The script id was blank for the build {0}:{1}", new Object[]{build.getProject().getName(), build.getDisplayName()});
@@ -195,29 +190,29 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                 listener.getLogger().println(Messages.scriptNotFound(scriptId));
             }
             return false;
-        } 
-        
+        }
+
         boolean isOk = false;
         if (!script.nonAdministerUsing) {
             listener.getLogger().println(Messages.scriptNotUsableInBuildStep(script.getName()));
-            LOGGER.log(Level.WARNING, "The script [{0} ({1})] is not allowed to be executed in a build, check its configuration. It concerns the build [{2}:{3}]", 
+            LOGGER.log(Level.WARNING, "The script [{0} ({1})] is not allowed to be executed in a build, check its configuration. It concerns the build [{2}:{3}]",
                     new Object[]{script.getName(), script.getId(), build.getProject().getName(), build.getDisplayName()}
                     );
             return false;
         }
-        
+
         if(!ScriptHelper.isApproved(script.script)){
             listener.getLogger().println(Messages.scriptNotApprovedYet(script.getName()));
-            LOGGER.log(Level.WARNING, "The script [{0} ({1})] is not approved yet, consider asking your administrator to approve it. It concerns the build [{2}:{3}]", 
+            LOGGER.log(Level.WARNING, "The script [{0} ({1})] is not approved yet, consider asking your administrator to approve it. It concerns the build [{2}:{3}]",
                     new Object[]{script.getName(), script.getId(), build.getProject().getName(), build.getDisplayName()}
                     );
             return false;
         }
-        
+
         try {
 
             // expand the parameters before passing these to the execution, this is to allow any token macro to resolve parameter values
-            List<Parameter> expandedParams = new LinkedList<Parameter>();
+            List<Parameter> expandedParams = new LinkedList<>();
 
             if (propagateParams) {
                 final ParametersAction paramsAction = build.getAction(ParametersAction.class);
@@ -237,16 +232,22 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             final Object output;
             if (script.onlyMaster) {
                 // When run on master, make build, launcher, listener available to script
-                output = FilePath.localChannel.call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, listener, launcher, build));
+                output = FilePath.localChannel.call(new GroovyScript(script.script, expandedParams, true, listener, launcher, build));
             } else {
-                output = launcher.getChannel().call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[expandedParams.size()]), true, listener));
+                VirtualChannel channel = launcher.getChannel();
+                if (channel == null) {
+                    output = null;
+                    listener.getLogger().println(Messages.scriptExecutionFailed(scriptId) + " - " + Messages.agent_no_channel());
+                } else {
+                    output = channel.call(new GroovyScript(script.script, expandedParams, true, listener));
+                }
             }
             if (output instanceof Boolean && Boolean.FALSE.equals(output)) {
                 isOk = false;
             } else {
                 isOk = true;
             }
-        } catch (Exception e) {
+        } catch (IOException | InterruptedException | MacroEvaluationException e) {
             listener.getLogger().println(Messages.scriptExecutionFailed(scriptId) + " - " + e.getMessage());
             e.printStackTrace(listener.getLogger());
         }
@@ -267,23 +268,15 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
         ScriptlerBuilder that = (ScriptlerBuilder) o;
 
-        if (propagateParams != that.propagateParams)
-            return false;
-        if (builderId != null ? !builderId.equals(that.builderId) : that.builderId != null)
-            return false;
-        if (scriptId != null ? !scriptId.equals(that.scriptId) : that.scriptId != null)
-            return false;
-
-        return Arrays.equals(parameters, that.parameters);
+        return Objects.equals(propagateParams, that.propagateParams) &&
+                Objects.equals(builderId, that.builderId) &&
+                Objects.equals(scriptId, that.scriptId) &&
+                Objects.equals(parameters, that.parameters);
     }
 
     @Override
     public int hashCode() {
-        int result = builderId != null ? builderId.hashCode() : 0;
-        result = 31 * result + (scriptId != null ? scriptId.hashCode() : 0);
-        result = 31 * result + (propagateParams ? 1 : 0);
-        result = 31 * result + Arrays.hashCode(parameters);
-        return result;
+        return Objects.hash(propagateParams, builderId, scriptId, parameters);
     }
 
     // Overridden for better type safety.
@@ -296,14 +289,10 @@ public class ScriptlerBuilder extends Builder implements Serializable {
      * Automatically registered by {@link XStream2.AssociatedConverterImpl#findConverter(Class)}
      * Process the class regularly but add a check after that
      */
+    @SuppressWarnings("unused") // discovered dynamically
     public static final class ConverterImpl extends XStream2.PassthruConverter<ScriptlerBuilder>{
         public ConverterImpl(XStream2 xstream) {
             super(xstream);
-        }
-
-        @Override
-        public boolean canConvert(Class type) {
-            return super.canConvert(type);
         }
 
         @Override
@@ -316,37 +305,8 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                     conversionException.add(error.getKey(), error.getValue());
                 }
 
-                //TODO when upgrading to 1.625+, we could remove this code
-                if(!Jenkins.getVersion().isOlderThan(new VersionNumber("1.625"))){
-                    XStreamException criticalXStreamException = buildCriticalXStreamException(conversionException);
-                    throw criticalXStreamException;
-                }
-
-                // go directly to XmlFile#unmarshal catch
-                throw new Error(conversionException);
+                throw new CriticalXStreamException(conversionException);
             }
-        }
-
-        @SuppressWarnings("unchecked")
-        private @CheckForNull XStreamException buildCriticalXStreamException(ConversionException conversionException){
-            XStreamException xStreamException = null;
-            try {
-                Class<? extends XStreamException> criticalXStreamExceptionClass = (Class<? extends XStreamException>) this.getClass().getClassLoader().loadClass("jenkins.util.xstream.CriticalXStreamException");
-                Constructor<? extends XStreamException> constructor = criticalXStreamExceptionClass.getConstructor(XStreamException.class);
-                xStreamException = constructor.newInstance(conversionException);
-            } catch (ClassNotFoundException e) {
-                LOGGER.log(Level.SEVERE, "The CriticalXStreamException was not found using jenkins.util.xstream.CriticalXStreamException", e);
-            } catch (NoSuchMethodException e) {
-                LOGGER.log(Level.SEVERE, "The CriticalXStreamException does not have the expected constructor accepting only XStreamException as parameter", e);
-            } catch (IllegalAccessException e) {
-                LOGGER.log(Level.SEVERE, "Problem during invocation of constructor", e);
-            } catch (InstantiationException e) {
-                LOGGER.log(Level.SEVERE, "Problem during invocation of constructor", e);
-            } catch (InvocationTargetException e) {
-                LOGGER.log(Level.SEVERE, "Problem during invocation of constructor", e);
-            }
-
-            return xStreamException;
         }
     }
 
@@ -356,7 +316,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {
-            return Jenkins.getInstance().hasPermission(ScriptlerPluginImpl.RUN_SCRIPTS);
+            return Jenkins.get().hasPermission(ScriptlerPermissions.RUN_SCRIPTS);
         }
 
         @Override
@@ -366,7 +326,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
         // used by Jelly views
         public Permission getRequiredPermission() {
-            return ScriptlerPluginImpl.RUN_SCRIPTS;
+            return ScriptlerPermissions.RUN_SCRIPTS;
         }
 
         @Override
@@ -377,12 +337,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
             if (StringUtils.isNotBlank(id)) {
                 boolean inPropagateParams = formData.getBoolean("propagateParams");
-                Parameter[] params = null;
-                try {
-                    params = UIHelper.extractParameters(formData);
-                } catch (ServletException e) {
-                    throw new FormException(Messages.parameterExtractionFailed(), "parameters");
-                }
+                List<Parameter> params = UIHelper.extractParameters(formData);
                 builder = new ScriptlerBuilder(builderId, id, inPropagateParams, params);
             }
 
@@ -394,29 +349,27 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             }
 
             if (builder == null) {
-                builder = new ScriptlerBuilder(builderId, null, false, null);
+                builder = new ScriptlerBuilder(builderId, null, false, Collections.emptyList());
             }
 
-            builder.generateBuilderIdIfRequired();
-
-            return builder;
+            return builder.recreateBuilderWithBuilderIdIfRequired();
         }
 
         public List<Script> getScripts() {
             // TODO currently only script for RUN_SCRIPT permissions are returned?
             Set<Script> scripts = getConfig().getScripts();
-            List<Script> scriptsForBuilder = new ArrayList<Script>();
+            List<Script> scriptsForBuilder = new ArrayList<>();
             for (Script script : scripts) {
                 if (script.nonAdministerUsing) {
                     scriptsForBuilder.add(script);
                 }
             }
-            Collections.sort(scriptsForBuilder, Script.COMPARATOR_BY_NAME);
+            scriptsForBuilder.sort(Script.COMPARATOR_BY_NAME);
             return scriptsForBuilder;
         }
 
         private ScriptlerManagement getScriptler() {
-            return Jenkins.getInstance().getExtensionList(ScriptlerManagement.class).get(0);
+            return ExtensionList.lookupSingleton(ScriptlerManagement.class);
         }
 
         private ScriptlerConfiguration getConfig() {
@@ -425,7 +378,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
         /**
          * gets the argument description to be displayed on the screen when selecting a config in the dropdown
-         * 
+         *
          * @param scriptlerScriptId
          *            the config id to get the arguments description for
          * @return the description
@@ -444,14 +397,14 @@ public class ScriptlerBuilder extends Builder implements Serializable {
      * Notify the user with multiple message about the validation that failed
      */
     private static class MultipleErrorFormValidation extends RuntimeException implements HttpResponse {
-        private Map<String, String> fieldToMessage = new HashMap<String, String>();
+        private Map<String, String> fieldToMessage = new HashMap<>();
 
         public MultipleErrorFormValidation(Map<String, String> fieldToMessage) {
             this.fieldToMessage = fieldToMessage;
         }
 
         private String getAggregatedMessage(){
-            List<String> errorMessageList = new ArrayList<String>();
+            List<String> errorMessageList = new ArrayList<>();
             for (Map.Entry<String, String> error : fieldToMessage.entrySet()) {
                 errorMessageList.add(buildMessageForField(error.getKey(), error.getValue()));
             }

@@ -28,6 +28,7 @@ import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
 import com.gargoylesoftware.htmlunit.xml.XmlPage;
+import hudson.ExtensionList;
 import hudson.model.FileParameterValue;
 import hudson.model.FreeStyleProject;
 import net.sf.json.JSONObject;
@@ -35,6 +36,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagementHelper;
+import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runners.model.Statement;
@@ -45,10 +47,13 @@ import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 /**
  * Warning: a user without RUN_SCRIPT can currently only clone an existing builder INSIDE a project.
@@ -66,12 +71,12 @@ public class ScriptlerBuilderWithRestartTest {
     private static final String SCRIPT_NOT_USABLE = "not_usable.groovy";
 
     @Test
-    public void configRoundtrip() throws Exception {
+    public void configRoundtrip() {
         r.addStep(new Statement() {
             @Override public void evaluate() throws Throwable {
                 r.j.jenkins.setCrumbIssuer(null);
 
-                ScriptlerManagement scriptler = r.j.jenkins.getExtensionList(ScriptlerManagement.class).get(0);
+                ScriptlerManagement scriptler = ExtensionList.lookupSingleton(ScriptlerManagement.class);
                 ScriptlerManagementHelper helper = new ScriptlerManagementHelper(scriptler);
 
                 setupScript(helper, SCRIPT_USABLE_1, true);
@@ -88,20 +93,20 @@ public class ScriptlerBuilderWithRestartTest {
 
                 final String projectName = project.getName();
                 request.setRequestParameters(Arrays.asList(new NameValuePair("json", JSONObject.fromObject(
-                        new HashMap() {{
+                        new HashMap<String, Object>() {{
                             put("name", projectName);
-                            put("builder", new HashMap() {{
+                            put("builder", new HashMap<String, Object>() {{
                                 put("kind", ScriptlerBuilder.class.getName());
                                 put("builderId", "");
                                 put("scriptlerScriptId", SCRIPT_USABLE_1);
                                 put("propagateParams", true);
-                                put("defineParams", new HashMap() {{
+                                put("defineParams", new HashMap<String, List<Map<String, String>>>() {{
                                     put("parameters", Arrays.asList(
-                                            new HashMap() {{
+                                            new HashMap<String, String>() {{
                                                 put("name", "param1");
                                                 put("value", "value1");
                                             }},
-                                            new HashMap() {{
+                                            new HashMap<String, String>() {{
                                                 put("name", "param2");
                                                 put("value", "value2");
                                             }}
@@ -118,11 +123,8 @@ public class ScriptlerBuilderWithRestartTest {
                 assertNotNull(scriptlerBuilder.getBuilderId());
                 assertEquals(SCRIPT_USABLE_1, scriptlerBuilder.getScriptId());
                 assertEquals(true, scriptlerBuilder.isPropagateParams());
-                assertEquals(2, scriptlerBuilder.getParameters().length);
-                assertEquals("param1", scriptlerBuilder.getParameters()[0].getName());
-                assertEquals("value1", scriptlerBuilder.getParameters()[0].getValue());
-                assertEquals("param2", scriptlerBuilder.getParameters()[1].getName());
-                assertEquals("value2", scriptlerBuilder.getParameters()[1].getValue());
+                assertThat(scriptlerBuilder.getParameters(), hasSize(2));
+                assertThat(scriptlerBuilder.getParameters(), hasItems(new Parameter("param1", "value1"), new Parameter("param2", "value2")));
             }
         });
 
@@ -135,11 +137,8 @@ public class ScriptlerBuilderWithRestartTest {
                 assertNotNull(scriptlerBuilder.getBuilderId());
                 assertEquals(SCRIPT_USABLE_1, scriptlerBuilder.getScriptId());
                 assertEquals(true, scriptlerBuilder.isPropagateParams());
-                assertEquals(2, scriptlerBuilder.getParameters().length);
-                assertEquals("param1", scriptlerBuilder.getParameters()[0].getName());
-                assertEquals("value1", scriptlerBuilder.getParameters()[0].getValue());
-                assertEquals("param2", scriptlerBuilder.getParameters()[1].getName());
-                assertEquals("value2", scriptlerBuilder.getParameters()[1].getValue());
+                assertThat(scriptlerBuilder.getParameters(), hasSize(2));
+                assertThat(scriptlerBuilder.getParameters(), hasItems(new Parameter("param1", "value1"), new Parameter("param2", "value2")));
             }
         });
     }
@@ -153,12 +152,12 @@ public class ScriptlerBuilderWithRestartTest {
     }
 
     @Test
-    public void configRoundtripConfigXml() throws Exception {
+    public void configRoundtripConfigXml() {
         r.addStep(new Statement() {
             @Override public void evaluate() throws Throwable {
                 r.j.jenkins.setCrumbIssuer(null);
 
-                ScriptlerManagement scriptler = r.j.jenkins.getExtensionList(ScriptlerManagement.class).get(0);
+                ScriptlerManagement scriptler = ExtensionList.lookupSingleton(ScriptlerManagement.class);
                 ScriptlerManagementHelper helper = new ScriptlerManagementHelper(scriptler);
 
                 setupScript(helper, SCRIPT_USABLE_1, true);
@@ -207,11 +206,8 @@ public class ScriptlerBuilderWithRestartTest {
                 assertTrue(scriptlerBuilder.getBuilderId().equals(""));
                 assertEquals(SCRIPT_USABLE_1, scriptlerBuilder.getScriptId());
                 assertEquals(true, scriptlerBuilder.isPropagateParams());
-                assertEquals(2, scriptlerBuilder.getParameters().length);
-                assertEquals("param1", scriptlerBuilder.getParameters()[0].getName());
-                assertEquals("value1", scriptlerBuilder.getParameters()[0].getValue());
-                assertEquals("param2", scriptlerBuilder.getParameters()[1].getName());
-                assertEquals("value2", scriptlerBuilder.getParameters()[1].getValue());
+                assertThat(scriptlerBuilder.getParameters(), hasSize(2));
+                assertThat(scriptlerBuilder.getParameters(), hasItems(new Parameter("param1", "value1"), new Parameter("param2", "value2")));
             }
         });
 
@@ -224,11 +220,8 @@ public class ScriptlerBuilderWithRestartTest {
                 assertNotNull(scriptlerBuilder.getBuilderId());
                 assertEquals(SCRIPT_USABLE_1, scriptlerBuilder.getScriptId());
                 assertEquals(true, scriptlerBuilder.isPropagateParams());
-                assertEquals(2, scriptlerBuilder.getParameters().length);
-                assertEquals("param1", scriptlerBuilder.getParameters()[0].getName());
-                assertEquals("value1", scriptlerBuilder.getParameters()[0].getValue());
-                assertEquals("param2", scriptlerBuilder.getParameters()[1].getName());
-                assertEquals("value2", scriptlerBuilder.getParameters()[1].getValue());
+                assertThat(scriptlerBuilder.getParameters(), hasSize(2));
+                assertThat(scriptlerBuilder.getParameters(), hasItems(new Parameter("param1", "value1"), new Parameter("param2", "value2")));
             }
         });
     }

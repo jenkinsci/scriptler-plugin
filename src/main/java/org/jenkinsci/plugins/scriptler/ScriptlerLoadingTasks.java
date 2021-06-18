@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2010, Dominik Bartholdi
+ * Copyright (c) 2010-2021, Dominik Bartholdi & Michael Tughan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,67 +23,45 @@
  */
 package org.jenkinsci.plugins.scriptler;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import hudson.Plugin;
+import hudson.init.InitMilestone;
+import hudson.init.Initializer;
+import org.apache.commons.io.FileUtils;
+import org.jenkinsci.plugins.scriptler.config.Script;
+import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
+import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import hudson.init.InitMilestone;
-import hudson.init.Initializer;
-import hudson.security.Permission;
-import hudson.security.PermissionGroup;
-import hudson.security.PermissionScope;
-import jenkins.model.Jenkins;
-import org.apache.commons.io.FileUtils;
-import org.jenkinsci.plugins.scriptler.config.Script;
-import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
-import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
+public final class ScriptlerLoadingTasks {
 
-/**
- * @author domi
- * 
- */
-public class ScriptlerPluginImpl extends Plugin {
+    private final static Logger LOGGER = Logger.getLogger(ScriptlerLoadingTasks.class.getName());
 
-    private final static Logger LOGGER = Logger.getLogger(ScriptlerPluginImpl.class.getName());
-    
-    public static final PermissionGroup SCRIPTLER_PERMISSIONS = new PermissionGroup(ScriptlerManagement.class, Messages._permissons_title());
-
-    public static final Permission CONFIGURE = new Permission(
-            SCRIPTLER_PERMISSIONS, "Configure",
-            Messages._permissons_configure_description(), Jenkins.RUN_SCRIPTS,
-            PermissionScope.JENKINS
-    );
-    public static final Permission RUN_SCRIPTS = new Permission(
-            SCRIPTLER_PERMISSIONS, "RunScripts",
-            Messages._permissons_runScript_description(), Jenkins.RUN_SCRIPTS,
-            PermissionScope.JENKINS
-    );
-    
-    @Override
-    public void start() throws Exception {
-        super.start();
-        synchronizeConfig();
+    private ScriptlerLoadingTasks() {
     }
 
     /**
      * Checks if all available scripts on the system are in the config and if all configured files are physically on the filesystem.
-     * 
-     * @throws IOException
+     *
+     * @throws IOException if the configuration could not be loaded or saved
      */
-    private void synchronizeConfig() throws IOException {
+    @Initializer(after = InitMilestone.PLUGINS_PREPARED)
+    public static void synchronizeConfig() throws IOException {
         LOGGER.info("initialize Scriptler");
-        if (!ScriptlerManagement.getScriptlerHomeDirectory().exists()) {
-            boolean dirsDone = ScriptlerManagement.getScriptlerHomeDirectory().mkdirs();
-            if(!dirsDone) {
-                LOGGER.severe("could not create Scriptler home directory: " + ScriptlerManagement.getScriptlerHomeDirectory());
+        File homeDirectory = ScriptlerManagement.getScriptlerHomeDirectory();
+        if (!homeDirectory.exists()) {
+            boolean dirsDone = homeDirectory.mkdirs();
+            if (!dirsDone) {
+                LOGGER.log(Level.SEVERE, "could not create Scriptler home directory: {0}", homeDirectory);
             }
         }
+
         File scriptDirectory = ScriptlerManagement.getScriptDirectory();
-        createMissingFolders(scriptDirectory);
+        if (!scriptDirectory.exists() && !scriptDirectory.mkdirs()) {
+            LOGGER.log(Level.SEVERE, "could not create Scriptler scripts directory: {0}", scriptDirectory);
+        }
 
         ScriptlerConfiguration cfg = ScriptlerConfiguration.load();
 
@@ -91,25 +69,14 @@ public class ScriptlerPluginImpl extends Plugin {
 
         cfg.save();
     }
-    
-    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
-    private void createMissingFolders(File folder){
-        if (!folder.exists()) {
-            folder.mkdirs();
-        }
-    }
 
     @Initializer(after = InitMilestone.JOB_LOADED)
-    public static void afterJobLoaded() throws Exception {
-        setupExistingScripts();
-    }
-    
-    private static void setupExistingScripts() throws Exception {
+    public static void setupExistingScripts() {
         for (Script script : ScriptlerConfiguration.getConfiguration().getScripts()) {
             File scriptFile = new File(ScriptlerManagement.getScriptDirectory(), script.getScriptPath());
-            try{
+            try {
                 String scriptSource = FileUtils.readFileToString(scriptFile, "UTF-8");
-    
+
                 // we cannot do that during start since the ScriptApproval is not yet loaded
                 // and only after JOB_LOADED to have the securityRealm configured
                 ScriptHelper.putScriptInApprovalQueueIfRequired(scriptSource);

@@ -23,8 +23,9 @@
  */
 package org.jenkinsci.plugins.scriptler;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
-import hudson.PluginWrapper;
+import hudson.ExtensionList;
 import hudson.Util;
 import hudson.markup.MarkupFormatter;
 import hudson.markup.RawHtmlMarkupFormatter;
@@ -48,10 +49,9 @@ import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
@@ -74,22 +74,22 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     // used in Jelly view
     public Permission getScriptlerRunScripts() {
-        return ScriptlerPluginImpl.RUN_SCRIPTS;
+        return ScriptlerPermissions.RUN_SCRIPTS;
     }
     
     // used in Jelly view
     public Permission getScriptlerConfigure() {
-        return ScriptlerPluginImpl.CONFIGURE;
+        return ScriptlerPermissions.CONFIGURE;
     }
     
     public boolean hasAtLeastOneScriptlerPermission(){
-        return Jenkins.getInstance().hasPermission(ScriptlerPluginImpl.RUN_SCRIPTS) || Jenkins.getInstance().hasPermission(ScriptlerPluginImpl.CONFIGURE);
+        return Jenkins.get().hasPermission(ScriptlerPermissions.RUN_SCRIPTS) || Jenkins.get().hasPermission(ScriptlerPermissions.CONFIGURE);
     }
     
     public void checkAtLeastOneScriptlerPermission(){
         // to be sure the user has either CONFIGURE or RUN_SCRIPTS permission
-        if(!Jenkins.getInstance().hasPermission(ScriptlerPluginImpl.RUN_SCRIPTS)){
-            Jenkins.getInstance().checkPermission(ScriptlerPluginImpl.CONFIGURE);
+        if(!Jenkins.get().hasPermission(ScriptlerPermissions.RUN_SCRIPTS)){
+            Jenkins.get().checkPermission(ScriptlerPermissions.CONFIGURE);
         }
     }
 
@@ -143,11 +143,6 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         return INSTANCE;
     }
 
-    public String getPluginResourcePath() {
-        PluginWrapper wrapper = Jenkins.getInstance().getPluginManager().getPlugin(ScriptlerPluginImpl.class);
-        return Jenkins.getInstance().getRootUrl() + "plugin/" + wrapper.getShortName() + "/";
-    }
-
     /**
      * save the scriptler 'global' settings (on settings screen, not global Jenkins config)
      * 
@@ -159,7 +154,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      */
     @RequirePOST
     public HttpResponse doScriptlerSettings(StaplerRequest res, StaplerResponse rsp, @QueryParameter("disableRemoteCatalog") boolean disableRemoteCatalog) throws IOException {
-        checkPermission(ScriptlerPluginImpl.CONFIGURE);
+        checkPermission(ScriptlerPermissions.CONFIGURE);
 
         ScriptlerConfiguration cfg = getConfiguration();
         cfg.setDisbableRemoteCatalog(disableRemoteCatalog);
@@ -181,29 +176,26 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      *            the catalog to download the file from
      * @return same forward as from <code>doScriptAdd</code>
      * @throws IOException
-     * @throws ServletException
      */
     @RequirePOST
-    public HttpResponse doDownloadScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("catalog") String catalogName) throws IOException, ServletException {
-        checkPermission(ScriptlerPluginImpl.CONFIGURE);
+    public HttpResponse doDownloadScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("catalog") String catalogName) throws IOException {
+        checkPermission(ScriptlerPermissions.CONFIGURE);
 
         ScriptlerConfiguration c = getConfiguration();
         if (c.isDisbableRemoteCatalog()) {
             return new HttpRedirect("index");
         }
 
-        for (ScriptInfoCatalog scriptInfoCatalog : ScriptInfoCatalog.all()) {
+        for (ScriptInfoCatalog<ScriptInfo> scriptInfoCatalog : getCatalogs()) {
             if (catalogName.equals(scriptInfoCatalog.getInfo().name)) {
                 final ScriptInfo info = scriptInfoCatalog.getEntryById(id);
-                final String source = scriptInfoCatalog.getScriptSource(info);
-                final List<Parameter> paramList = new ArrayList<Parameter>();
+                final String source = scriptInfoCatalog.getScriptSource(scriptInfoCatalog.getEntryById(id));
+                final List<Parameter> paramList = new ArrayList<>();
                 for (String paramName : info.getParameters()) {
                     paramList.add(new Parameter(paramName, null));
                 }
 
-                Parameter[] parameters = paramList.toArray(new Parameter[paramList.size()]);
-
-                final String finalName = saveScriptAndForward(id, info.getName(), info.getComment(), source, false, false, catalogName, id, parameters);
+                final String finalName = saveScriptAndForward(id, info.getName(), info.getComment(), source, false, false, catalogName, id, paramList);
                 return new HttpRedirect("editScript?id=" + finalName);
             }
         }
@@ -244,9 +236,9 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     public HttpResponse doScriptAdd(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("name") String name, @QueryParameter("comment") String comment, @QueryParameter("script") String script,
             @QueryParameter("nonAdministerUsing") boolean nonAdministerUsing, @QueryParameter("onlyMaster") boolean onlyMaster, String originCatalogName, String originId) throws IOException, ServletException {
 
-        checkPermission(ScriptlerPluginImpl.CONFIGURE);
+        checkPermission(ScriptlerPermissions.CONFIGURE);
 
-        Parameter[] parameters = UIHelper.extractParameters(req.getSubmittedForm());
+        List<Parameter> parameters = UIHelper.extractParameters(req.getSubmittedForm());
 
         saveScriptAndForward(id, name, comment, script, nonAdministerUsing, onlyMaster, originCatalogName, originId, parameters);
         return new HttpRedirect("index");
@@ -258,7 +250,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @return the final name of the saved script - which is also the id of the script!
      * @throws IOException
      */
-    private String saveScriptAndForward(String id, String name, String comment, String script, boolean nonAdministerUsing, boolean onlyMaster, String originCatalogName, String originId, Parameter[] parameters) throws IOException {
+    private String saveScriptAndForward(String id, String name, String comment, String script, boolean nonAdministerUsing, boolean onlyMaster, String originCatalogName, String originId, @NonNull List<Parameter> parameters) throws IOException {
         script = script == null ? "TODO" : script;
         if (StringUtils.isEmpty(id)) {
             throw new IllegalArgumentException("'id' must not be empty!");
@@ -270,16 +262,13 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         // save (overwrite) the file/script
         File newScriptFile = new File(getScriptDirectory(), finalFileName);
     
-        if(!Util.isDescendant(getScriptDirectory(), new File(getScriptDirectory(),finalFileName))) {
+        if(!Util.isDescendant(getScriptDirectory(), newScriptFile)) {
             LOGGER.log(Level.WARNING, "Folder traversal detected, file path received: {0}, after fixing: {1}", new Object[]{id, finalFileName});
             throw new IOException("Invalid file path received: " + id);
         }
-        
-        Writer writer = new FileWriter(newScriptFile);
-        try {
+
+        try (BufferedWriter writer = Files.newBufferedWriter(newScriptFile.toPath(), StandardCharsets.UTF_8)) {
             writer.write(script);
-        } finally {
-            writer.close();
         }
 
         commitFileToGitRepo(finalFileName);
@@ -303,18 +292,13 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * adds/commits the given file to the local git repo - file must be written to scripts directory!
      * 
      * @param finalFileName
-     * @throws IOException
      */
-    private void commitFileToGitRepo(final String finalFileName) throws IOException {
-        try {
-            getGitRepo().addSingleFileToRepo(finalFileName);
-        } catch (Exception e) {
-            throw new IOException("failed to update git repo", e);
-        }
+    private void commitFileToGitRepo(final String finalFileName) {
+        getGitRepo().addSingleFileToRepo(finalFileName);
     }
 
     private GitScriptlerRepository getGitRepo() {
-        return Jenkins.getInstance().getExtensionList(GitScriptlerRepository.class).get(GitScriptlerRepository.class);
+        return ExtensionList.lookupSingleton(GitScriptlerRepository.class);
     }
 
     /**
@@ -324,7 +308,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      */
     @RequirePOST
     public HttpResponse doHardResetGit() throws IOException {
-        checkPermission(ScriptlerPluginImpl.CONFIGURE);
+        checkPermission(ScriptlerPermissions.CONFIGURE);
         getGitRepo().hardReset();
         return new HttpRedirect("../scriptler.git");
     }
@@ -343,7 +327,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      */
     @RequirePOST
     public HttpResponse doRemoveScript(StaplerRequest res, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException {
-        checkPermission(ScriptlerPluginImpl.CONFIGURE);
+        checkPermission(ScriptlerPermissions.CONFIGURE);
 
         // remove the file
         File oldScript = new File(getScriptDirectory(), id);
@@ -352,9 +336,9 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         }
 
         try {
-            final GitScriptlerRepository gitRepo = Jenkins.getInstance().getExtensionList(GitScriptlerRepository.class).get(GitScriptlerRepository.class);
+            final GitScriptlerRepository gitRepo = ExtensionList.lookupSingleton(GitScriptlerRepository.class);
             gitRepo.rmSingleFileToRepo(id);
-        } catch (Exception e) {
+        } catch (IllegalStateException e) {
             throw new IOException("failed to update git repo", e);
         }
 
@@ -377,7 +361,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      */
     @RequirePOST
     public HttpResponse doUploadScript(StaplerRequest req) throws IOException, ServletException {
-        checkPermission(ScriptlerPluginImpl.CONFIGURE);
+        checkPermission(ScriptlerPermissions.CONFIGURE);
         try {
             
 
@@ -400,7 +384,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     /**
      * Protected only for testing
      */
-    /*private*/ void saveScript(FileItem fileItem, boolean nonAdministerUsing, String fileName) throws Exception, IOException {
+    /*private*/ void saveScript(FileItem fileItem, boolean nonAdministerUsing, String fileName) throws Exception {
         // upload can only be to/from local catalog
         String fixedFileName = fixFileName(null, fileName);
 
@@ -448,7 +432,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws ServletException
      */
     public void doRunScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException, ServletException {
-        checkPermission(ScriptlerPluginImpl.RUN_SCRIPTS);
+        checkPermission(ScriptlerPermissions.RUN_SCRIPTS);
 
         Script script = ScriptHelper.getScript(id, true);
         if(script == null) {
@@ -458,7 +442,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         if(script.script == null){
             req.setAttribute("scriptNotFound", true);
         }else{
-            boolean canByPassScriptApproval = Jenkins.getInstance().hasPermission(Jenkins.RUN_SCRIPTS);
+            boolean canByPassScriptApproval = Jenkins.get().hasPermission(Jenkins.RUN_SCRIPTS);
         
             // we do not want user with approval right to auto-approve script when landing on that page
             if(!ScriptHelper.isApproved(script.script, false)){
@@ -494,11 +478,11 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      */
     @RequirePOST
     public void doTriggerScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("script") String scriptSrc, @QueryParameter("node") String node) throws IOException, ServletException {
-        checkPermission(ScriptlerPluginImpl.RUN_SCRIPTS);
+        checkPermission(ScriptlerPermissions.RUN_SCRIPTS);
 
-        final Parameter[] parameters = UIHelper.extractParameters(req.getSubmittedForm());
+        final List<Parameter> parameters = UIHelper.extractParameters(req.getSubmittedForm());
 
-        boolean canByPassScriptApproval = Jenkins.getInstance().hasPermission(Jenkins.RUN_SCRIPTS);
+        boolean canByPassScriptApproval = Jenkins.get().hasPermission(Jenkins.RUN_SCRIPTS);
 
         // set the script info back to the request, to display it together with the output.
         Script originalScript = ScriptHelper.getScript(id, true);
@@ -557,7 +541,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             @QueryParameter(fixEmpty = true) String node, @QueryParameter(fixEmpty = true) String contentType)
             throws IOException, ServletException {
 
-        checkPermission(ScriptlerPluginImpl.RUN_SCRIPTS);
+        checkPermission(ScriptlerPermissions.RUN_SCRIPTS);
 
         String id = req.getRestOfPath();
         if (id.startsWith("/")) {
@@ -585,7 +569,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             return;
         }
         
-        Parameter[] paramArray = prepareParameters(req, tempScript);
+        Collection<Parameter> paramArray = prepareParameters(req, tempScript);
 
         rsp.setContentType(contentType == null ? "text/plain" : contentType);
 
@@ -598,22 +582,21 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private Parameter[] prepareParameters(StaplerRequest req, Script tempScript) {
+    @NonNull
+    private Collection<Parameter> prepareParameters(StaplerRequest req, Script tempScript) {
         // retain default parameter values
-        Map<String, Parameter> params = new HashMap<String, Parameter>();
+        Map<String, Parameter> params = new HashMap<>();
         for (Parameter param : tempScript.getParameters()) {
             params.put(param.getName(), param);
         }
 
         // overwrite parameters that are passed as parameters
-        for (Map.Entry<String, String[]> param : (Set<Map.Entry<String, String[]>>) req.getParameterMap().entrySet()) {
+        for (Map.Entry<String, String[]> param : req.getParameterMap().entrySet()) {
             if (params.containsKey(param.getKey())) {
                 params.put(param.getKey(), new Parameter(param.getKey(), param.getValue()[0]));
             }
         }
-        Parameter[] paramArray = params.values().toArray(new Parameter[params.size()]);
-        return paramArray;
+        return params.values();
     }
 
     private String[] resolveSlaveNames(String nameAlias) {
@@ -630,9 +613,9 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
                 slaves.remove(MASTER);
             }
         } else {
-            slaves = Arrays.asList(nameAlias);
+            slaves = Collections.singletonList(nameAlias);
         }
-        return slaves.toArray(new String[slaves.size()]);
+        return slaves.toArray(new String[0]);
     }
 
     /**
@@ -667,13 +650,13 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws ServletException
      */
     public void doEditScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException, ServletException {
-        checkPermission(ScriptlerPluginImpl.CONFIGURE);
+        checkPermission(ScriptlerPermissions.CONFIGURE);
     
         Script script = ScriptHelper.getScript(id, true);
-        if(script.script == null){
+        if(script == null || script.script == null){
             req.setAttribute("scriptNotFound", true);
         }else{
-            boolean canByPassScriptApproval = Jenkins.getInstance().hasPermission(Jenkins.RUN_SCRIPTS);
+            boolean canByPassScriptApproval = Jenkins.get().hasPermission(Jenkins.RUN_SCRIPTS);
         
             // we do not want user with approval right to auto-approve script when landing on that page
             if(!ScriptHelper.isApproved(script.script, false)){
@@ -695,7 +678,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     public List<String> getSlaveAlias(Script script) {
 
         if (script.onlyMaster) {
-            List<String> slaveNames = new ArrayList<String>();
+            List<String> slaveNames = new ArrayList<>();
             slaveNames.add(MASTER);
             return slaveNames;
         }
@@ -716,8 +699,8 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     }
 
     private List<String> getSlaveNames() {
-        Computer[] computers = Jenkins.getInstance().getComputers();
-        List<String> slaves = new ArrayList<String>();
+        Computer[] computers = Jenkins.get().getComputers();
+        List<String> slaves = new ArrayList<>();
         for (Computer c : computers) {
             slaves.add(c.getName());
         }
@@ -729,13 +712,13 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * 
      * @return the catalog
      */
-    public List<ScriptInfoCatalog> getCatalogs() {
+    public List<ScriptInfoCatalog<ScriptInfo>> getCatalogs() {
         return ScriptInfoCatalog.all();
     }
 
     public ScriptInfoCatalog<? extends ScriptInfo> getCatalogByName(String catalogName) {
         if (StringUtils.isNotBlank(catalogName)) {
-            for (ScriptInfoCatalog<? extends ScriptInfo> sic : getCatalogs()) {
+            for (ScriptInfoCatalog<ScriptInfo> sic : getCatalogs()) {
                 final CatalogInfo info = sic.getInfo();
                 if (catalogName.equals(info.name)) {
                     return sic;
@@ -747,7 +730,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     public CatalogInfo getCatalogInfoByName(String catalogName) {
         if (StringUtils.isNotBlank(catalogName)) {
-            for (ScriptInfoCatalog<? extends ScriptInfo> sic : getCatalogs()) {
+            for (ScriptInfoCatalog<ScriptInfo> sic : getCatalogs()) {
                 final CatalogInfo info = sic.getInfo();
                 if (catalogName.equals(info.name)) {
                     return info;
@@ -767,11 +750,11 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     }
 
     public static File getScriptlerHomeDirectory() {
-        return new File(Jenkins.getInstance().getRootDir(), "scriptler");
+        return new File(Jenkins.get().getRootDir(), "scriptler");
     }
 
     private void checkPermission(Permission permission) {
-        Jenkins.getInstance().checkPermission(permission);
+        Jenkins.get().checkPermission(permission);
     }
 
     private String fixFileName(String catalogName, String name) {

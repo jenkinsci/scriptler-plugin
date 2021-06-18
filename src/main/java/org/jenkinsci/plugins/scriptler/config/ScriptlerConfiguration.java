@@ -31,13 +31,16 @@ import hudson.util.XStream2;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
-import org.jenkinsci.plugins.scriptler.ScriptlerPluginImpl;
+import org.jenkinsci.plugins.scriptler.ScriptlerPermissions;
 import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
 import org.jenkinsci.plugins.scriptler.util.ByIdSorter;
 
@@ -57,7 +60,7 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
 
     // keep to avoid loading issues with older version
     @Deprecated
-    private transient List<CatalogInfo> catalogInfos = new ArrayList<CatalogInfo>();
+    private transient List<CatalogInfo> catalogInfos = new ArrayList<>();
 
     private boolean disbableRemoteCatalog = false;
 
@@ -68,7 +71,7 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
      */
     @Deprecated
     private boolean allowRunScriptPermission = false;
-    
+
     /**
      * /!\ keep to avoid loading issues with older version
      * The regular permission required is Scriptler/Configure now
@@ -79,7 +82,7 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
 
     public ScriptlerConfiguration(SortedSet<Script> scripts) {
         if (scripts != null) {
-            this.scriptSet = scripts;
+            setScripts(scripts);
         }
     }
 
@@ -100,12 +103,12 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
             // As it might be that we have an unsorted set, we ensure the
             // sorting at load time.
             ScriptlerConfiguration sc = (ScriptlerConfiguration) f.read();
-            SortedSet<Script> sorted = new TreeSet<Script>(new ByIdSorter());
+            SortedSet<Script> sorted = new TreeSet<>(new ByIdSorter());
             sorted.addAll(sc.getScripts());
             sc.setScripts(sorted);
             return sc;
         } else {
-            return new ScriptlerConfiguration(new TreeSet<Script>(new ByIdSorter()));
+            return new ScriptlerConfiguration(new TreeSet<>(new ByIdSorter()));
         }
     }
 
@@ -160,15 +163,15 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
     @Restricted(DoNotUse.class) // for Jelly view
     public List<ScriptAndApproved> getSortedScripts(){
         List<Script> sortedScripts;
-        if(Jenkins.getInstance().hasPermission(ScriptlerPluginImpl.CONFIGURE)){
-            sortedScripts = new ArrayList<Script>(this.getScripts());
+        if(Jenkins.get().hasPermission(ScriptlerPermissions.CONFIGURE)){
+            sortedScripts = new ArrayList<>(this.getScripts());
         }else{
-            sortedScripts = new ArrayList<Script>(this.getUserScripts());
+            sortedScripts = new ArrayList<>(this.getUserScripts());
         }
 
-        Collections.sort(sortedScripts, Script.COMPARATOR_BY_NAME);
+        sortedScripts.sort(Script.COMPARATOR_BY_NAME);
 
-        List<ScriptAndApproved> result = new ArrayList<ScriptAndApproved>(sortedScripts.size());
+        List<ScriptAndApproved> result = new ArrayList<>(sortedScripts.size());
         for (Script script : sortedScripts) {
             Script scriptWithSrc = ScriptHelper.getScript(script.getId(), true);
             Boolean approved = null;
@@ -179,21 +182,21 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
         }
         return result;
     }
-    
+
     @Restricted(NoExternalUse.class) // for Jelly view
     public static class ScriptAndApproved {
         private Script script;
         private Boolean approved;
-    
+
         private ScriptAndApproved(Script script, Boolean approved) {
             this.script = script;
             this.approved = approved;
         }
-    
+
         public Script getScript() {
             return script;
         }
-    
+
         public Boolean getApproved() {
             return approved;
         }

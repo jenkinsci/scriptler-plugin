@@ -4,6 +4,7 @@
 package org.jenkinsci.plugins.scriptler.git;
 
 import hudson.Extension;
+import hudson.ExtensionList;
 import hudson.model.RootAction;
 
 import java.io.IOException;
@@ -33,7 +34,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.jenkinsci.main.modules.sshd.SSHD;
 import org.jenkinsci.plugins.gitserver.FileBackedHttpGitRepository;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
-import org.jenkinsci.plugins.scriptler.ScriptlerPluginImpl;
+import org.jenkinsci.plugins.scriptler.ScriptlerPermissions;
 import org.jenkinsci.plugins.scriptler.SyncUtil;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
 
@@ -88,7 +89,7 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
     }
 
     public boolean hasPushPermission() {
-        return Jenkins.get().hasPermission(ScriptlerPluginImpl.CONFIGURE);
+        return Jenkins.get().hasPermission(ScriptlerPermissions.CONFIGURE);
     }
 
     /**
@@ -96,13 +97,13 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
      */
     @Override
     protected void checkPushPermission() {
-        Jenkins.getInstance().checkPermission(ScriptlerPluginImpl.CONFIGURE);
+        Jenkins.get().checkPermission(ScriptlerPermissions.CONFIGURE);
     }
 
     @Override
     protected void updateWorkspace(Repository repo) throws IOException, GitAPIException {
         super.updateWorkspace(repo);
-        final ScriptlerConfiguration cfg = Jenkins.getInstance().getExtensionList(ScriptlerManagement.class).get(0).getConfiguration();
+        final ScriptlerConfiguration cfg = ExtensionList.lookupSingleton(ScriptlerManagement.class).getConfiguration();
         SyncUtil.syncDirWithCfg(ScriptlerManagement.getScriptDirectory(), cfg);
         cfg.save();
     }
@@ -112,10 +113,8 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
      * 
      * @param fileName
      *            must be relative to repo root dir
-     * @throws Exception
-     *             if an exception occurred
      */
-    public void addSingleFileToRepo(String fileName) throws Exception {
+    public void addSingleFileToRepo(String fileName) {
         try {
             Git git = new Git(this.openRepository());
             AddCommand cmd = git.add();
@@ -136,10 +135,8 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
      * 
      * @param fileName
      *            must be relative to repo root dir
-     * @throws Exception
-     *             if an exception occurred
      */
-    public void rmSingleFileToRepo(String fileName) throws Exception {
+    public void rmSingleFileToRepo(String fileName) {
         try {
             Git git = new Git(this.openRepository());
             RmCommand cmd = git.rm();
@@ -171,7 +168,7 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
     }
 
     public Collection<LogInfo> getLog() throws IOException {
-        Collection<LogInfo> msgs = new ArrayList<LogInfo>();
+        Collection<LogInfo> msgs = new ArrayList<>();
         try {
             // TODO find a way to limit the number of log entries - e.g. ..log().addRange(...).call()
             for (RevCommit c : new Git(this.openRepository()).log().call()) {

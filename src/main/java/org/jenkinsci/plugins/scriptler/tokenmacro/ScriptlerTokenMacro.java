@@ -2,13 +2,11 @@ package org.jenkinsci.plugins.scriptler.tokenmacro;
 
 import hudson.Extension;
 import hudson.FilePath;
-import hudson.model.TaskListener;
 import hudson.model.AbstractBuild;
+import hudson.model.TaskListener;
+import hudson.remoting.Channel;
+import hudson.remoting.ChannelClosedException;
 import hudson.remoting.VirtualChannel;
-
-import java.io.IOException;
-
-import jenkins.model.Jenkins.MasterComputer;
 
 import org.jenkinsci.plugins.scriptler.Messages;
 import org.jenkinsci.plugins.scriptler.config.Script;
@@ -17,11 +15,13 @@ import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
+import java.io.IOException;
+import java.util.Collections;
+
 /**
  * TokenMacro that allows the execution of a scriptler script an any arbitrary location supporting TokenMacros e.g. <code>${SCRIPTLER, scriptId="superscript.groovy"}</code>
- * 
+ *
  * @author Dominik Bartholdi (imod)
- * 
  */
 @Extension
 public class ScriptlerTokenMacro extends DataBoundTokenMacro {
@@ -44,10 +44,15 @@ public class ScriptlerTokenMacro extends DataBoundTokenMacro {
         if (script.onlyMaster) {
             channel = FilePath.localChannel;
         } else {
-            channel = context.getWorkspace().getChannel();
+            FilePath remoteFilePath = context.getWorkspace();
+            if (remoteFilePath == null) {
+                // the remote node has apparently disconnected, so we can't run our script
+                throw new ChannelClosedException((Channel) null, null);
+            }
+            channel = remoteFilePath.getChannel();
         }
-        
-        Object output = channel.call(new GroovyScript(script.script, null, true, listener, null, context));
+
+        Object output = channel.call(new GroovyScript(script.script, Collections.emptyList(), true, listener, null, context));
 
         return output != null ? output.toString() : "";
     }

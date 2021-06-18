@@ -29,12 +29,14 @@ import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
 import com.gargoylesoftware.htmlunit.xml.XmlPage;
+import hudson.ExtensionList;
 import hudson.model.FileParameterValue;
 import hudson.model.FreeStyleProject;
 import hudson.model.Item;
 import hudson.model.Project;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
@@ -51,18 +53,11 @@ import javax.annotation.CheckForNull;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.*;
 
 /**
  * Warning: a user without RUN_SCRIPT can currently only clone an existing builder INSIDE a project.
@@ -83,7 +78,7 @@ public class ScriptlerBuilderTest {
     public void setupScripts() throws Exception {
         j.jenkins.setCrumbIssuer(null);
 
-        ScriptlerManagement scriptler = j.jenkins.getExtensionList(ScriptlerManagement.class).get(0);
+        ScriptlerManagement scriptler = ExtensionList.lookupSingleton(ScriptlerManagement.class);
         ScriptlerManagementHelper helper = new ScriptlerManagementHelper(scriptler);
 
         setupScript(helper, SCRIPT_USABLE_1, true);
@@ -102,6 +97,11 @@ public class ScriptlerBuilderTest {
     }
 
     @Test
+    public void equalsContract() {
+        EqualsVerifier.forClass(ScriptlerBuilder.class).usingGetClass().verify();
+    }
+
+    @Test
     public void configRoundtripWebUI() throws Exception {
         FreeStyleProject project = j.createFreeStyleProject("test");
 
@@ -111,20 +111,20 @@ public class ScriptlerBuilderTest {
 
         final String projectName = project.getName();
         request.setRequestParameters(Arrays.asList(new NameValuePair("json", JSONObject.fromObject(
-                new HashMap() {{
+                new HashMap<String, Object>() {{
                     put("name", projectName);
-                    put("builder", new HashMap() {{
+                    put("builder", new HashMap<String, Object>() {{
                         put("kind", ScriptlerBuilder.class.getName());
                         put("builderId", "");
                         put("scriptlerScriptId", SCRIPT_USABLE_1);
                         put("propagateParams", true);
-                        put("defineParams", new HashMap() {{
+                        put("defineParams", new HashMap<String, List<Map<String, String>>>() {{
                             put("parameters", Arrays.asList(
-                                    new HashMap() {{
+                                    new HashMap<String, String>() {{
                                         put("name", "param1");
                                         put("value", "value1");
                                     }},
-                                    new HashMap() {{
+                                    new HashMap<String, String>() {{
                                         put("name", "param2");
                                         put("value", "value2");
                                     }}
@@ -141,11 +141,8 @@ public class ScriptlerBuilderTest {
         assertNotNull(scriptlerBuilder.getBuilderId());
         assertEquals(SCRIPT_USABLE_1, scriptlerBuilder.getScriptId());
         assertEquals(true, scriptlerBuilder.isPropagateParams());
-        assertEquals(2, scriptlerBuilder.getParameters().length);
-        assertEquals("param1", scriptlerBuilder.getParameters()[0].getName());
-        assertEquals("value1", scriptlerBuilder.getParameters()[0].getValue());
-        assertEquals("param2", scriptlerBuilder.getParameters()[1].getName());
-        assertEquals("value2", scriptlerBuilder.getParameters()[1].getValue());
+        assertThat(scriptlerBuilder.getParameters(), hasSize(2));
+        assertThat(scriptlerBuilder.getParameters(), hasItems(new Parameter("param1", "value1"), new Parameter("param2", "value2")));
     }
 
     @Test
@@ -185,11 +182,8 @@ public class ScriptlerBuilderTest {
         assertTrue(scriptlerBuilder.getBuilderId().equals(""));
         assertEquals(SCRIPT_USABLE_1, scriptlerBuilder.getScriptId());
         assertEquals(true, scriptlerBuilder.isPropagateParams());
-        assertEquals(2, scriptlerBuilder.getParameters().length);
-        assertEquals("param1", scriptlerBuilder.getParameters()[0].getName());
-        assertEquals("value1", scriptlerBuilder.getParameters()[0].getValue());
-        assertEquals("param2", scriptlerBuilder.getParameters()[1].getName());
-        assertEquals("value2", scriptlerBuilder.getParameters()[1].getValue());
+        assertThat(scriptlerBuilder.getParameters(), hasSize(2));
+        assertThat(scriptlerBuilder.getParameters(), hasItems(new Parameter("param1", "value1"), new Parameter("param2", "value2")));
     }
 
     @Test
@@ -304,8 +298,8 @@ public class ScriptlerBuilderTest {
     private void checkScriptModification() throws Exception {
         FreeStyleProject project = j.createFreeStyleProject("test-modification");
         project.setDescription("desc_0");
-        project.getBuildersList().add(new ScriptlerBuilder("random-id", SCRIPT_USABLE_1, false, new Parameter[0]));
-        project.getBuildersList().add(new ScriptlerBuilder("", SCRIPT_USABLE_4, false, new Parameter[0]));
+        project.getBuildersList().add(new ScriptlerBuilder("random-id", SCRIPT_USABLE_1, false, Collections.emptyList()));
+        project.getBuildersList().add(new ScriptlerBuilder("", SCRIPT_USABLE_4, false, Collections.emptyList()));
 
         // only one in this scenario
         assertEquals(project.getBuildersList().get(ScriptlerBuilder.class).getScriptId(), SCRIPT_USABLE_1);
@@ -358,21 +352,21 @@ public class ScriptlerBuilderTest {
         ScriptlerBuilder builder;
 
         { // no care directly of the builderId
-            builder = new ScriptlerBuilder("given-id", SCRIPT_USABLE_1, false, new Parameter[0]);
+            builder = new ScriptlerBuilder("given-id", SCRIPT_USABLE_1, false, Collections.emptyList());
             errors = callCheckData(builder);
             assertTrue(errors.isEmpty());
 
-            builder = new ScriptlerBuilder(null, SCRIPT_USABLE_1, false, new Parameter[0]);
+            builder = new ScriptlerBuilder(null, SCRIPT_USABLE_1, false, Collections.emptyList());
             errors = callCheckData(builder);
             assertTrue(errors.isEmpty());
 
-            builder = new ScriptlerBuilder("", SCRIPT_USABLE_1, false, new Parameter[0]);
+            builder = new ScriptlerBuilder("", SCRIPT_USABLE_1, false, Collections.emptyList());
             errors = callCheckData(builder);
             assertTrue(errors.isEmpty());
         }
 
         // concern especially SECURITY-366
-        builder = new ScriptlerBuilder("", SCRIPT_NOT_USABLE, false, new Parameter[0]);
+        builder = new ScriptlerBuilder("", SCRIPT_NOT_USABLE, false, Collections.emptyList());
         errors = callCheckData(builder);
         assertEquals(1, errors.size());
         assertTrue(errors.containsKey("scriptId"));
@@ -472,10 +466,10 @@ public class ScriptlerBuilderTest {
     ) throws Exception {
         assertTrue(builderScriptAlternateId.length % 2 == 0);
 
-        final List builders = new ArrayList();
+        final List<Map<String, Object>> builders = new ArrayList<>();
         for (int i = 0; i < builderScriptAlternateId.length; i += 2) {
             final int fi = i;
-            builders.add(new HashMap() {{
+            builders.add(new HashMap<String, Object>() {{
                 put("kind", ScriptlerBuilder.class.getName());
                 put("builderId", builderScriptAlternateId[fi]);
                 put("scriptlerScriptId", builderScriptAlternateId[fi + 1]);
@@ -489,7 +483,7 @@ public class ScriptlerBuilderTest {
         request.setRequestParameters(Arrays.asList(
                 new NameValuePair("description", description),
                 new NameValuePair("json", JSONObject.fromObject(
-                        new HashMap() {{
+                        new HashMap<String, Object>() {{
                             put("name", project.getName());
                             put("description", description);
                             put("builder", builders);
@@ -544,13 +538,13 @@ public class ScriptlerBuilderTest {
         }
     }
 
-    private String retrieveXmlConfigForProject(JenkinsRule.WebClient wc, Project p) throws Exception {
+    private String retrieveXmlConfigForProject(JenkinsRule.WebClient wc, Project<?, ?> p) throws Exception {
         XmlPage xmlPage = wc.goToXml(p.getShortUrl() + "config.xml");
         j.assertGoodStatus(xmlPage);
         return xmlPage.getWebResponse().getContentAsString();
     }
 
-    private HtmlPage postXmlConfigForProject(JenkinsRule.WebClient wc, Project p, String xml) throws Exception {
+    private HtmlPage postXmlConfigForProject(JenkinsRule.WebClient wc, Project<?, ?> p, String xml) throws Exception {
         WebRequest request = new WebRequest(new URL(p.getAbsoluteUrl() + "config.xml"), HttpMethod.POST);
         request.setRequestBody(xml);
         request.setEncodingType(null);
@@ -637,7 +631,7 @@ public class ScriptlerBuilderTest {
         assertEquals(countAfter, countBefore);
     }
 
-    private int getNumberOfScriptlerBuilder(Project project) {
+    private int getNumberOfScriptlerBuilder(Project<?, ?> project) {
         return project.getBuildersList().getAll(ScriptlerBuilder.class).size();
     }
 

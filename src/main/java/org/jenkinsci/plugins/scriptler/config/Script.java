@@ -23,17 +23,20 @@
  */
 package org.jenkinsci.plugins.scriptler.config;
 
-import java.util.Comparator;
+import edu.umd.cs.findbugs.annotations.NonNull;
+
+import java.util.*;
 
 public class Script implements Comparable<Script>, NamedResource {
 
-    private String id;
+    private final String id;
     public final String name;
     public final String comment;
     public final String originCatalog;
     public final String originScript;
     public final String originDate;
-    private Parameter[] parameters;
+    @NonNull
+    private final List<Parameter> parameters;
 
     public boolean available = true;
 
@@ -51,7 +54,7 @@ public class Script implements Comparable<Script>, NamedResource {
     /**
      * used to create/update a new script in the UI
      */
-    public Script(String id, String name, String comment, boolean nonAdministerUsing, Parameter[] parameters, boolean onlyMaster) {
+    public Script(String id, String name, String comment, boolean nonAdministerUsing, @NonNull List<Parameter> parameters, boolean onlyMaster) {
         this(id, name, comment, true, null, null, null, nonAdministerUsing, parameters, onlyMaster);
     }
 
@@ -59,14 +62,14 @@ public class Script implements Comparable<Script>, NamedResource {
      * used during plugin start to synchronize available scripts
      */
     public Script(String id, String comment, boolean available, boolean nonAdministerUsing, boolean onlyMaster) {
-        this(id, id, comment, available, null, null, null, nonAdministerUsing, new Parameter[0], onlyMaster);
+        this(id, id, comment, available, null, null, null, nonAdministerUsing, Collections.emptyList(), onlyMaster);
     }
 
     /**
      * Constructor to create a script imported from a foreign catalog.
      * 
      */
-    public Script(String id, String name, String comment, boolean available, String originCatalog, String originScript, String originDate, Parameter[] parameters) {
+    public Script(String id, String name, String comment, boolean available, String originCatalog, String originScript, String originDate, @NonNull List<Parameter> parameters) {
         this(id, name, comment, available, originCatalog, originScript, originDate, false, parameters, false);
     }
 
@@ -74,14 +77,14 @@ public class Script implements Comparable<Script>, NamedResource {
     /**
      * used to merge scripts
      */
-    public Script(String id, String name, String comment, String originCatalog, String originScript, String originDate, boolean nonAdministerUsing, Parameter[] parameters, boolean onlyMaster) {
+    public Script(String id, String name, String comment, String originCatalog, String originScript, String originDate, boolean nonAdministerUsing, @NonNull List<Parameter> parameters, boolean onlyMaster) {
         this(id, name, comment, true, originCatalog, originScript, originDate, nonAdministerUsing, parameters, onlyMaster);
     }
     
     /**
      * used to merge scripts
      */
-    public Script(String id, String name, String comment, boolean available, String originCatalog, String originScript, String originDate, boolean nonAdministerUsing, Parameter[] parameters, boolean onlyMaster) {
+    public Script(String id, String name, String comment, boolean available, String originCatalog, String originScript, String originDate, boolean nonAdministerUsing, @NonNull List<Parameter> parameters, boolean onlyMaster) {
         this.id = id;
         this.name = name;
         this.comment = comment;
@@ -90,7 +93,7 @@ public class Script implements Comparable<Script>, NamedResource {
         this.originScript = originScript;
         this.originDate = originDate;
         this.nonAdministerUsing = nonAdministerUsing;
-        this.parameters = parameters;
+        this.parameters = new ArrayList<>(parameters);
         this.onlyMaster = onlyMaster;
     }
 
@@ -119,12 +122,14 @@ public class Script implements Comparable<Script>, NamedResource {
         this.script = script;
     }
 
-    public void setParameters(Parameter[] parameters) {
-        this.parameters = parameters;
+    public void setParameters(@NonNull List<Parameter> parameters) {
+        this.parameters.clear();
+        this.parameters.addAll(parameters);
     }
 
-    public Parameter[] getParameters() {
-        return parameters;
+    @NonNull
+    public List<Parameter> getParameters() {
+        return Collections.unmodifiableList(parameters);
     }
 
     /*
@@ -141,7 +146,7 @@ public class Script implements Comparable<Script>, NamedResource {
      */
     public Object readResolve() {
         if (id == null) {
-            id = name;
+            return new Script(name, name, comment, available, originCatalog, originScript, originDate, nonAdministerUsing, parameters, onlyMaster);
         }
         return this;
     }
@@ -162,10 +167,7 @@ public class Script implements Comparable<Script>, NamedResource {
      */
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        return result;
+       return Objects.hash(id);
     }
 
     /**
@@ -176,21 +178,12 @@ public class Script implements Comparable<Script>, NamedResource {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
+
         Script other = (Script) obj;
-        if (id == null) {
-            if (other.id != null) {
-                return false;
-            }
-        } else if (!id.equals(other.id)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(id, other.id);
     }
 
     public static final Comparator<Script> COMPARATOR_BY_NAME = new Comparator<Script>() {

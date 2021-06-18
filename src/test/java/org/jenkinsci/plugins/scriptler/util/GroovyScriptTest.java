@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import hudson.util.StreamTaskListener;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -60,8 +61,8 @@ public class GroovyScriptTest {
     }
 
     @Test
-    public void threadSafety() throws Exception {
-        ArrayBlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<Runnable>(100);
+    public void threadSafety() throws InterruptedException {
+        ArrayBlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(100);
         ThreadPoolExecutor tpe = new ThreadPoolExecutor(5, 5, 10, SECONDS, workQueue);
 
         for (int i = 0; i < 100; i++) {
@@ -85,7 +86,7 @@ public class GroovyScriptTest {
     }
 
     private GroovyScript newInstance(ByteArrayOutputStream sos, String scriptSource, Parameter... params) {
-        GroovyScript gs = new GroovyScript(scriptSource, params, true, new StreamTaskListener(sos)) {
+        GroovyScript gs = new GroovyScript(scriptSource, Arrays.asList(params), true, new StreamTaskListener(sos)) {
             @Override
             public ClassLoader getClassLoader() {
                 return Thread.currentThread().getContextClassLoader();

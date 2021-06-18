@@ -1,5 +1,7 @@
 package org.jenkinsci.plugins.scriptler.util;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
+import hudson.FilePath;
 import hudson.model.Computer;
 import hudson.util.StreamTaskListener;
 
@@ -10,8 +12,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -21,7 +22,6 @@ import javax.annotation.CheckForNull;
 import javax.servlet.ServletException;
 
 import jenkins.model.Jenkins;
-import jenkins.model.Jenkins.MasterComputer;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 
@@ -49,7 +49,7 @@ public class ScriptHelper {
     private final static Logger LOGGER = Logger.getLogger(ScriptHelper.class.getName());
 
     private static final Pattern SCRIPT_META_PATTERN = Pattern.compile(".*BEGIN META(.+?)END META.*", Pattern.DOTALL);
-    private static final Map<String, Class<?>> JSON_CLASS_MAPPING = new HashMap<String, Class<?>>();
+    private static final Map<String, Class<?>> JSON_CLASS_MAPPING = new HashMap<>();
     static {
         JSON_CLASS_MAPPING.put("authors", Author.class);
         JSON_CLASS_MAPPING.put("parameters", Parameter.class);
@@ -129,7 +129,7 @@ public class ScriptHelper {
         }
     }
 
-    public static String runScript(String[] slaves, String scriptTxt, Parameter[] parameters) throws IOException, ServletException {
+    public static String runScript(String[] slaves, String scriptTxt, @NonNull Collection<Parameter> parameters) throws IOException, ServletException {
         StringBuffer output = new StringBuffer();
         for (String slave : slaves) {
             LOGGER.log(Level.FINE, "here is the node -> " + slave);
@@ -152,16 +152,16 @@ public class ScriptHelper {
      * @throws IOException
      * @throws ServletException
      */
-    public static String runScript(String node, String scriptTxt, Parameter[] parameters) throws IOException, ServletException {
+    public static String runScript(String node, String scriptTxt, @NonNull Collection<Parameter> parameters) throws IOException, ServletException {
 
         Object output = "[no output]";
         ByteArrayOutputStream sos = new ByteArrayOutputStream();
         if (node != null && scriptTxt != null) {
 
             try {
-                Computer comp = Jenkins.getInstance().getComputer(node);
+                Computer comp = Jenkins.get().getComputer(node);
                 if (comp == null && "(master)".equals(node)) {
-                    output = MasterComputer.localChannel.call(new GroovyScript(scriptTxt, parameters, false, new StreamTaskListener(sos)));
+                    output = FilePath.localChannel.call(new GroovyScript(scriptTxt, parameters, false, new StreamTaskListener(sos)));
                 } else if (comp == null) {
                     output = Messages.node_not_found(node) + "\n";
                 } else {
