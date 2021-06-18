@@ -49,10 +49,9 @@ import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
@@ -263,16 +262,13 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         // save (overwrite) the file/script
         File newScriptFile = new File(getScriptDirectory(), finalFileName);
     
-        if(!Util.isDescendant(getScriptDirectory(), new File(getScriptDirectory(),finalFileName))) {
+        if(!Util.isDescendant(getScriptDirectory(), newScriptFile)) {
             LOGGER.log(Level.WARNING, "Folder traversal detected, file path received: {0}, after fixing: {1}", new Object[]{id, finalFileName});
             throw new IOException("Invalid file path received: " + id);
         }
-        
-        Writer writer = new FileWriter(newScriptFile);
-        try {
+
+        try (BufferedWriter writer = Files.newBufferedWriter(newScriptFile.toPath(), StandardCharsets.UTF_8)) {
             writer.write(script);
-        } finally {
-            writer.close();
         }
 
         commitFileToGitRepo(finalFileName);
