@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.scriptler.util;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import hudson.Launcher;
@@ -15,10 +16,7 @@ import org.jenkinsci.remoting.Role;
 import org.jenkinsci.remoting.RoleChecker;
 
 import java.io.PrintStream;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -27,7 +25,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class GroovyScript extends MasterToSlaveCallable<Object, RuntimeException> {
     private static final long serialVersionUID = 1L;
     private final String script;
-    private final Parameter[] parameters;
+    @NonNull
+    private final Collection<Parameter> parameters;
     private final boolean failWithException;
     private final TaskListener listener;
     private transient final AbstractBuild<?, ?> build;
@@ -54,9 +53,9 @@ public class GroovyScript extends MasterToSlaveCallable<Object, RuntimeException
      * @param launcher the launcher
      * @param build the current build
      */
-    public GroovyScript(String script, Parameter[] parameters, boolean failWithException, TaskListener listener, Launcher launcher, AbstractBuild<?, ?> build) {
+    public GroovyScript(String script, @NonNull Collection<Parameter> parameters, boolean failWithException, TaskListener listener, Launcher launcher, AbstractBuild<?, ?> build) {
         this.script = script;
-        this.parameters = parameters;
+        this.parameters = new ArrayList<>(parameters);
         this.failWithException = failWithException;
         this.listener = listener;
         this.cl = getClassLoader();
@@ -71,7 +70,7 @@ public class GroovyScript extends MasterToSlaveCallable<Object, RuntimeException
      * @param failWithException should the job fail with an exception
      * @param listener access to logging via listener
      */
-    public GroovyScript(String script, Parameter[] parameters, boolean failWithException, TaskListener listener) {
+    public GroovyScript(String script, @NonNull Collection<Parameter> parameters, boolean failWithException, TaskListener listener) {
         this(script, parameters, failWithException, listener, null, null);
     }
 
@@ -87,14 +86,12 @@ public class GroovyScript extends MasterToSlaveCallable<Object, RuntimeException
         PrintStream logger = listener.getLogger();
         GroovyShell shell = new GroovyShell(cl);
 
-        if(parameters != null) {
-            for (Parameter param : parameters) {
-                final String paramName = param.getName();
-                if (DEFAULT_VARIABLES.contains(paramName)) {
-                    logger.println(Messages.skipParamter(paramName));
-                } else {
-                    shell.setVariable(paramName, param.getValue());
-                }
+        for (Parameter param : parameters) {
+            final String paramName = param.getName();
+            if (DEFAULT_VARIABLES.contains(paramName)) {
+                logger.println(Messages.skipParamter(paramName));
+            } else {
+                shell.setVariable(paramName, param.getValue());
             }
         }
 

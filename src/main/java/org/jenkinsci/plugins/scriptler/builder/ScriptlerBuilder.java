@@ -5,6 +5,7 @@ package org.jenkinsci.plugins.scriptler.builder;
 
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.ExtensionList;
 import hudson.FilePath;
@@ -48,13 +49,7 @@ import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -75,12 +70,13 @@ public class ScriptlerBuilder extends Builder implements Serializable {
     private final String builderId;
     private final String scriptId;
     private final boolean propagateParams;
-    private final Parameter[] parameters;
+    @NonNull
+    private final List<Parameter> parameters;
 
-    public ScriptlerBuilder(String builderId, String scriptId, boolean propagateParams, Parameter[] parameters) {
+    public ScriptlerBuilder(String builderId, String scriptId, boolean propagateParams, @NonNull List<Parameter> parameters) {
         this.builderId = builderId;
         this.scriptId = scriptId;
-        this.parameters = parameters;
+        this.parameters = new ArrayList<>(parameters);
         this.propagateParams = propagateParams;
     }
 
@@ -165,8 +161,9 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         return scriptId;
     }
 
-    public Parameter[] getParameters() {
-        return parameters;
+    @NonNull
+    public List<Parameter> getParameters() {
+        return Collections.unmodifiableList(parameters);
     }
 
     public String getBuilderId() {
@@ -234,14 +231,14 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             final Object output;
             if (script.onlyMaster) {
                 // When run on master, make build, launcher, listener available to script
-                output = FilePath.localChannel.call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[0]), true, listener, launcher, build));
+                output = FilePath.localChannel.call(new GroovyScript(script.script, expandedParams, true, listener, launcher, build));
             } else {
                 VirtualChannel channel = launcher.getChannel();
                 if (channel == null) {
                     output = null;
                     listener.getLogger().println(Messages.scriptExecutionFailed(scriptId) + " - " + Messages.agent_no_channel());
                 } else {
-                    output = channel.call(new GroovyScript(script.script, expandedParams.toArray(new Parameter[0]), true, listener));
+                    output = channel.call(new GroovyScript(script.script, expandedParams, true, listener));
                 }
             }
             if (output instanceof Boolean && Boolean.FALSE.equals(output)) {
@@ -273,12 +270,12 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         return Objects.equals(propagateParams, that.propagateParams) &&
                 Objects.equals(builderId, that.builderId) &&
                 Objects.equals(scriptId, that.scriptId) &&
-                Arrays.equals(parameters, that.parameters);
+                Objects.equals(parameters, that.parameters);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(propagateParams, builderId, scriptId, Arrays.hashCode(parameters));
+        return Objects.hash(propagateParams, builderId, scriptId, parameters);
     }
 
     // Overridden for better type safety.
@@ -339,7 +336,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
             if (StringUtils.isNotBlank(id)) {
                 boolean inPropagateParams = formData.getBoolean("propagateParams");
-                Parameter[] params = UIHelper.extractParameters(formData);
+                List<Parameter> params = UIHelper.extractParameters(formData);
                 builder = new ScriptlerBuilder(builderId, id, inPropagateParams, params);
             }
 
@@ -351,7 +348,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             }
 
             if (builder == null) {
-                builder = new ScriptlerBuilder(builderId, null, false, null);
+                builder = new ScriptlerBuilder(builderId, null, false, Collections.emptyList());
             }
 
             return builder.recreateBuilderWithBuilderIdIfRequired();

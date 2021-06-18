@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.scriptler.util;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
 import hudson.model.Computer;
 import hudson.util.StreamTaskListener;
@@ -11,8 +12,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -129,7 +129,7 @@ public class ScriptHelper {
         }
     }
 
-    public static String runScript(String[] slaves, String scriptTxt, Parameter[] parameters) throws IOException, ServletException {
+    public static String runScript(String[] slaves, String scriptTxt, @NonNull Collection<Parameter> parameters) throws IOException, ServletException {
         StringBuffer output = new StringBuffer();
         for (String slave : slaves) {
             LOGGER.log(Level.FINE, "here is the node -> " + slave);
@@ -152,7 +152,7 @@ public class ScriptHelper {
      * @throws IOException
      * @throws ServletException
      */
-    public static String runScript(String node, String scriptTxt, Parameter[] parameters) throws IOException, ServletException {
+    public static String runScript(String node, String scriptTxt, @NonNull Collection<Parameter> parameters) throws IOException, ServletException {
 
         Object output = "[no output]";
         ByteArrayOutputStream sos = new ByteArrayOutputStream();

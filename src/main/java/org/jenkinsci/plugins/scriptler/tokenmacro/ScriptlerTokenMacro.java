@@ -7,6 +7,7 @@ import hudson.model.TaskListener;
 import hudson.remoting.Channel;
 import hudson.remoting.ChannelClosedException;
 import hudson.remoting.VirtualChannel;
+
 import org.jenkinsci.plugins.scriptler.Messages;
 import org.jenkinsci.plugins.scriptler.config.Script;
 import org.jenkinsci.plugins.scriptler.util.GroovyScript;
@@ -15,6 +16,7 @@ import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
 import java.io.IOException;
+import java.util.Collections;
 
 /**
  * TokenMacro that allows the execution of a scriptler script an any arbitrary location supporting TokenMacros e.g. <code>${SCRIPTLER, scriptId="superscript.groovy"}</code>
@@ -50,7 +52,7 @@ public class ScriptlerTokenMacro extends DataBoundTokenMacro {
             channel = remoteFilePath.getChannel();
         }
 
-        Object output = channel.call(new GroovyScript(script.script, null, true, listener, null, context));
+        Object output = channel.call(new GroovyScript(script.script, Collections.emptyList(), true, listener, null, context));
 
         return output != null ? output.toString() : "";
     }
