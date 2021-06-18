@@ -35,7 +35,7 @@
 				${%Example}
 				<pre>println System.getenv("PATH")</pre>
 			</p>
-			<f:form method="post" action="scriptAdd">
+			<f:form method="post" name="scriptAdd" action="scriptAdd">
 			    <f:entry title="${%Id}">
                     <f:textbox name="id" />
                 </f:entry>
@@ -52,8 +52,7 @@
                     <f:checkbox name="onlyMaster" checked="${script.onlyMaster}" />
 		</f:entry>
 				<f:entry title="${%Script}">
-					<textarea id="script" name="script" class="script">
-					</textarea>
+					<textarea id="script" name="script" class="${h.isUnitTest ? '' : 'script'}"/>
 				</f:entry>
 				<f:block>
 					<f:submit value="${%Submit}" />

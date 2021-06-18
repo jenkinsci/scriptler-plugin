@@ -24,7 +24,6 @@
 package org.jenkinsci.plugins.scriptler;
 
 import hudson.Extension;
-import hudson.PluginWrapper;
 import hudson.Util;
 import hudson.markup.MarkupFormatter;
 import hudson.markup.RawHtmlMarkupFormatter;
@@ -49,9 +48,8 @@ import org.kohsuke.stapler.interceptor.RequirePOST;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
@@ -141,11 +139,6 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     public MarkupFormatter getMarkupFormatter() {
         return INSTANCE;
-    }
-
-    public String getPluginResourcePath() {
-        PluginWrapper wrapper = Jenkins.getInstance().getPluginManager().getPlugin(ScriptlerPluginImpl.class);
-        return Jenkins.getInstance().getRootUrl() + "plugin/" + wrapper.getShortName() + "/";
     }
 
     /**
@@ -270,17 +263,12 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         // save (overwrite) the file/script
         File newScriptFile = new File(getScriptDirectory(), finalFileName);
     
-        if(!Util.isDescendant(getScriptDirectory(), new File(getScriptDirectory(),finalFileName))) {
+        if(!Util.isDescendant(getScriptDirectory(), newScriptFile)) {
             LOGGER.log(Level.WARNING, "Folder traversal detected, file path received: {0}, after fixing: {1}", new Object[]{id, finalFileName});
             throw new IOException("Invalid file path received: " + id);
         }
-        
-        Writer writer = new FileWriter(newScriptFile);
-        try {
-            writer.write(script);
-        } finally {
-            writer.close();
-        }
+
+        FileUtils.writeStringToFile(newScriptFile, script, StandardCharsets.UTF_8);
 
         commitFileToGitRepo(finalFileName);
 
