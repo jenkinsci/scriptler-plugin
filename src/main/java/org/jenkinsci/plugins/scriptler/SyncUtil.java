@@ -3,13 +3,10 @@ package org.jenkinsci.plugins.scriptler;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.jenkinsci.plugins.scriptler.config.Script;
@@ -41,14 +38,12 @@ public class SyncUtil {
             if (cfg.getScriptById(file.getName()) == null) {
                 final ScriptInfo info = ScriptHelper.extractScriptInfo(ScriptHelper.readScriptFromFile(file));
                 if (info != null) {
-                    final List<String> paramList = info.getParameters();
-                    Parameter[] parameters = new Parameter[paramList.size()];
-                    for (int i = 0; i < parameters.length; i++) {
-                        parameters[i] = new Parameter(paramList.get(i), null);
-                    }
+                    List<Parameter> parameters = info.getParameters().stream()
+                            .map(name -> new Parameter(name, null))
+                            .collect(Collectors.toList());
                     cfg.addOrReplace(new Script(file.getName(), info.getName(), info.getComment(), false, parameters, false));
                 } else {
-                    cfg.addOrReplace(new Script(file.getName(), file.getName(), Messages.script_loaded_from_directory(), false, null, false));
+                    cfg.addOrReplace(new Script(file.getName(), file.getName(), Messages.script_loaded_from_directory(), false, Collections.emptyList(), false));
                 }
 
             }

@@ -1,3 +1,4 @@
+
 package org.jenkinsci.plugins.scriptler.restapi;
 
 import static org.junit.Assert.assertTrue;
@@ -11,6 +12,8 @@ import hudson.model.FileParameterValue.FileItemImpl;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.FileUtils;
@@ -41,8 +44,10 @@ public class ScriptlerRestApiTest {
         ScriptlerManagementHelper helper = new ScriptlerManagementHelper(scriptler);
         saveFile(helper, SCRIPT_ID, "print \"hello $arg1, this is $arg2.\"");
 
-        scriptler.getConfiguration().getScriptById(SCRIPT_ID)
-                .setParameters(new Parameter[]{ new Parameter("arg1", "world"), new Parameter("arg2", "scriptler") });
+        List<Parameter> parameters = new ArrayList<>();
+        parameters.add(new Parameter("arg1", "world"));
+        parameters.add(new Parameter("arg2", "scriptler"));
+        scriptler.getConfiguration().getScriptById(SCRIPT_ID).setParameters(parameters);
     }
     
     private void saveFile(ScriptlerManagementHelper helper, String scriptId, String scriptContent) throws Exception {

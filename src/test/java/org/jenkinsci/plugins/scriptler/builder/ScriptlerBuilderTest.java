@@ -53,18 +53,11 @@ import javax.annotation.CheckForNull;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.*;
 
 /**
  * Warning: a user without RUN_SCRIPT can currently only clone an existing builder INSIDE a project.
@@ -148,11 +141,8 @@ public class ScriptlerBuilderTest {
         assertNotNull(scriptlerBuilder.getBuilderId());
         assertEquals(SCRIPT_USABLE_1, scriptlerBuilder.getScriptId());
         assertEquals(true, scriptlerBuilder.isPropagateParams());
-        assertEquals(2, scriptlerBuilder.getParameters().length);
-        assertEquals("param1", scriptlerBuilder.getParameters()[0].getName());
-        assertEquals("value1", scriptlerBuilder.getParameters()[0].getValue());
-        assertEquals("param2", scriptlerBuilder.getParameters()[1].getName());
-        assertEquals("value2", scriptlerBuilder.getParameters()[1].getValue());
+        assertThat(scriptlerBuilder.getParametersList(), hasSize(2));
+        assertThat(scriptlerBuilder.getParametersList(), hasItems(new Parameter("param1", "value1"), new Parameter("param2", "value2")));
     }
 
     @Test
@@ -192,11 +182,8 @@ public class ScriptlerBuilderTest {
         assertTrue(scriptlerBuilder.getBuilderId().equals(""));
         assertEquals(SCRIPT_USABLE_1, scriptlerBuilder.getScriptId());
         assertEquals(true, scriptlerBuilder.isPropagateParams());
-        assertEquals(2, scriptlerBuilder.getParameters().length);
-        assertEquals("param1", scriptlerBuilder.getParameters()[0].getName());
-        assertEquals("value1", scriptlerBuilder.getParameters()[0].getValue());
-        assertEquals("param2", scriptlerBuilder.getParameters()[1].getName());
-        assertEquals("value2", scriptlerBuilder.getParameters()[1].getValue());
+        assertThat(scriptlerBuilder.getParametersList(), hasSize(2));
+        assertThat(scriptlerBuilder.getParametersList(), hasItems(new Parameter("param1", "value1"), new Parameter("param2", "value2")));
     }
 
     @Test
@@ -311,8 +298,8 @@ public class ScriptlerBuilderTest {
     private void checkScriptModification() throws Exception {
         FreeStyleProject project = j.createFreeStyleProject("test-modification");
         project.setDescription("desc_0");
-        project.getBuildersList().add(new ScriptlerBuilder("random-id", SCRIPT_USABLE_1, false, new Parameter[0]));
-        project.getBuildersList().add(new ScriptlerBuilder("", SCRIPT_USABLE_4, false, new Parameter[0]));
+        project.getBuildersList().add(new ScriptlerBuilder("random-id", SCRIPT_USABLE_1, false, Collections.emptyList()));
+        project.getBuildersList().add(new ScriptlerBuilder("", SCRIPT_USABLE_4, false, Collections.emptyList()));
 
         // only one in this scenario
         assertEquals(project.getBuildersList().get(ScriptlerBuilder.class).getScriptId(), SCRIPT_USABLE_1);
@@ -365,21 +352,21 @@ public class ScriptlerBuilderTest {
         ScriptlerBuilder builder;
 
         { // no care directly of the builderId
-            builder = new ScriptlerBuilder("given-id", SCRIPT_USABLE_1, false, new Parameter[0]);
+            builder = new ScriptlerBuilder("given-id", SCRIPT_USABLE_1, false, Collections.emptyList());
             errors = callCheckData(builder);
             assertTrue(errors.isEmpty());
 
-            builder = new ScriptlerBuilder(null, SCRIPT_USABLE_1, false, new Parameter[0]);
+            builder = new ScriptlerBuilder(null, SCRIPT_USABLE_1, false, Collections.emptyList());
             errors = callCheckData(builder);
             assertTrue(errors.isEmpty());
 
-            builder = new ScriptlerBuilder("", SCRIPT_USABLE_1, false, new Parameter[0]);
+            builder = new ScriptlerBuilder("", SCRIPT_USABLE_1, false, Collections.emptyList());
             errors = callCheckData(builder);
             assertTrue(errors.isEmpty());
         }
 
         // concern especially SECURITY-366
-        builder = new ScriptlerBuilder("", SCRIPT_NOT_USABLE, false, new Parameter[0]);
+        builder = new ScriptlerBuilder("", SCRIPT_NOT_USABLE, false, Collections.emptyList());
         errors = callCheckData(builder);
         assertEquals(1, errors.size());
         assertTrue(errors.containsKey("scriptId"));

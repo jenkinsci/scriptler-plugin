@@ -23,6 +23,7 @@
  */
 package org.jenkinsci.plugins.scriptler;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.ExtensionList;
 import hudson.Util;
@@ -192,9 +193,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
                     paramList.add(new Parameter(paramName, null));
                 }
 
-                Parameter[] parameters = paramList.toArray(new Parameter[0]);
-
-                final String finalName = saveScriptAndForward(id, info.getName(), info.getComment(), source, false, false, catalogName, id, parameters);
+                final String finalName = saveScriptAndForward(id, info.getName(), info.getComment(), source, false, false, catalogName, id, paramList);
                 return new HttpRedirect("editScript?id=" + finalName);
             }
         }
@@ -237,7 +236,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
         checkPermission(ScriptlerPermissions.CONFIGURE);
 
-        Parameter[] parameters = UIHelper.extractParameters(req.getSubmittedForm());
+        List<Parameter> parameters = UIHelper.extractParameters(req.getSubmittedForm());
 
         saveScriptAndForward(id, name, comment, script, nonAdministerUsing, onlyMaster, originCatalogName, originId, parameters);
         return new HttpRedirect("index");
@@ -249,7 +248,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @return the final name of the saved script - which is also the id of the script!
      * @throws IOException
      */
-    private String saveScriptAndForward(String id, String name, String comment, String script, boolean nonAdministerUsing, boolean onlyMaster, String originCatalogName, String originId, Parameter[] parameters) throws IOException {
+    private String saveScriptAndForward(String id, String name, String comment, String script, boolean nonAdministerUsing, boolean onlyMaster, String originCatalogName, String originId, @NonNull List<Parameter> parameters) throws IOException {
         script = script == null ? "TODO" : script;
         if (StringUtils.isEmpty(id)) {
             throw new IllegalArgumentException("'id' must not be empty!");
@@ -477,7 +476,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     public void doTriggerScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("script") String scriptSrc, @QueryParameter("node") String node) throws IOException, ServletException {
         checkPermission(ScriptlerPermissions.RUN_SCRIPTS);
 
-        final Parameter[] parameters = UIHelper.extractParameters(req.getSubmittedForm());
+        final List<Parameter> parameters = UIHelper.extractParameters(req.getSubmittedForm());
 
         boolean canByPassScriptApproval = Jenkins.get().hasPermission(Jenkins.RUN_SCRIPTS);
 
@@ -566,7 +565,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             return;
         }
         
-        Parameter[] paramArray = prepareParameters(req, tempScript);
+        Collection<Parameter> paramArray = prepareParameters(req, tempScript);
 
         rsp.setContentType(contentType == null ? "text/plain" : contentType);
 
@@ -579,8 +578,8 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private Parameter[] prepareParameters(StaplerRequest req, Script tempScript) {
+    @NonNull
+    private Collection<Parameter> prepareParameters(StaplerRequest req, Script tempScript) {
         // retain default parameter values
         Map<String, Parameter> params = new HashMap<>();
         for (Parameter param : tempScript.getParameters()) {
@@ -593,8 +592,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
                 params.put(param.getKey(), new Parameter(param.getKey(), param.getValue()[0]));
             }
         }
-        Parameter[] paramArray = params.values().toArray(new Parameter[0]);
-        return paramArray;
+        return params.values();
     }
 
     private String[] resolveSlaveNames(String nameAlias) {

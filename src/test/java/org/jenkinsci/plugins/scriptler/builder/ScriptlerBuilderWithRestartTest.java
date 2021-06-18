@@ -36,6 +36,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagementHelper;
+import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runners.model.Statement;
@@ -49,9 +50,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 /**
  * Warning: a user without RUN_SCRIPT can currently only clone an existing builder INSIDE a project.
@@ -121,11 +123,8 @@ public class ScriptlerBuilderWithRestartTest {
                 assertNotNull(scriptlerBuilder.getBuilderId());
                 assertEquals(SCRIPT_USABLE_1, scriptlerBuilder.getScriptId());
                 assertEquals(true, scriptlerBuilder.isPropagateParams());
-                assertEquals(2, scriptlerBuilder.getParameters().length);
-                assertEquals("param1", scriptlerBuilder.getParameters()[0].getName());
-                assertEquals("value1", scriptlerBuilder.getParameters()[0].getValue());
-                assertEquals("param2", scriptlerBuilder.getParameters()[1].getName());
-                assertEquals("value2", scriptlerBuilder.getParameters()[1].getValue());
+                assertThat(scriptlerBuilder.getParametersList(), hasSize(2));
+                assertThat(scriptlerBuilder.getParametersList(), hasItems(new Parameter("param1", "value1"), new Parameter("param2", "value2")));
             }
         });
 
@@ -138,11 +137,8 @@ public class ScriptlerBuilderWithRestartTest {
                 assertNotNull(scriptlerBuilder.getBuilderId());
                 assertEquals(SCRIPT_USABLE_1, scriptlerBuilder.getScriptId());
                 assertEquals(true, scriptlerBuilder.isPropagateParams());
-                assertEquals(2, scriptlerBuilder.getParameters().length);
-                assertEquals("param1", scriptlerBuilder.getParameters()[0].getName());
-                assertEquals("value1", scriptlerBuilder.getParameters()[0].getValue());
-                assertEquals("param2", scriptlerBuilder.getParameters()[1].getName());
-                assertEquals("value2", scriptlerBuilder.getParameters()[1].getValue());
+                assertThat(scriptlerBuilder.getParametersList(), hasSize(2));
+                assertThat(scriptlerBuilder.getParametersList(), hasItems(new Parameter("param1", "value1"), new Parameter("param2", "value2")));
             }
         });
     }
@@ -210,11 +206,8 @@ public class ScriptlerBuilderWithRestartTest {
                 assertTrue(scriptlerBuilder.getBuilderId().equals(""));
                 assertEquals(SCRIPT_USABLE_1, scriptlerBuilder.getScriptId());
                 assertEquals(true, scriptlerBuilder.isPropagateParams());
-                assertEquals(2, scriptlerBuilder.getParameters().length);
-                assertEquals("param1", scriptlerBuilder.getParameters()[0].getName());
-                assertEquals("value1", scriptlerBuilder.getParameters()[0].getValue());
-                assertEquals("param2", scriptlerBuilder.getParameters()[1].getName());
-                assertEquals("value2", scriptlerBuilder.getParameters()[1].getValue());
+                assertThat(scriptlerBuilder.getParametersList(), hasSize(2));
+                assertThat(scriptlerBuilder.getParametersList(), hasItems(new Parameter("param1", "value1"), new Parameter("param2", "value2")));
             }
         });
 
@@ -227,11 +220,8 @@ public class ScriptlerBuilderWithRestartTest {
                 assertNotNull(scriptlerBuilder.getBuilderId());
                 assertEquals(SCRIPT_USABLE_1, scriptlerBuilder.getScriptId());
                 assertEquals(true, scriptlerBuilder.isPropagateParams());
-                assertEquals(2, scriptlerBuilder.getParameters().length);
-                assertEquals("param1", scriptlerBuilder.getParameters()[0].getName());
-                assertEquals("value1", scriptlerBuilder.getParameters()[0].getValue());
-                assertEquals("param2", scriptlerBuilder.getParameters()[1].getName());
-                assertEquals("value2", scriptlerBuilder.getParameters()[1].getValue());
+                assertThat(scriptlerBuilder.getParametersList(), hasSize(2));
+                assertThat(scriptlerBuilder.getParametersList(), hasItems(new Parameter("param1", "value1"), new Parameter("param2", "value2")));
             }
         });
     }

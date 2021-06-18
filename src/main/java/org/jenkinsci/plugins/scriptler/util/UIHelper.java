@@ -1,11 +1,13 @@
 package org.jenkinsci.plugins.scriptler.util;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
@@ -13,24 +15,25 @@ public class UIHelper {
 
     /**
      * Extracts the parameters from the given request
-     * 
+     *
      * @param req
      *            the request potentially containing parameters
      * @return parameters - might be an empty array, but never <code>null</code>.
      */
-    public static Parameter[] extractParameters(JSONObject json) {
-        Parameter[] parameters = new Parameter[0];
+    @NonNull
+    public static List<Parameter> extractParameters(JSONObject json) {
+        List<Parameter> parameters = Collections.emptyList();
         final JSONObject defineParams = json.optJSONObject("defineParams");
         if (defineParams != null && !defineParams.isNullObject()) {
             JSONObject argsObj = defineParams.optJSONObject("parameters");
             if (argsObj == null) {
                 JSONArray argsArrayObj = defineParams.optJSONArray("parameters");
                 if (argsArrayObj != null) {
-                    parameters = mapJsonArray(argsArrayObj, Parameter::new).toArray(new Parameter[0]);
+                    parameters = mapJsonArray(argsArrayObj, Parameter::new);
                 }
             } else {
                 Parameter param = new Parameter(argsObj);
-                parameters = new Parameter[] { param };
+                parameters = Collections.singletonList(param);
             }
         }
         return parameters;
