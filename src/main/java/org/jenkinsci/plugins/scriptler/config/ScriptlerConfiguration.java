@@ -82,7 +82,7 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
 
     public ScriptlerConfiguration(SortedSet<Script> scripts) {
         if (scripts != null) {
-            this.scriptSet = scripts;
+            setScripts(scripts);
         }
     }
 

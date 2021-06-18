@@ -38,7 +38,7 @@ public class ScriptSet {
     private static final Logger LOGGER = Logger.getLogger(ScriptSet.class.getName());
 
     // have it sorted
-    protected Set<Script> scriptSet = new TreeSet<>();
+    protected final Set<Script> scriptSet = new TreeSet<>();
 
     public Script getScriptById(String id) {
         for (Script scr : scriptSet) {
@@ -91,7 +91,8 @@ public class ScriptSet {
     }
 
     public void setScripts(Set<Script> scripts) {
-        this.scriptSet = scripts;
+        scriptSet.clear();
+        scriptSet.addAll(scripts);
     }
 
 }
