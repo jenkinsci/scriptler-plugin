@@ -416,7 +416,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             script = new Script(fixedFileName, fixedFileName, true, nonAdministerUsing, false);
         }
 
-        String scriptSource = FileUtils.readFileToString(f, "UTF-8");
+        String scriptSource = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
         ScriptHelper.putScriptInApprovalQueueIfRequired(scriptSource);
 
         ScriptlerConfiguration config = getConfiguration();

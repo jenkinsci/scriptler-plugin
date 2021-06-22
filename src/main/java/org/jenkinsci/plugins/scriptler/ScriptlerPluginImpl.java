@@ -28,6 +28,7 @@ import hudson.Plugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -108,7 +109,7 @@ public class ScriptlerPluginImpl extends Plugin {
         for (Script script : ScriptlerConfiguration.getConfiguration().getScripts()) {
             File scriptFile = new File(ScriptlerManagement.getScriptDirectory(), script.getScriptPath());
             try{
-                String scriptSource = FileUtils.readFileToString(scriptFile, "UTF-8");
+                String scriptSource = FileUtils.readFileToString(scriptFile, StandardCharsets.UTF_8);
     
                 // we cannot do that during start since the ScriptApproval is not yet loaded
                 // and only after JOB_LOADED to have the securityRealm configured
