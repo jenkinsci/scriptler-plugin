@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.scriptler;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -40,7 +41,7 @@ public class SyncUtil {
         // if not, add it to the configuration
         for (File file : availablePhysicalScripts) {
             if (cfg.getScriptById(file.getName()) == null) {
-                final ScriptInfo info = ScriptHelper.extractScriptInfo(FileUtils.readFileToString(file, "UTF-8"));
+                final ScriptInfo info = ScriptHelper.extractScriptInfo(FileUtils.readFileToString(file, StandardCharsets.UTF_8));
                 if (info != null) {
                     final List<String> paramList = info.getParameters();
                     Parameter[] parameters = new Parameter[paramList.size()];
