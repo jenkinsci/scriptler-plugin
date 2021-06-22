@@ -31,7 +31,6 @@ import hudson.model.*;
 import hudson.security.Permission;
 import jenkins.model.Jenkins;
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.jenkinsci.plugins.scriptler.config.Script;
@@ -49,7 +48,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
@@ -268,7 +266,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             throw new IOException("Invalid file path received: " + id);
         }
 
-        FileUtils.writeStringToFile(newScriptFile, script, StandardCharsets.UTF_8);
+        ScriptHelper.writeScriptToFile(newScriptFile, script);
 
         commitFileToGitRepo(finalFileName);
 
@@ -416,7 +414,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             script = new Script(fixedFileName, fixedFileName, true, nonAdministerUsing, false);
         }
 
-        String scriptSource = FileUtils.readFileToString(f, "UTF-8");
+        String scriptSource = ScriptHelper.readScriptFromFile(f);
         ScriptHelper.putScriptInApprovalQueueIfRequired(scriptSource);
 
         ScriptlerConfiguration config = getConfiguration();

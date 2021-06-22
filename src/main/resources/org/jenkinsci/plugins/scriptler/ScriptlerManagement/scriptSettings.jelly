@@ -61,7 +61,8 @@
 
 			<h1>${%Upload new Script}</h1>
 			<div style="margin-bottom: 1em;">
-				${%uploadtext}
+				${%uploadtext}<br/>
+				${%UploadEncoding}
               </div>
 			<f:form method="post" action="uploadScript" name="uploadScript"
 				enctype="multipart/form-data">

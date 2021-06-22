@@ -1,15 +1,14 @@
 package org.jenkinsci.plugins.scriptler.util;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.model.Computer;
 import hudson.util.StreamTaskListener;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -25,7 +24,7 @@ import jenkins.model.Jenkins.MasterComputer;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptler.Messages;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
@@ -55,6 +54,15 @@ public class ScriptHelper {
         JSON_CLASS_MAPPING.put("parameters", Parameter.class);
     }
 
+    @NonNull
+    public static String readScriptFromFile(@NonNull File file) throws IOException {
+        return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+    }
+
+    public static void writeScriptToFile(@NonNull File file, @NonNull String script) throws IOException {
+        FileUtils.writeStringToFile(file, script, StandardCharsets.UTF_8);
+    }
+
     /**
      * Loads the script information.
      * 
@@ -71,10 +79,8 @@ public class ScriptHelper {
         Script s = ScriptlerConfiguration.getConfiguration().getScriptById(id);
         if (withSrc && s != null) {
             File scriptSrc = new File(ScriptlerManagement.getScriptDirectory(), s.getScriptPath());
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(scriptSrc),
-                            Charset.forName("UTF-8")))) {
-                String src = IOUtils.toString(reader);
-                s.setScript(src);
+            try {
+                s.setScript(readScriptFromFile(scriptSrc));
             } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, Messages.scriptSourceNotFound(id));
             }
@@ -161,7 +167,7 @@ public class ScriptHelper {
             try {
                 Computer comp = Jenkins.getInstance().getComputer(node);
                 if (comp == null && "(master)".equals(node)) {
-                    output = MasterComputer.localChannel.call(new GroovyScript(scriptTxt, parameters, false, new StreamTaskListener(sos)));
+                    output = MasterComputer.localChannel.call(new GroovyScript(scriptTxt, parameters, false, new StreamTaskListener(sos, StandardCharsets.UTF_8)));
                 } else if (comp == null) {
                     output = Messages.node_not_found(node) + "\n";
                 } else {
@@ -170,7 +176,7 @@ public class ScriptHelper {
                     }
 
                     else {
-                        output = comp.getChannel().call(new GroovyScript(scriptTxt, parameters, false, new StreamTaskListener(sos)));
+                        output = comp.getChannel().call(new GroovyScript(scriptTxt, parameters, false, new StreamTaskListener(sos, StandardCharsets.UTF_8)));
                     }
                 }
 
@@ -178,7 +184,7 @@ public class ScriptHelper {
                 throw new ServletException(e);
             }
         }
-        return sos.toString(Charset.forName("UTF-8").name());
+        return new String(sos.toByteArray(), StandardCharsets.UTF_8);
     }
 
     /**

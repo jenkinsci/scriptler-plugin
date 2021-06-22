@@ -1,12 +1,12 @@
 package org.jenkinsci.plugins.scriptler.share.gh;
 
 import hudson.Extension;
-import hudson.Util;
 import hudson.ProxyConfiguration;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfoCatalog;
@@ -79,13 +80,9 @@ public class GHCatalog extends ScriptInfoCatalog<ScriptInfo> {
     @Override
     public String getScriptSource(ScriptInfo scriptInfo) {
 
-        try {
-
-            final String scriptUrl = CATALOG_INFO.getReplacedDownloadUrl(scriptInfo.getName(), scriptInfo.getId());
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            Util.copyStreamAndClose(ProxyConfiguration.open(new URL(scriptUrl)).getInputStream(), out);
-            return out.toString("UTF-8");
-
+        final String scriptUrl = CATALOG_INFO.getReplacedDownloadUrl(scriptInfo.getName(), scriptInfo.getId());
+        try (InputStream is = ProxyConfiguration.getInputStream(new URL(scriptUrl))) {
+            return IOUtils.toString(is, StandardCharsets.UTF_8);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "not abe to load script sources from GH for: " + scriptInfo, e);
         }

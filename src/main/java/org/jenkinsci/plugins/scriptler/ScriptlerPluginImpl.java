@@ -37,7 +37,6 @@ import hudson.security.Permission;
 import hudson.security.PermissionGroup;
 import hudson.security.PermissionScope;
 import jenkins.model.Jenkins;
-import org.apache.commons.io.FileUtils;
 import org.jenkinsci.plugins.scriptler.config.Script;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
 import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
@@ -108,7 +107,7 @@ public class ScriptlerPluginImpl extends Plugin {
         for (Script script : ScriptlerConfiguration.getConfiguration().getScripts()) {
             File scriptFile = new File(ScriptlerManagement.getScriptDirectory(), script.getScriptPath());
             try{
-                String scriptSource = FileUtils.readFileToString(scriptFile, "UTF-8");
+                String scriptSource = ScriptHelper.readScriptFromFile(scriptFile);
     
                 // we cannot do that during start since the ScriptApproval is not yet loaded
                 // and only after JOB_LOADED to have the securityRealm configured

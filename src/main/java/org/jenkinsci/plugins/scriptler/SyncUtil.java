@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.io.FileUtils;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.jenkinsci.plugins.scriptler.config.Script;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
@@ -40,7 +39,7 @@ public class SyncUtil {
         // if not, add it to the configuration
         for (File file : availablePhysicalScripts) {
             if (cfg.getScriptById(file.getName()) == null) {
-                final ScriptInfo info = ScriptHelper.extractScriptInfo(FileUtils.readFileToString(file, "UTF-8"));
+                final ScriptInfo info = ScriptHelper.extractScriptInfo(ScriptHelper.readScriptFromFile(file));
                 if (info != null) {
                     final List<String> paramList = info.getParameters();
                     Parameter[] parameters = new Parameter[paramList.size()];
