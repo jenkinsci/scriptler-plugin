@@ -98,7 +98,7 @@ THE SOFTWARE.
 					</tr>
 				</table>
 
-				<textarea id="script" name="script" class="script">
+				<textarea id="script" name="script" class="${h.isUnitTest ? '' : 'script'}">
 					<j:choose>
 						<j:when test="${scriptNotFound}">
 							${%ScriptNotFound}

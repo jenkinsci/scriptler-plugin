@@ -107,7 +107,6 @@ public class ScriptlerRestApiTest {
     }
 
     @Test
-    @Ignore("no idea why this does not work, htmlunit does not send the modified textarea...")
     public void testSuccessWithChangedScript() throws Exception {
 
         JenkinsRule.WebClient webClient = j.createWebClient();
