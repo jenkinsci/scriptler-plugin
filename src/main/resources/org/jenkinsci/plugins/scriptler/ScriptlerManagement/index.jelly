@@ -67,7 +67,7 @@
 									<a href="editScript?id=${t.id}" class="scriptler-link-button scriptler-icon-slot">
 										<img width="16" height="16" title="${%edit script} ${t.name}" src="${imagesURL }/16x16/document_edit.gif" />
 									</a>
-									<form method="post" action="removeScript" class="scriptler-inline scriptler-icon-slot" onclick="return confirmDelete('${t.name}')">
+									<form method="post" action="removeScript" class="scriptler-inline scriptler-icon-slot" data-name="${t.name}" onclick="return confirmDelete(this)">
 										<input type="hidden" name="id" value="${t.id}" />
 										<button type="submit" name="submit_param" value="submit_value" class="scriptler-link-button">
 											<img width="16" height="16" title="${%remove script} ${t.name}" src="${imagesURL}/16x16/edit-delete.gif" />
@@ -99,7 +99,8 @@
 				</table>
 			</div>
     <script>
-    function confirmDelete(name) {
+    function confirmDelete(element) {
+      var name = element.getAttribute('data-name');
       if (confirm("Sure you want to delete ["+name+"]?")) {
         return true;
       }else{
