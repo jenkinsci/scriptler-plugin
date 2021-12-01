@@ -39,8 +39,7 @@ THE SOFTWARE.
 	<l:layout norefresh="true" type="full-screen">
 		<l:main-panel>
 			<h1>
-				<img width="48" height="48" src="${imagesURL}/16x16/document_edit.gif" />
-				<img width="16" height="16" src="${imagesURL}/16x16/empty.gif" />
+				<l:icon class="icon-notepad icon-xlg" />
 				${%title}
 			</h1>
 			<f:form>

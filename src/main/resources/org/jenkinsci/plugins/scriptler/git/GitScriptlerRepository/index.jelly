@@ -3,7 +3,7 @@
     <l:layout title="">
         <l:main-panel>
             <h1>
-                <img src="${app.rootUrl}plugin/scriptler/images/Git-Icon-1788C.png" width="48" height="48"/>
+                <img src="${app.rootUrl}plugin/scriptler/images/Git-Icon-1788C.svg" width="48" height="48"/>
                 Accessing Scriptler scripts
             </h1>
             <p>${%blurb}</p>

@@ -16,7 +16,7 @@
 		<st:include page="sidepanel.jelly" />
 		<l:main-panel>
 			<h1>
-				<img src="${imagesURL}/48x48/${it.iconFileName}" alt="" />
+				<l:icon class="icon-notepad icon-xlg" />
 				${%title}
 			</h1>
 
@@ -41,36 +41,42 @@
 							<td class="pane scriptler-toolbar" width="1%">
 								<j:choose>
 									<j:when test="${approved == null}">
-										<img width="16" height="16" title="${%fileNotAvailable}" src="${imagesURL}/16x16/red.gif" class="scriptler-icon-slot-first" />
+										<a class="scriptler-icon-slot">
+											<l:icon title="${%fileNotAvailable}" class="icon-error icon-sm" />
+										</a>
 									</j:when>
 									<j:when test="${approved == true}">
-										<img width="16" height="16" title="${%scriptApproved}" src="${imagesURL}/16x16/accept.png" class="scriptler-icon-slot-first" />
+										<l:icon title="${%scriptApproved}" class="icon-accept icon-sm" />
 									</j:when>
 									<j:otherwise>
-										<img width="16" height="16" title="${%scriptNotYetApproved}" src="${imagesURL}/16x16/warning.png" class="scriptler-icon-slot-first"/>
+										<l:icon title="${%scriptNotYetApproved}" class="icon-warning icon-sm"/>
 									</j:otherwise>
 								</j:choose>
 								<j:choose>
 									<j:when test="${t.nonAdministerUsing}">
-										<img width="16" height="16" title="${%usableInBuildStep}" src="${imagesURL}/16x16/setting.png" class="scriptler-icon-slot" />
+										<a class="scriptler-icon-slot">
+											<l:icon title="${%usableInBuildStep}" class="icon-setting icon-sm" />
+										</a>
 									</j:when>
 									<j:otherwise>
-										<img width="16" height="16" title="${%notUsableInBuildStep}" src="${imagesURL}/16x16/lock.png" class="scriptler-icon-slot" />
+										<a class="scriptler-icon-slot">
+											<l:icon title="${%notUsableInBuildStep}" class="icon-lock icon-sm" />
+										</a>
 									</j:otherwise>
 								</j:choose>
 								<l:hasPermission permission="${it.scriptlerRunScripts}">
 									<a href="runScript?id=${t.id}" class="scriptler-icon-slot">
-										<img width="16" height="16" title="${%run script} ${t.name}" src="${imagesURL}/16x16/terminal.gif" />
+										<l:icon class="icon-terminal icon-sm" title="${%run script} ${t.name}" />
 									</a>
 								</l:hasPermission>
 								<l:hasPermission permission="${it.scriptlerConfigure}">
 									<a href="editScript?id=${t.id}" class="scriptler-link-button scriptler-icon-slot">
-										<img width="16" height="16" title="${%edit script} ${t.name}" src="${imagesURL }/16x16/document_edit.gif" />
+										<l:icon class="icon-notepad icon-sm" title="${%edit script} ${t.name}" />
 									</a>
 									<form method="post" action="removeScript" class="scriptler-inline scriptler-icon-slot" data-name="${t.name}" onclick="return confirmDelete(this)">
 										<input type="hidden" name="id" value="${t.id}" />
 										<button type="submit" name="submit_param" value="submit_value" class="scriptler-link-button">
-											<img width="16" height="16" title="${%remove script} ${t.name}" src="${imagesURL}/16x16/edit-delete.gif" />
+											<l:icon class="icon-edit-delete icon-sm" title="${%remove script} ${t.name}" />
 										</button>
 									</form>
 								</l:hasPermission>

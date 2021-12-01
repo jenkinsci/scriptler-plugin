@@ -100,7 +100,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      */
     @Override
     public String getIconFileName() {
-        return hasAtLeastOneScriptlerPermission() ? "notepad.gif" : null;
+        return hasAtLeastOneScriptlerPermission() ? "notepad.png" : null;
     }
 
     /*
