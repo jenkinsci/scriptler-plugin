@@ -26,8 +26,7 @@
 		<st:include page="sidepanel.jelly" />
 		<l:main-panel>
 			<h1>
-				<img width="48" height="48" src="${imagesURL}/48x48/folder.gif" />
-				<img width="16" height="16" src="${imagesURL}/16x16/empty.gif" />
+				<l:icon class="icon-folder icon-xlg" />
 				${%title}
 			</h1>
 
