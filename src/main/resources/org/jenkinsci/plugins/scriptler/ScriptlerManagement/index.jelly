@@ -41,9 +41,7 @@
 							<td class="pane scriptler-toolbar" width="1%">
 								<j:choose>
 									<j:when test="${approved == null}">
-										<a class="scriptler-icon-slot">
-											<l:icon title="${%fileNotAvailable}" class="icon-error icon-sm" />
-										</a>
+										<l:icon title="${%fileNotAvailable}" class="icon-error icon-sm" />
 									</j:when>
 									<j:when test="${approved == true}">
 										<l:icon title="${%scriptApproved}" class="icon-accept icon-sm" />
