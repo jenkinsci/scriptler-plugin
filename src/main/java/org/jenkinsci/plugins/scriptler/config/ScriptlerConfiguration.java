@@ -50,10 +50,8 @@ import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.DoNotUse;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
-/**
- */
 public final class ScriptlerConfiguration extends ScriptSet implements Saveable {
 
     private final static Logger LOGGER = Logger.getLogger(ScriptlerConfiguration.class.getName());
@@ -97,7 +95,7 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
         return new XmlFile(XSTREAM, new File(ScriptlerManagement.getScriptlerHomeDirectory(), "scriptler.xml"));
     }
 
-    public static @Nonnull ScriptlerConfiguration load() throws IOException {
+    public static @NonNull ScriptlerConfiguration load() throws IOException {
         XmlFile f = getXmlFile();
         if (f.exists()) {
             // As it might be that we have an unsorted set, we ensure the

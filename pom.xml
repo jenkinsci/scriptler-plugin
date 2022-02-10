@@ -39,7 +39,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.javadoc.skip>true</maven.javadoc.skip>
-		<jenkins.version>2.249</jenkins.version>
+		<jenkins.version>2.319.3</jenkins.version>
 		<java.level>8</java.level>
 	</properties>
 	<scm>
@@ -48,43 +48,43 @@
 		<url>https://github.com/jenkinsci/scriptler-plugin</url>
   	  <tag>HEAD</tag>
   </scm>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.jenkins.tools.bom</groupId>
+                <artifactId>bom-2.319.x</artifactId>
+                <version>1148.v7261f385f859</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.jenkins-ci.plugins</groupId>
 			<artifactId>token-macro</artifactId>
-			<version>2.13</version>
-			<exclusions>
-				<exclusion>
-					<!-- Causes enforcer violation with Jenkins 2.249 -->
-					<groupId>org.jenkins-ci</groupId>
-					<artifactId>symbol-annotation</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<dependency>
 			<groupId>org.jenkins-ci.modules</groupId>
 			<artifactId>sshd</artifactId>
-			<version>2.6</version>
-			<scope>provided</scope><!-- this is in the core -->
 		</dependency>
 
 		<dependency>
 			<groupId>org.jenkins-ci.plugins</groupId>
 			<artifactId>git-server</artifactId>
-			<version>1.7</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.jenkins-ci.plugins</groupId>
 			<artifactId>script-security</artifactId>
-			<version>1.26</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.jenkins-ci.plugins</groupId>
 			<artifactId>antisamy-markup-formatter</artifactId>
-			<version>2.1</version>
 		</dependency>
 
 		<dependency>

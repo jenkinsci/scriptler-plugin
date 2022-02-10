@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;;
 import javax.servlet.ServletException;
 
 import jenkins.model.Jenkins;
@@ -191,7 +191,7 @@ public class ScriptHelper {
      * @param fullScriptBody
      *            the script to extract the meta info from
      * @return <code>null</code> if no meta info found
-     * @see https://github.com/jenkinsci/jenkins-scripts/tree/master/scriptler
+     * @see <a href="https://github.com/jenkinsci/jenkins-scripts/tree/master/scriptler">...</a>
      */
     public static ScriptInfo extractScriptInfo(String fullScriptBody) {
         final Matcher matcher = SCRIPT_META_PATTERN.matcher(fullScriptBody);

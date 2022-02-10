@@ -5,6 +5,7 @@ package org.jenkinsci.plugins.scriptler.builder;
 
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.ExtensionList;
@@ -45,8 +46,6 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.Serializable;
@@ -89,7 +88,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         this.propagateParams = propagateParams;
     }
 
-    private @Nonnull Map<String, String> checkGenericData() {
+    private @NonNull Map<String, String> checkGenericData() {
         Map<String, String> errors = new HashMap<>();
 
         Script script = ScriptHelper.getScript(scriptId, true);
@@ -104,7 +103,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         return errors;
     }
 
-    private void checkPermission(@Nonnull Map<String, String> errors){
+    private void checkPermission(@NonNull Map<String, String> errors){
         if(Jenkins.get().hasPermission(Jenkins.RUN_SCRIPTS)){
             // user has right to add / edit Scripler steps
             return;
@@ -137,7 +136,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         return this;
     }
 
-    private boolean hasSameScriptlerBuilderInProject(@Nonnull Project<?, ?> project, @Nonnull ScriptlerBuilder targetBuilder){
+    private boolean hasSameScriptlerBuilderInProject(@NonNull Project<?, ?> project, @NonNull ScriptlerBuilder targetBuilder){
         List<ScriptlerBuilder> allScriptlerBuilders = _getAllScriptlerBuildersFromProject(project);
         for (ScriptlerBuilder builder : allScriptlerBuilders) {
             if(targetBuilder.equals(builder)){
@@ -148,7 +147,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         return false;
     }
 
-    private @Nonnull List<ScriptlerBuilder> _getAllScriptlerBuildersFromProject(@Nonnull Project<?, ?> project){
+    private @NonNull List<ScriptlerBuilder> _getAllScriptlerBuildersFromProject(@NonNull Project<?, ?> project){
         return project.getBuildersList().getAll(ScriptlerBuilder.class);
     }
 
