@@ -186,11 +186,9 @@ public class Script implements Comparable<Script>, NamedResource {
         return Objects.equals(id, other.id);
     }
 
-    public static final Comparator<Script> COMPARATOR_BY_NAME = new Comparator<Script>() {
-        @Override public int compare(Script a, Script b) {
-            String nameA = a.getName() != null ? a.getName() : "";
-            String nameB = b.getName() != null ? b.getName() : "";
-            return nameA.compareToIgnoreCase(nameB);
-        }
+    public static final Comparator<Script> COMPARATOR_BY_NAME = (Script a, Script b) -> {
+        String nameA = a.getName() != null ? a.getName() : "";
+        String nameB = b.getName() != null ? b.getName() : "";
+        return nameA.compareToIgnoreCase(nameB);
     };
 }

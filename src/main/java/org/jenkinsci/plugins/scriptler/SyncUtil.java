@@ -76,11 +76,7 @@ public class SyncUtil {
     private static List<File> getAvailableScripts(File scriptDirectory) {
         LOGGER.log(Level.FINE, "Listing files of {0}", scriptDirectory.getAbsoluteFile());
 
-        File[] scriptFiles = scriptDirectory.listFiles(new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.endsWith(".groovy");
-            }
-        });
+        File[] scriptFiles = scriptDirectory.listFiles((File dir, String name) -> name.endsWith(".groovy"));
 
         List<File> fileList;
         if (scriptFiles == null) {
