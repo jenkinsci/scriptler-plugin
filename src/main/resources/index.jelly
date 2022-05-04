@@ -1,3 +1,4 @@
+<?jelly escape-by-default='true'?>
 <div>
 	Scriptler allows you to store/edit/execute Groovy scripts on any of the
 	slaves/nodes... no need for copy paste Groovy code anymore. Beside
