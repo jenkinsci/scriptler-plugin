@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.scriptler.share.gh;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.Extension;
 import hudson.ProxyConfiguration;
 
@@ -17,8 +18,6 @@ import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfoCatalog;
-
-import javax.annotation.CheckForNull;
 
 /**
  * Provides access to the scriptler scripts shared at https://github.com/jenkinsci/jenkins-scripts

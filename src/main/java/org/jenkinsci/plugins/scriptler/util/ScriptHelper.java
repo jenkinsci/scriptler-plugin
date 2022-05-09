@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.scriptler.util;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
 import hudson.model.Computer;
@@ -15,7 +16,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.annotation.CheckForNull;
 import javax.servlet.ServletException;
 
 import jenkins.model.Jenkins;

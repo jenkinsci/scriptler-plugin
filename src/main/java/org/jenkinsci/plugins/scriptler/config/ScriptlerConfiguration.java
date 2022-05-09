@@ -23,6 +23,7 @@
  */
 package org.jenkinsci.plugins.scriptler.config;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.BulkChange;
 import hudson.XmlFile;
 import hudson.model.Saveable;
@@ -49,8 +50,6 @@ import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.DoNotUse;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
-
-import javax.annotation.Nonnull;
 
 /**
  */
@@ -97,7 +96,7 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
         return new XmlFile(XSTREAM, new File(ScriptlerManagement.getScriptlerHomeDirectory(), "scriptler.xml"));
     }
 
-    public static @Nonnull ScriptlerConfiguration load() throws IOException {
+    public static @NonNull ScriptlerConfiguration load() throws IOException {
         XmlFile f = getXmlFile();
         if (f.exists()) {
             // As it might be that we have an unsorted set, we ensure the
