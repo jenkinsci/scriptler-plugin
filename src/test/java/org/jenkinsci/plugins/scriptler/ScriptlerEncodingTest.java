@@ -4,8 +4,6 @@ import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlTextArea;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
@@ -16,6 +14,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeNoException;
 import static org.junit.Assume.assumeThat;
 import static org.hamcrest.CoreMatchers.is;
 
@@ -28,25 +27,35 @@ public class ScriptlerEncodingTest {
 
     private static Charset previousDefaultCharset;
 
-    @Before
-    public void overwriteDefaultCharset() throws Exception {
+    private void overwriteDefaultCharset() throws Exception {
+      try {
         Field defaultCharset = Charset.class.getDeclaredField("defaultCharset");
         defaultCharset.setAccessible(true);
         previousDefaultCharset = (Charset) defaultCharset.get(null);
         defaultCharset.set(null, StandardCharsets.ISO_8859_1);
         assumeThat(Charset.defaultCharset().name(), is("ISO-8859-1"));
+      } catch (Exception e) { // TODO Java9+ InaccessibleObjectException
+        // Per JDK-4163515, this is not supported. It happened to work prior to Java 17, though.
+        assumeNoException(e);
+      }
     }
 
-    @After
-    public void restoreDefaultCharset() throws Exception {
+    private void restoreDefaultCharset() throws Exception {
+      try {
         Field defaultCharset = Charset.class.getDeclaredField("defaultCharset");
         defaultCharset.setAccessible(true);
         defaultCharset.set(null, previousDefaultCharset);
+      } catch (Exception e) { // TODO Java9+ InaccessibleObjectException
+        // Per JDK-4163515, this is not supported. It happened to work prior to Java 17, though.
+        assumeNoException(e);
+      }
     }
 
     @Test
     @Issue("JENKINS-59841")
     public void testNonAsciiEncodingSaving() throws Exception {
+      overwriteDefaultCharset();
+      try {
         JenkinsRule.WebClient wc = j.createWebClient();
 
         HtmlPage scriptAddPage = wc.goTo("scriptler/scriptSettings");
@@ -63,5 +72,8 @@ public class ScriptlerEncodingTest {
         j.assertGoodStatus(showScriptPage);
         HtmlTextArea script = showScriptPage.getElementByName("script");
         assertEquals(INTERNATIONALIZED_SCRIPT, script.getText());
+      } finally {
+        restoreDefaultCharset();
+      }
     }
 }
