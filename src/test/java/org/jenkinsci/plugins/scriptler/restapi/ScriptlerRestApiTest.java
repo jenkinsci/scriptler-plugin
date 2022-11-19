@@ -12,11 +12,12 @@ import hudson.model.FileParameterValue.FileItemImpl;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.io.FileUtils;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagementHelper;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
@@ -51,9 +52,9 @@ public class ScriptlerRestApiTest {
     }
     
     private void saveFile(ScriptlerManagementHelper helper, String scriptId, String scriptContent) throws Exception {
-        File f = File.createTempFile(scriptId, "-temp");
-        FileUtils.writeStringToFile(f, scriptContent);
-        FileItem fi = new FileItemImpl(f);
+        Path f = Files.createTempFile("script", "-temp");
+        Files.writeString(f, scriptContent);
+        FileItem fi = new FileItemImpl(f.toFile());
         helper.saveScript(fi, true, scriptId);
     }
     
