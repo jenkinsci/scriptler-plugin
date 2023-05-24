@@ -98,7 +98,13 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      */
     @Override
     public String getIconFileName() {
-        return hasAtLeastOneScriptlerPermission() ? "notepad.svg" : null;
+        return hasAtLeastOneScriptlerPermission() ? "symbol-file-tray-stacked-outline plugin-ionicons-api" : null;
+    }
+
+    @NonNull
+    @Override
+    public Category getCategory() {
+        return Category.CONFIGURATION;
     }
 
     /*

@@ -41,22 +41,22 @@
                    </f:entry>
                 </f:block>				
 				<f:block>
-					<p:blockWrapper>
+					<div>
                         <f:optionalBlock name="defineParams" title="${%ParametersDescription}" checked="${!empty(instance.parameters)}" help="/plugin/scriptler/help-params.html">
                             <f:entry title="${%Parameters}" field="parameters">
                                 <f:repeatable var="param" items="${instance.parameters}" name="parameters" noAddButton="true" minimum="1">
-                                    <p:blockWrapper style="width:100%">
+                                    <div style="width:100%">
                                         <f:entry>
                                             ${%ParameterName} <input type="text" name="name" value="${param.name}" size="50"/>
                                             ${%ParameterValue} <input type="text" name="value" value="${param.value}" size="80"/>
                                             <input type="button" name="delete_button" value="${%DeleteParameter}" class="repeatable-delete show-if-not-only" style="margin-left: 1em;" />
                                             <input type="button" name="add_button" value="${%AddParameter}" class="repeatable-add show-if-last" />
                                         </f:entry>
-                                    </p:blockWrapper>
+                                    </div>
                                 </f:repeatable>
                             </f:entry>
                         </f:optionalBlock>						
-					</p:blockWrapper>
+					</div>
 				</f:block>
 			</f:entry>
 		</j:otherwise>

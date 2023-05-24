@@ -35,14 +35,14 @@
 			${%scriptlerdirectorytext} <code>${it.scriptlerHomeDirectory}</code><br />
 			${%scriptdirectorytext} <code>${it.scriptDirectory}</code>
 			<p />
-			<f:form method="post" action="scriptlerSettings">
+			<f:form name="scriptlerSettings" method="post" action="scriptlerSettings">
 				<j:jelly xmlns:j="jelly:core">
 					<f:entry title="${%Disable remote catalog}" help="/plugin/scriptler/help-disableRemoterCatalog.html">
 						<f:checkbox name="disableRemoteCatalog" checked="${it.disableRemoteCatalog()}" />
 					</f:entry>
 				</j:jelly>
 				<f:block>
-					<f:submit value="${%Submit}" />
+					<f:submit value="${%Save}" />
 				</f:block>
 			</f:form>
 			
