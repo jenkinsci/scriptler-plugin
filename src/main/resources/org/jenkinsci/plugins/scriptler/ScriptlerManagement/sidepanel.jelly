@@ -30,9 +30,8 @@ THE SOFTWARE.
   <l:header />
   <l:side-panel>
     <l:tasks>
-      <l:task icon="icon-gear2 icon-md" href="${rootURL}/manage" title="${%Manage Jenkins}" permission="${app.ADMINISTER}" />
       <j:if test="${it.hasAtLeastOneScriptlerPermission()}">
-        <l:task icon="icon-next icon-md" href="${rootURL}/scriptler" title="${%Run/Edit Scripts}" />
+        <l:task icon="icon-next icon-md" href="${rootURL}/scriptler" title="${%Run / Edit Scripts}" />
       </j:if>
       <l:hasPermission permission="${it.scriptlerConfigure}">
         <l:task icon="icon-new-package icon-md" href="scriptSettings" title="${%Add a new Script}" />
@@ -40,7 +39,7 @@ THE SOFTWARE.
               <l:task icon="icon-folder icon-md" href="catalog" title="${%Remote Script catalogs}" />
         </j:if>
         <l:task icon="icon-setting icon-md" href="settings" title="${%Scriptler settings}" />
-        <l:task icon="plugin/scriptler/images/Git-Icon-1788C.svg" href="${rootURL}/scriptler.git" title="${%Git repo}" />
+        <l:task icon="symbol-git-compare-outline plugin-ionicons-api" href="${rootURL}/scriptler.git" title="${%Git repo}" />
       </l:hasPermission>
     </l:tasks>
     <t:executors computers="${h.singletonList(it)}" />

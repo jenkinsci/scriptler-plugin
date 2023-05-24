@@ -48,20 +48,20 @@ THE SOFTWARE.
 						<f:textbox name="comment" value="${script.comment}" disabled="true"/>
 					</f:entry>
                     <f:block>
-	                    <p:blockWrapper>
+	                    <div>
 	                        <f:optionalBlock name="defineParams" title="${%ParamDefinition}" checked="${!empty(script.parameters)}" >
 	                            <f:entry title="${%Parameters}" field="parameters" disabled="true">
 	                                <f:repeatable var="param" items="${script.parameters}" name="parameters" noAddButton="true" minimum="1">
-	                                    <p:blockWrapper style="width:100%">
+	                                    <div style="width:100%">
 	                                        <f:entry>
 	                                            ${%ParameterName} <input type="text" name="name" value="${param.name}" size="50" disabled="true"/>
 	                                            ${%ParameterDefaultValue} <input type="text" name="value" value="${param.value}" size="80" disabled="true"/>
 	                                        </f:entry>
-	                                    </p:blockWrapper>
+	                                    </div>
 	                                </f:repeatable>
 	                            </f:entry>
 	                        </f:optionalBlock>
-	                    </p:blockWrapper>
+	                    </div>
 	                </f:block>					
 					<f:entry title="${%Script}">
 						<textarea id="script" name="script" class="script">

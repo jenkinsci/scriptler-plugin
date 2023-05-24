@@ -15,10 +15,7 @@
 		</st:once>
 		<st:include page="sidepanel.jelly" />
 		<l:main-panel>
-			<h1>
-				<l:icon class="icon-notepad icon-xlg" />
-				${%title}
-			</h1>
+			<h1>${%title}</h1>
 
 			${%intro}
 			<h4>

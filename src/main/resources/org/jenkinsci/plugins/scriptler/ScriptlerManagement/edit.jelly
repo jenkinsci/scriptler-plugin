@@ -30,11 +30,8 @@ THE SOFTWARE.
 	<l:layout title="Scriptler - ${%title}" permission="${it.scriptlerConfigure}" norefresh="true">
 		<st:include page="sidepanel.jelly" />
 		<l:main-panel>
-			<h1>
-				<l:icon class="icon-notepad icon-xlg" />
-				${%title}
-			</h1>
-			<f:form method="post" action="scriptAdd">
+			<h1>${%title}</h1>
+			<f:form name="scriptAdd" method="post" action="scriptAdd">
 				<f:entry title="${%Id}" description="${%IdDescription}">
 					<f:textbox name="id" value="${script.id}" />
 				</f:entry>
@@ -51,22 +48,24 @@ THE SOFTWARE.
 					<f:checkbox name="onlyMaster" checked="${script.onlyMaster}" />
 				</f:entry>
 				<f:block>
-					<p:blockWrapper>
+					<div>
 						<f:optionalBlock name="defineParams" title="${%ParametersDescription}" checked="${!empty(script.parameters)}">
 							<f:entry title="${%Parameters}" field="parameters">
-								<f:repeatable var="param" items="${script.parameters}" name="parameters" noAddButton="true" minimum="1">
-									<p:blockWrapper style="width:100%">
-										<f:entry>
-											${%ParameterName} <input type="text" name="name" value="${param.name}" size="50"/>
-											${%ParameterDefaultValue} <input type="text" name="value" value="${param.value}" size="80"/>
-											<input type="button" name="delete_button" value="${%DeleteParameter}" class="repeatable-delete show-if-not-only" style="margin-left: 1em;" />
-											<input type="button" name="add_button" value="${%AddParameter}" class="repeatable-add show-if-last" />
-										</f:entry>
-									</p:blockWrapper>
+								<f:repeatable var="param" items="${script.parameters}" name="parameters" add="${%AddParameter}"
+															minimum="1">
+									<div class="show-if-not-only">
+										<f:repeatableDeleteButton value="${%DeleteParameter}"/>
+									</div>
+									<f:entry title="${%ParameterName}">
+										<f:textbox name="name" value="${param.name}"/>
+									</f:entry>
+									<f:entry title="${%ParameterDefaultValue}">
+										<f:textbox name="value" value="${param.value}"/>
+									</f:entry>
 								</f:repeatable>
 							</f:entry>
 						</f:optionalBlock>
-					</p:blockWrapper>
+					</div>
 				</f:block>					
 				<f:entry title="${%Script}">
 					<textarea id="script" name="script" class="script">
@@ -93,7 +92,7 @@ THE SOFTWARE.
 						</j:choose>			
 						<br />
 					</j:if>
-					<f:submit value="${%Submit}" />
+					<f:submit value="${%Save}" />
 				</f:block>
 			</f:form>
 		</l:main-panel>

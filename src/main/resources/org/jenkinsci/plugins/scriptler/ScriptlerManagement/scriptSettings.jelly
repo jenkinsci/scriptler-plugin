@@ -25,10 +25,7 @@
 	<l:layout title="Scriptler - ${%title}" permission="${it.scriptlerConfigure}" norefresh="true">
 		<st:include page="sidepanel.jelly" />
 		<l:main-panel>
-			<h1>
-				<l:icon class="icon-notepad icon-xlg" />
-				${%title}
-			</h1>
+			<h1>${%title}</h1>
 			<p>
 				${%intro}
 				<br />
@@ -55,7 +52,7 @@
 					<textarea id="script" name="script" class="${h.isUnitTest ? '' : 'script'}"/>
 				</f:entry>
 				<f:block>
-					<f:submit value="${%Submit}" />
+					<f:submit value="${%Save}" />
 				</f:block>
 			</f:form>
 
