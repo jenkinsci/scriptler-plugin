@@ -4,8 +4,8 @@ package org.jenkinsci.plugins.scriptler.restapi;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.gargoylesoftware.htmlunit.html.*;
-//import com.gargoylesoftware.htmlunit.javascript.host.URL;
+import org.htmlunit.html.*;
+//import org.htmlunit.javascript.host.URL;
 import hudson.ExtensionList;
 import hudson.Functions;
 import hudson.model.FileParameterValue.FileItemImpl;
@@ -25,8 +25,8 @@ import org.jvnet.hudson.test.BuildWatcher;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
-import com.gargoylesoftware.htmlunit.Page;
+import org.htmlunit.FailingHttpStatusCodeException;
+import org.htmlunit.Page;
 
 public class ScriptlerRestApiTest {
 
