@@ -39,7 +39,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.javadoc.skip>true</maven.javadoc.skip>
-		<jenkins.version>2.332.1</jenkins.version>
+		<jenkins.version>2.387.3</jenkins.version>
 	</properties>
 	<scm>
 		<connection>scm:git:git://github.com/jenkinsci/scriptler-plugin.git</connection>
@@ -52,8 +52,8 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.332.x</artifactId>
-                <version>1362.v59f2f3db_80ee</version>
+                <artifactId>bom-2.387.x</artifactId>
+                <version>2143.ve4c3c9ec790a</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
