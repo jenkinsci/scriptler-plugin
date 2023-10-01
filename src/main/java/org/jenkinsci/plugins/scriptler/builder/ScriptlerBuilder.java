@@ -40,6 +40,7 @@ import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
 import org.jenkinsci.plugins.scriptler.util.UIHelper;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
+import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
@@ -81,6 +82,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         this(builderId, scriptId, propagateParams, Arrays.asList(Objects.requireNonNull(parameters)));
     }
 
+    @DataBoundConstructor
     public ScriptlerBuilder(String builderId, String scriptId, boolean propagateParams, @NonNull List<Parameter> parameters) {
         this.builderId = builderId;
         this.scriptId = scriptId;

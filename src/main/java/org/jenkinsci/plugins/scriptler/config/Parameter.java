@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.scriptler.config;
 
 import net.sf.json.JSONObject;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.Serializable;
 import java.util.*;
@@ -25,6 +26,7 @@ public class Parameter implements Serializable {
         value = object.getString(VALUE);
     }
 
+    @DataBoundConstructor
     public Parameter(String name, String value) {
         this.name = name;
         this.value = value;
