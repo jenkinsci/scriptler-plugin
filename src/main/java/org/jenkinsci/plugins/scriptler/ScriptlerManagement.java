@@ -30,6 +30,7 @@ import hudson.Util;
 import hudson.markup.MarkupFormatter;
 import hudson.markup.RawHtmlMarkupFormatter;
 import hudson.model.*;
+import hudson.security.AccessControlled;
 import hudson.security.Permission;
 import jenkins.model.Jenkins;
 import org.apache.commons.fileupload.FileItem;
@@ -637,8 +638,13 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws IOException
      * @throws ServletException
      */
-    public void doShowScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException, ServletException {
-        // action directly accessible to any people configuring job, so no permission check
+    public void doShowScript(StaplerRequest req, StaplerResponse rsp, @AncestorInPath Item item, @QueryParameter("id") String id) throws IOException, ServletException {
+        // action directly accessible to any people configuring job, so use a more lenient permission check
+        Jenkins jenkins = Jenkins.get();
+        if (!jenkins.hasAnyPermission(ScriptlerPermissions.RUN_SCRIPTS, ScriptlerPermissions.CONFIGURE)) {
+            AccessControlled parent = item == null ? jenkins : item;
+            parent.checkPermission(Item.CONFIGURE);
+        }
         Script script = ScriptHelper.getScript(id, true);
         req.setAttribute("script", script);
         req.getView(this, "show.jelly").forward(req, rsp);

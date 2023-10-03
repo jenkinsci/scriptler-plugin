@@ -1,5 +1,6 @@
 
 function scriptler_initDetailLink(rootURL, referenceTag){
+   var itemURL = referenceTag.getAttribute('data-item-url');
    var selId = referenceTag.value;
    var all = new Array();
    all = document.getElementsByName('scriptlerScriptId');
@@ -7,7 +8,7 @@ function scriptler_initDetailLink(rootURL, referenceTag){
 	   if(referenceTag == all.item(i)){
 		   var detailsLinkTag = document.getElementsByName('showScriptlerDetailLink').item(i);
 		   if(selId.length != 0){
-			   detailsLinkTag .href=rootURL+"/scriptler/showScript?id=".concat(selId);
+			   detailsLinkTag .href=rootURL+"/" + itemURL + "scriptler/showScript?id=".concat(selId);
 			   detailsLinkTag .style.display = 'block';
 			}else{
 			   detailsLinkTag .style.display = 'none';
