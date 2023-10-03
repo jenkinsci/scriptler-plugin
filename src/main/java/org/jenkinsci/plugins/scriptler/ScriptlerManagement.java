@@ -332,7 +332,12 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         checkPermission(ScriptlerPermissions.CONFIGURE);
 
         // remove the file
-        File oldScript = new File(getScriptDirectory(), id);
+        File scriptDirectory = getScriptDirectory();
+        File oldScript = new File(scriptDirectory, id);
+        if (!Util.isDescendant(scriptDirectory, oldScript)) {
+            LOGGER.log(Level.WARNING, "Folder traversal detected, file path received: {0}, after fixing: {1}", new Object[]{id, oldScript});
+            throw new Failure("Invalid file path received: " + id);
+        }
         if(!oldScript.delete() && oldScript.exists()) {
             throw new Failure("not able to delete " + oldScript.getAbsolutePath());
         }

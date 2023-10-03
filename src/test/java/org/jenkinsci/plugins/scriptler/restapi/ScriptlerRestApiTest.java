@@ -4,6 +4,10 @@ package org.jenkinsci.plugins.scriptler.restapi;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.net.URL;
+import java.util.Collections;
+import org.htmlunit.HttpMethod;
+import org.htmlunit.WebRequest;
 import org.htmlunit.html.*;
 //import org.htmlunit.javascript.host.URL;
 import hudson.ExtensionList;
@@ -18,9 +22,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.fileupload.FileItem;
+import org.htmlunit.util.NameValuePair;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagementHelper;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
+import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
 import org.junit.*;
 import org.jvnet.hudson.test.BuildWatcher;
 import org.jvnet.hudson.test.Issue;
@@ -126,5 +132,30 @@ public class ScriptlerRestApiTest {
     public void testUnknownScript() throws Exception {
         JenkinsRule.WebClient webClient = j.createWebClient();
         webClient.goTo("scriptler/runScript?id=unknown.groovy");
+    }
+
+    @Test
+    @Issue("SECURITY-3205")
+    public void fixFolderTraversalThroughDeleteScript() throws Exception {
+        File configurationFile = ScriptlerConfiguration.getXmlFile().getFile();
+        String path = "../" + configurationFile.getName();
+
+        try (JenkinsRule.WebClient webClient = j.createWebClient()) {
+            URL rootUrl = new URL(webClient.getContextPath() + "scriptler/removeScript");
+            WebRequest req = new WebRequest(rootUrl, HttpMethod.POST);
+            req.setRequestParameters(Collections.singletonList(new NameValuePair("id", path)));
+            webClient.addCrumb(req);
+            webClient.getPage(req);
+            fail();
+        } catch (FailingHttpStatusCodeException e) {
+            if (e.getStatusCode() != 400) {
+                // some other kind of error that we're not checking for
+                throw e;
+            }
+            if (!configurationFile.exists()) {
+                fail("The configuration file was deleted");
+            }
+            assert(e.getResponse().getContentAsString().contains("Invalid file path received: " + path));
+        }
     }
 }
