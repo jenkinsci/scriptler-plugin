@@ -122,7 +122,7 @@ THE SOFTWARE.
 				<div align="right">
 					<f:submit value="${%Run}" name="run" />
 				</div>
-				<script>$('script').focus();</script>
+				<script>document.getElementById('script').focus();</script>
 			</form>
 			<j:if test="${output!=null}">
 				<h2>${%Result}</h2>
