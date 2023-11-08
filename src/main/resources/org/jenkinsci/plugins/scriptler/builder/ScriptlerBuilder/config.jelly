@@ -1,7 +1,7 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:p="/lib/scriptler">
 
-    <st:adjunct assumes="org.kohsuke.stapler.framework.prototype.prototype" includes="org.kohsuke.stapler.bind"/>
+    <st:adjunct includes="org.kohsuke.stapler.bind"/>
 	<st:once>
 		<script type="text/javascript" src="${resURL}/plugin/scriptler/lib/scriptler.js" />
 	</st:once>
