@@ -28,7 +28,6 @@
 		<changelist>999999-SNAPSHOT</changelist>
 		<gitHubRepo>jenkinsci/scriptler-plugin</gitHubRepo>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.javadoc.skip>true</maven.javadoc.skip>
 		<jenkins.version>2.426.1</jenkins.version>
 	</properties>
 	<scm>
