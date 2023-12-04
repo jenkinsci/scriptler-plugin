@@ -16,7 +16,7 @@ public class UIHelper {
     /**
      * Extracts the parameters from the given request
      *
-     * @param req
+     * @param json
      *            the request potentially containing parameters
      * @return parameters - might be an empty array, but never <code>null</code>.
      */

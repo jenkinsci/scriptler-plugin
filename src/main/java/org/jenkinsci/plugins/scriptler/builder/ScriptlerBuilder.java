@@ -302,7 +302,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
     }
 
     /**
-     * Automatically registered by {@link XStream2.AssociatedConverterImpl#findConverter(Class)}
+     * Automatically registered by XStream2.AssociatedConverterImpl#findConverter(Class)
      * Process the class regularly but add a check after that
      */
     @SuppressWarnings("unused") // discovered dynamically
