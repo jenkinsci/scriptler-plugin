@@ -444,7 +444,8 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         if(script.script == null){
             req.setAttribute("scriptNotFound", true);
         }else{
-            boolean canByPassScriptApproval = Jenkins.get().hasPermission(Jenkins.RUN_SCRIPTS);
+            Jenkins j = Jenkins.get();
+            boolean canByPassScriptApproval = j.hasPermission(ScriptlerPermissions.RUN_SCRIPTS) || j.hasPermission(Jenkins.ADMINISTER);
         
             // we do not want user with approval right to auto-approve script when landing on that page
             if(!ScriptHelper.isApproved(script.script, false)){
@@ -484,7 +485,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
         final List<Parameter> parameters = UIHelper.extractParameters(req.getSubmittedForm());
 
-        boolean canByPassScriptApproval = Jenkins.get().hasPermission(Jenkins.RUN_SCRIPTS);
+        boolean canByPassScriptApproval = Jenkins.get().hasPermission(ScriptlerPermissions.RUN_SCRIPTS);
 
         // set the script info back to the request, to display it together with the output.
         Script originalScript = ScriptHelper.getScript(id, true);
@@ -658,7 +659,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         if(script == null || script.script == null){
             req.setAttribute("scriptNotFound", true);
         }else{
-            boolean canByPassScriptApproval = Jenkins.get().hasPermission(Jenkins.RUN_SCRIPTS);
+            boolean canByPassScriptApproval = Jenkins.get().hasPermission(ScriptlerPermissions.RUN_SCRIPTS);
         
             // we do not want user with approval right to auto-approve script when landing on that page
             if(!ScriptHelper.isApproved(script.script, false)){

@@ -1,5 +1,31 @@
 # CHANGELOG
 
+Attention: this is a fork from https://github.com/jenkinsci/scriptler-plugin
+It fixes the problem with only Jenkins Admins being able to edit the jobs 
+with a scriplter while regular users get an exception
+```bash
+java.lang.NullPointerException
+	at java.base/java.util.ArrayList.<init>(ArrayList.java:179)
+	at org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder.<init>(ScriptlerBuilder.java:89)
+	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:490)
+	at org.kohsuke.stapler.RequestImpl.invokeConstructor(RequestImpl.java:604)
+	at org.kohsuke.stapler.RequestImpl.instantiate(RequestImpl.java:883)
+	at org.kohsuke.stapler.RequestImpl$TypePair.convertJSON(RequestImpl.java:768)
+	at org.kohsuke.stapler.RequestImpl.bindJSON(RequestImpl.java:551)
+	at org.kohsuke.stapler.RequestImpl.instantiate(RequestImpl.java:877)
+	at org.kohsuke.stapler.RequestImpl$TypePair.convertJSON(RequestImpl.java:768)
+	at org.kohsuke.stapler.RequestImpl.bindJSON(RequestImpl.java:551)
+	at org.kohsuke.stapler.RequestImpl.bindJSON(RequestImpl.java:546)
+	at hudson.model.Descriptor.bindJSON(Descriptor.java:623)
+	at hudson.model.Descriptor.newInstance(Descriptor.java:593)
+Caused: java.lang.LinkageError: Failed to instantiate class org.biouno.unochoice.model.ScriptlerScript from {"value":"1","scriptlerBuilder":{"backupJobName":"repo","builderId":"1701112116349_2","scriptlerScriptId":"get-tags-heads.groovy","propagateParams":true,"defineParams":{"parameters":{"name":"repo","value":"git@github.com:riskive/datasource-sdk"}}},"isSandboxed":false,"stapler-class":"org.biouno.unochoice.model.ScriptlerScript","$class":"org.biouno.unochoice.model.ScriptlerScript"}
+	at hudson.model.Descriptor.newInstance(Descriptor.java:596)
+
+```
+
 ## Newer releases
 
 See [GitHub Releases](https://github.com/jenkinsci/scriptler-plugin/releases)

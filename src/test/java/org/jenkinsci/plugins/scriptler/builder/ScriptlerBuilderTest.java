@@ -41,6 +41,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagementHelper;
+import org.jenkinsci.plugins.scriptler.ScriptlerPermissions;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.junit.Before;
 import org.junit.Rule;
@@ -193,7 +194,7 @@ public class ScriptlerBuilderTest {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
                 .grant(Jenkins.ADMINISTER).everywhere().to("admin")
-                .grant(Jenkins.RUN_SCRIPTS).everywhere().to("scripter")
+                .grant(ScriptlerPermissions.RUN_SCRIPTS).everywhere().to("scripter")
                 .grant(Jenkins.READ, Item.READ, Item.CONFIGURE).everywhere().toEveryone()
         );
 
@@ -287,7 +288,7 @@ public class ScriptlerBuilderTest {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
                 .grant(Jenkins.ADMINISTER).everywhere().to("admin")
-                .grant(Jenkins.RUN_SCRIPTS).everywhere().to("scripter")
+                .grant(ScriptlerPermissions.RUN_SCRIPTS).everywhere().to("scripter")
                 .grant(Jenkins.READ, Item.READ, Item.CONFIGURE).everywhere().toEveryone()
         );
 

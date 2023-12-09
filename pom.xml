@@ -10,9 +10,9 @@
 	<name>Scriptler</name>
 	<version>${changelist}</version>
 	<packaging>hpi</packaging>
-	<url>https://github.com/jenkinsci/scriptler-plugin</url>
+	<url>https://github.com/riskive/scriptler-plugin</url>
 	<inceptionYear>2010</inceptionYear>
-	<repositories>
+		<repositories>
 		<repository>
 			<id>repo.jenkins-ci.org</id>
 			<url>https://repo.jenkins-ci.org/public/</url>
@@ -25,8 +25,8 @@
 		</pluginRepository>
 	</pluginRepositories>
 	<properties>
-		<changelist>999999-SNAPSHOT</changelist>
-		<gitHubRepo>jenkinsci/scriptler-plugin</gitHubRepo>
+		<changelist>fix-editing-permissions</changelist>
+		<gitHubRepo>riskive/scriptler-plugin</gitHubRepo>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jenkins.version>2.426.1</jenkins.version>
 	</properties>
