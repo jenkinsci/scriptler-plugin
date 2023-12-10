@@ -12,7 +12,7 @@
 	<packaging>hpi</packaging>
 	<url>https://github.com/riskive/scriptler-plugin</url>
 	<inceptionYear>2010</inceptionYear>
-		<repositories>
+	<repositories>
 		<repository>
 			<id>repo.jenkins-ci.org</id>
 			<url>https://repo.jenkins-ci.org/public/</url>
@@ -87,4 +87,23 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	<distributionManagement>
+		<repository>
+			<id>maven.zerpofox.repo</id>
+			<url>s3://zf-maven-artifacts/scriptler-plugin</url>
+		</repository>
+		<snapshotRepository>
+			<id>maven.nuvalence.repo</id>
+			<url>s3://zf-maven-artifacts/scriptler-plugin</url>
+		</snapshotRepository>
+	</distributionManagement>
+	<build>
+		<extensions>
+			<extension>
+				<groupId>com.allogy.maven.wagon</groupId>
+				<artifactId>maven-s3-wagon</artifactId>
+				<version>1.2.0</version>
+			</extension>
+		</extensions>
+	</build>
 </project>
