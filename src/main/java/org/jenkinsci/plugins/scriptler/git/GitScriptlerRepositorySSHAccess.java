@@ -7,7 +7,7 @@ import hudson.Extension;
 
 import java.io.IOException;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.eclipse.jgit.transport.ReceivePack;
 import org.eclipse.jgit.transport.UploadPack;
