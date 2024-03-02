@@ -3,13 +3,15 @@ package org.jenkinsci.plugins.scriptler.tokenmacro;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
+import hudson.model.Node;
 import hudson.model.TaskListener;
 import hudson.remoting.Channel;
 import hudson.remoting.ChannelClosedException;
-import hudson.remoting.VirtualChannel;
 
+import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.scriptler.Messages;
 import org.jenkinsci.plugins.scriptler.config.Script;
+import org.jenkinsci.plugins.scriptler.util.ControllerGroovyScript;
 import org.jenkinsci.plugins.scriptler.util.GroovyScript;
 import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
@@ -40,19 +42,17 @@ public class ScriptlerTokenMacro extends DataBoundTokenMacro {
             throw new MacroEvaluationException(Messages.tokenmacro_AdminScriptOnly(scriptId));
         }
 
-        VirtualChannel channel;
-        if (script.onlyMaster) {
-            channel = FilePath.localChannel;
+        Object output;
+        if (script.onlyMaster || Jenkins.get().equals(context.getBuiltOn())) {
+            output = FilePath.localChannel.call(new ControllerGroovyScript(script.script, Collections.emptyList(), true, listener, null, context));
         } else {
             FilePath remoteFilePath = context.getWorkspace();
             if (remoteFilePath == null) {
                 // the remote node has apparently disconnected, so we can't run our script
                 throw new ChannelClosedException((Channel) null, null);
             }
-            channel = remoteFilePath.getChannel();
+            output = remoteFilePath.getChannel().call(new GroovyScript(script.script, Collections.emptyList(), true, listener));
         }
-
-        Object output = channel.call(new GroovyScript(script.script, Collections.emptyList(), true, listener, null, context));
 
         return output != null ? output.toString() : "";
     }
