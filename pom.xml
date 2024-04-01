@@ -28,7 +28,7 @@
 		<changelist>999999-SNAPSHOT</changelist>
 		<gitHubRepo>jenkinsci/scriptler-plugin</gitHubRepo>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<jenkins.version>2.426.1</jenkins.version>
+		<jenkins.version>2.426.3</jenkins.version>
 	</properties>
 	<scm>
 		<connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
