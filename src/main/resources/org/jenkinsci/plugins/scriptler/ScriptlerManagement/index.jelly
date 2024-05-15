@@ -18,10 +18,12 @@
 			<h1>${%title}</h1>
 
 			${%intro}
-			<h4>
+			<h4 style="margin-top: 1rem; margin-bottom: 0">
 				${%scriptdirectorytext}
 			</h4>
 			${it.scriptDirectory}
+
+            <br /><br />
 
 			<div class="excerpt">
 				<j:if test="${it.configuration.scripts.size() == 0}">
@@ -38,40 +40,40 @@
 							<td class="pane scriptler-toolbar" width="1%">
 								<j:choose>
 									<j:when test="${approved == null}">
-										<l:icon title="${%fileNotAvailable}" class="icon-error icon-sm" />
+										<l:icon tooltip="${%fileNotAvailable}" src="symbol-remove-circle plugin-ionicons-api" class="icon-sm jenkins-!-error-color" />
 									</j:when>
 									<j:when test="${approved == true}">
-										<l:icon title="${%scriptApproved}" class="icon-accept icon-sm" />
+                                            <l:icon tooltip="${%scriptApproved}" src="symbol-checkmark-circle plugin-ionicons-api" class="icon-sm jenkins-!-success-color" />
 									</j:when>
 									<j:otherwise>
-										<l:icon title="${%scriptNotYetApproved}" class="icon-warning icon-sm"/>
+										<l:icon tooltip="${%scriptNotYetApproved}" src="symbol-warning plugin-ionicons-api" class="icon-sm jenkins-!-warning-color"/>
 									</j:otherwise>
 								</j:choose>
 								<j:choose>
 									<j:when test="${t.nonAdministerUsing}">
 										<a class="scriptler-icon-slot">
-											<l:icon title="${%usableInBuildStep}" class="icon-setting icon-sm" />
+											<l:icon tooltip="${%usableInBuildStep}" src="symbol-construct-outline plugin-ionicons-api" class="icon-sm jenkins-!-text-color-secondary" />
 										</a>
 									</j:when>
 									<j:otherwise>
 										<a class="scriptler-icon-slot">
-											<l:icon title="${%notUsableInBuildStep}" class="icon-lock icon-sm" />
+											<l:icon tooltip="${%notUsableInBuildStep}" src="symbol-lock-closed-outline plugin-ionicons-api" class="icon-sm jenkins-!-text-color-secondary" />
 										</a>
 									</j:otherwise>
 								</j:choose>
 								<l:hasPermission permission="${it.scriptlerRunScripts}">
 									<a href="runScript?id=${t.id}" class="scriptler-icon-slot">
-										<l:icon class="icon-terminal icon-sm" title="${%run script} ${t.name}" />
+										<l:icon tooltip="${%runScript} ${t.name}" src="symbol-terminal-outline plugin-ionicons-api" class="icon-sm jenkins-!-text-color-secondary" />
 									</a>
 								</l:hasPermission>
 								<l:hasPermission permission="${it.scriptlerConfigure}">
 									<a href="editScript?id=${t.id}" class="scriptler-link-button scriptler-icon-slot">
-										<l:icon class="icon-notepad icon-sm" title="${%edit script} ${t.name}" />
+										<l:icon tooltip="${%editScript} ${t.name}" src="symbol-create-outline plugin-ionicons-api" class="icon-sm jenkins-!-text-color-secondary" />
 									</a>
 									<form method="post" action="removeScript" class="scriptler-inline scriptler-icon-slot" data-name="${t.name}" onclick="return confirmDelete(this)">
 										<input type="hidden" name="id" value="${t.id}" />
 										<button type="submit" name="submit_param" value="submit_value" class="scriptler-link-button">
-											<l:icon class="icon-edit-delete icon-sm" title="${%remove script} ${t.name}" />
+											<l:icon tooltip="${%removeScript} ${t.name}" src="symbol-trash-outline plugin-ionicons-api" class="icon-sm jenkins-!-text-color-secondary" />
 										</button>
 									</form>
 								</l:hasPermission>

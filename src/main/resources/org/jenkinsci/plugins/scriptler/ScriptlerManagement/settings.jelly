@@ -26,7 +26,6 @@
 		<st:include page="sidepanel.jelly" />
 		<l:main-panel>
 			<h1>
-				<l:icon class="icon-folder icon-xlg" />
 				${%title}
 			</h1>
 

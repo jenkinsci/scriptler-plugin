@@ -30,7 +30,6 @@ THE SOFTWARE.
 
 		<l:main-panel>
 			<h1>
-				<l:icon class="icon-terminal icon-xlg" />
 				${%title}
 			</h1>
 

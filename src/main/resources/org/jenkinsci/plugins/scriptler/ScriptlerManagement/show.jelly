@@ -33,7 +33,6 @@ THE SOFTWARE.
 	<l:layout title="Scriptler - ${%title}" norefresh="true" type="full-screen">
 		<l:main-panel>
 			<h1>
-				<l:icon class="icon-notepad icon-xlg" />
 				${%title}
 			</h1>
 			<f:form>
