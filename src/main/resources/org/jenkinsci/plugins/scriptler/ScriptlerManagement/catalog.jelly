@@ -51,7 +51,7 @@
 										<input type="hidden" name="id" value="${t.id}" />
 										<input type="hidden" name="catalog" value="${catalogName}" />
 										<button type="submit" name="submit_param" value="submit_value" class="scriptler-link-button">
-											<l:icon title="${%import script} '${t.name}'" class="icon-save icon-sm" />
+											<l:icon tooltip="${%import script} '${t.name}'" src="symbol-save-outline plugin-ionicons-api" class="icon-sm jenkins-!-accent-color" />
 										</button>
 									</form>
 								</td>
