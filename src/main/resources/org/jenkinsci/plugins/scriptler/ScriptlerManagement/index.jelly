@@ -43,7 +43,7 @@
 										<l:icon tooltip="${%fileNotAvailable}" src="symbol-remove-circle plugin-ionicons-api" class="icon-sm jenkins-!-error-color" />
 									</j:when>
 									<j:when test="${approved == true}">
-                                            <l:icon tooltip="${%scriptApproved}" src="symbol-checkmark-circle plugin-ionicons-api" class="icon-sm jenkins-!-success-color" />
+                                        <l:icon tooltip="${%scriptApproved}" src="symbol-checkmark-circle plugin-ionicons-api" class="icon-sm jenkins-!-success-color" />
 									</j:when>
 									<j:otherwise>
 										<l:icon tooltip="${%scriptNotYetApproved}" src="symbol-warning plugin-ionicons-api" class="icon-sm jenkins-!-warning-color"/>
