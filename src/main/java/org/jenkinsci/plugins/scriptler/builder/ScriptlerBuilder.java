@@ -35,6 +35,7 @@ import org.jenkinsci.plugins.scriptler.ScriptlerPermissions;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.jenkinsci.plugins.scriptler.config.Script;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
+import org.jenkinsci.plugins.scriptler.util.ControllerGroovyScript;
 import org.jenkinsci.plugins.scriptler.util.GroovyScript;
 import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
 import org.jenkinsci.plugins.scriptler.util.UIHelper;
@@ -248,7 +249,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             final Object output;
             if (script.onlyMaster) {
                 // When run on master, make build, launcher, listener available to script
-                output = FilePath.localChannel.call(new GroovyScript(script.script, expandedParams, true, listener, launcher, build));
+                output = FilePath.localChannel.call(new ControllerGroovyScript(script.script, expandedParams, true, listener, launcher, build));
             } else {
                 VirtualChannel channel = launcher.getChannel();
                 if (channel == null) {
