@@ -70,7 +70,8 @@
 									<a href="editScript?id=${t.id}" class="scriptler-link-button scriptler-icon-slot">
 										<l:icon tooltip="${%editScript} ${t.name}" src="symbol-create-outline plugin-ionicons-api" class="icon-sm jenkins-!-text-color-secondary" />
 									</a>
-									<form method="post" action="removeScript" class="scriptler-inline scriptler-icon-slot" data-name="${t.name}" onclick="return confirmDelete(this)">
+									<st:adjunct includes="org.jenkinsci.plugins.scriptler.ScriptlerManagement.confirm-remove" />
+									<form method="post" action="removeScript" class="scriptler-inline scriptler-icon-slot scriptler-remove-script-form" data-name="${t.name}">
 										<input type="hidden" name="id" value="${t.id}" />
 										<button type="submit" name="submit_param" value="submit_value" class="scriptler-link-button">
 											<l:icon tooltip="${%removeScript} ${t.name}" src="symbol-trash-outline plugin-ionicons-api" class="icon-sm jenkins-!-text-color-secondary" />
@@ -101,16 +102,6 @@
 					</j:forEach>
 				</table>
 			</div>
-    <script>
-    function confirmDelete(element) {
-      var name = element.getAttribute('data-name');
-      if (confirm("Sure you want to delete ["+name+"]?")) {
-        return true;
-      }else{
-        return false;
-      }
-    }
-   </script>
 		</l:main-panel>
 	</l:layout>
 </j:jelly>
