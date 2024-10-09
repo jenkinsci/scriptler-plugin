@@ -97,7 +97,7 @@ THE SOFTWARE.
 					</tr>
 				</table>
 
-				<textarea id="script" name="script" class="${h.isUnitTest ? '' : 'script'}">
+				<textarea id="script" autofocus="" name="script" class="${h.isUnitTest ? '' : 'script'}">
 					<j:choose>
 						<j:when test="${scriptNotFound}">
 							${%ScriptNotFound}
@@ -121,7 +121,6 @@ THE SOFTWARE.
 				<div align="right">
 					<f:submit value="${%Run}" name="run" />
 				</div>
-				<script>document.getElementById('script').focus();</script>
 			</form>
 			<j:if test="${output!=null}">
 				<h2>${%Result}</h2>
