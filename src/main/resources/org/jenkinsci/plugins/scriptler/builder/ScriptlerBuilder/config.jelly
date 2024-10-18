@@ -3,7 +3,11 @@
 
     <st:adjunct includes="org.kohsuke.stapler.bind"/>
 	<st:once>
-		<script type="text/javascript" src="${resURL}/plugin/scriptler/lib/scriptler.js" />
+		<script id="scriptler-builder-behaviour"
+				type="text/javascript"
+				data-root-url="${rootURL}"
+				data-has-permission="${h.hasPermission(it.build,descriptor.requiredPermission)}"
+				src="${resURL}/plugin/scriptler/lib/scriptler.js" />
 	</st:once>
 	<j:choose>
 		<j:when test="${empty(descriptor.scripts)}">
@@ -20,7 +24,7 @@
 			<f:entry title="${%Script}" field="buildStepContent">
 			    <input type="hidden" name="backupJobName" />
 			    <input type="hidden" name="builderId" value="${instance.builderId}" />
-				<select name="scriptlerScriptId" data-item-url="${it.url}" onChange="scriptler_initDetailLink('${rootURL}', this);scriptler_showParams(this, this.value);" >
+				<select name="scriptlerScriptId" data-item-url="${it.url}">
 					<option value="">(Default)</option>
 					<j:forEach var="inst" items="${descriptor.scripts}" varStatus="loop">
 						<j:choose>
@@ -33,7 +37,7 @@
 						</j:choose>
 					</j:forEach>
 				</select>
-				<a target="_blank" name="showScriptlerDetailLink" href="" style="display:none;" onclick="window.open(this.href,'window','width=900,height=640,resizable,scrollbars,toolbar,menubar') ;return false;"> ${%ViewScript}</a>
+				<a target="_blank" name="showScriptlerDetailLink" href="" style="display:none;"> ${%ViewScript}</a>
 				<div id="scriptlerDescription">${%RequiredParameters} <div name="scriptlerParameters" /></div>
                 <f:block>
                    <f:entry title="${%PropagateParams}" field="propagateParams" help="/plugin/scriptler/help-propagateParams.html">
@@ -62,25 +66,4 @@
 		</j:otherwise>
 	</j:choose>
 	<st:bind var="scriptlerBuilderDesc" value="${descriptor}"/>
-	<st:once>
-		<script type="text/javascript">
-			window.addEventListener('load', function() { 
-				var all = new Array();
-	   			all = document.getElementsByName('scriptlerScriptId');
-				for(var i = 0; i &lt; all.length; i++) {
-				    all.item(i).disabled=${!h.hasPermission(it.build,descriptor.requiredPermission)};
-					scriptler_initDetailLink('${rootURL}', all.item(i));
-				    scriptler_showParams(all.item(i), all.item(i).value);
-				}
-				
-				// remember the job name to send it along with the form
-				var jobName = document.getElementsByName('name').item(0).value;
-				var allBackupJobNames = document.getElementsByName('backupJobName');
-				for(var i = 0; i &lt; allBackupJobNames.length; i++) {
-				    allBackupJobNames.item(i).value = jobName; 
-				} 
-				
-			});
-		</script>
-	</st:once>
 </j:jelly>
