@@ -29,7 +29,9 @@
     <spotless.check.skip>false</spotless.check.skip>
     <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
     <jenkins.baseline>2.479</jenkins.baseline>
-    <jenkins.version>${jenkins.baseline}.1</jenkins.version>
+    <!-- TODO: switch back to the LTS baseline once the CSP fix is in LTS -->
+    <!--<jenkins.version>${jenkins.baseline}.1</jenkins.version>-->
+    <jenkins.version>2.482</jenkins.version>
   </properties>
 
   <dependencyManagement>

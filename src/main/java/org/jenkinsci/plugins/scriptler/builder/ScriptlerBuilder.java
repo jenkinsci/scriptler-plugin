@@ -437,11 +437,10 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         public void generateResponse(StaplerRequest2 req, StaplerResponse2 rsp, Object node)
                 throws IOException, ServletException {
             if (FormApply.isApply(req)) {
-                String script = buildMessages()
-                        .map(QuotedStringTokenizer::quote)
-                        .map(error -> "notificationBar.show(" + error + ",notificationBar.ERROR)")
-                        .collect(Collectors.joining(""));
-                FormApply.applyResponse(script).generateResponse(req, rsp, node);
+                String script =
+                        buildMessages().map(QuotedStringTokenizer::quote).collect(Collectors.joining(""));
+                FormApply.showNotification(script, FormApply.NotificationType.ERROR)
+                        .generateResponse(req, rsp, node);
             } else {
                 new Failure(getAggregatedMessage()).generateResponse(req, rsp, node);
             }
