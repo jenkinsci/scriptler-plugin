@@ -2,10 +2,13 @@ package org.jenkinsci.plugins.scriptler;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.jenkinsci.plugins.scriptler.config.Script;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
@@ -19,31 +22,39 @@ public class SyncUtil {
     private SyncUtil() {}
 
     /**
+     * @deprecated Use {@link #syncDirWithCfg(Path, ScriptlerConfiguration)} instead.
+     */
+    @Deprecated(since = "380")
+    public static void syncDirWithCfg(File scriptDirectory, ScriptlerConfiguration cfg) throws IOException {
+        syncDirWithCfg(scriptDirectory.toPath(), cfg);
+    }
+
+    /**
      *
      * @param scriptDirectory
      * @param cfg
      *            must be saved (by caller) after finishing this all sync
      * @throws IOException
      */
-    public static void syncDirWithCfg(File scriptDirectory, ScriptlerConfiguration cfg) throws IOException {
+    public static void syncDirWithCfg(Path scriptDirectory, ScriptlerConfiguration cfg) throws IOException {
 
-        List<File> availablePhysicalScripts = getAvailableScripts(scriptDirectory);
+        List<Path> availablePhysicalScripts = getAvailableScripts(scriptDirectory);
 
         // check if all physical files are available in the configuration
         // if not, add it to the configuration
-        for (File file : availablePhysicalScripts) {
-            if (cfg.getScriptById(file.getName()) == null) {
+        for (Path file : availablePhysicalScripts) {
+            final String fileName = Objects.toString(file.getFileName(), null);
+            if (cfg.getScriptById(fileName) == null) {
                 final ScriptInfo info = ScriptHelper.extractScriptInfo(ScriptHelper.readScriptFromFile(file));
                 if (info != null) {
                     List<Parameter> parameters = info.getParameters().stream()
                             .map(name -> new Parameter(name, null))
                             .collect(Collectors.toList());
-                    cfg.addOrReplace(
-                            new Script(file.getName(), info.getName(), info.getComment(), false, parameters, false));
+                    cfg.addOrReplace(new Script(fileName, info.getName(), info.getComment(), false, parameters, false));
                 } else {
                     cfg.addOrReplace(new Script(
-                            file.getName(),
-                            file.getName(),
+                            fileName,
+                            fileName,
                             Messages.script_loaded_from_directory(),
                             false,
                             Collections.emptyList(),
@@ -57,14 +68,14 @@ public class SyncUtil {
         Set<Script> unavailableScripts = new HashSet<>();
         for (Script s : cfg.getScripts()) {
             // only check the scripts belonging to this repodir
-            if ((new File(scriptDirectory, s.getScriptPath()).exists())) {
+            if (Files.exists(scriptDirectory.resolve(s.getScriptPath()))) {
                 s.setAvailable(true);
             } else {
                 Script unavailableScript = new Script(s.getId(), s.comment, false, false, false);
                 // to no loose parameter configuration if we loose the file
                 unavailableScript.setParameters(s.getParameters());
                 unavailableScripts.add(unavailableScript);
-                LOGGER.info("for repo '" + scriptDirectory.getAbsolutePath() + "' " + s + " is not available!");
+                LOGGER.info("for repo '" + scriptDirectory + "' " + s + " is not available!");
             }
         }
 
@@ -76,18 +87,11 @@ public class SyncUtil {
     /**
      * search into the declared backup directory for backup archives
      */
-    private static List<File> getAvailableScripts(File scriptDirectory) {
-        LOGGER.log(Level.FINE, "Listing files of {0}", scriptDirectory.getAbsoluteFile());
+    private static List<Path> getAvailableScripts(Path scriptDirectory) throws IOException {
+        LOGGER.log(Level.FINE, "Listing files of {0}", scriptDirectory);
 
-        File[] scriptFiles = scriptDirectory.listFiles((File dir, String name) -> name.endsWith(".groovy"));
-
-        List<File> fileList;
-        if (scriptFiles == null) {
-            fileList = new ArrayList<>();
-        } else {
-            fileList = Arrays.asList(scriptFiles);
+        try (Stream<Path> contents = Files.list(scriptDirectory)) {
+            return contents.filter(path -> path.endsWith(".groovy")).toList();
         }
-
-        return fileList;
     }
 }

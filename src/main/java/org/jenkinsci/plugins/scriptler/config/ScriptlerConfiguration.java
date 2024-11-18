@@ -30,7 +30,6 @@ import hudson.XmlFile;
 import hudson.model.Saveable;
 import hudson.model.listeners.SaveableListener;
 import hudson.util.XStream2;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -87,7 +86,11 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
     }
 
     public static XmlFile getXmlFile() {
-        return new XmlFile(XSTREAM, new File(ScriptlerManagement.getScriptlerHomeDirectory(), "scriptler.xml"));
+        return new XmlFile(
+                XSTREAM,
+                ScriptlerManagement.getScriptlerHomeDirectory2()
+                        .resolve("scriptler.xml")
+                        .toFile());
     }
 
     public static @NonNull ScriptlerConfiguration load() throws IOException {
@@ -168,8 +171,8 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
         for (Script script : sortedScripts) {
             Script scriptWithSrc = ScriptHelper.getScript(script.getId(), true);
             Boolean approved = null;
-            if (scriptWithSrc != null && scriptWithSrc.script != null) {
-                approved = ScriptHelper.isApproved(scriptWithSrc.script, false);
+            if (scriptWithSrc != null && scriptWithSrc.getScript() != null) {
+                approved = ScriptHelper.isApproved(scriptWithSrc.getScript(), false);
             }
             result.add(new ScriptAndApproved(script, approved));
         }

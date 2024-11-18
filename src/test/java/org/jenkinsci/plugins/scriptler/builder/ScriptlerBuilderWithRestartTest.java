@@ -31,15 +31,17 @@ import static org.junit.Assert.assertThat;
 import hudson.ExtensionList;
 import hudson.model.FileParameterValue;
 import hudson.model.FreeStyleProject;
-import java.io.File;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.sf.json.JSONObject;
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.io.FileUtils;
 import org.htmlunit.HttpMethod;
 import org.htmlunit.WebRequest;
 import org.htmlunit.html.HtmlPage;
@@ -163,11 +165,11 @@ public class ScriptlerBuilderWithRestartTest {
 
     private void setupScript(ScriptlerManagementHelper helper, String scriptId, boolean nonAdministerUsing)
             throws Exception {
-        File f = new File(scriptId);
-        FileUtils.writeStringToFile(f, "print 'Hello World!'");
-        FileItem fi = new FileParameterValue.FileItemImpl(f);
+        Path f = Paths.get(scriptId);
+        Files.writeString(f, "print 'Hello World!'", StandardCharsets.UTF_8);
+        FileItem fi = new FileParameterValue.FileItemImpl(f.toFile());
         helper.saveScript(fi, nonAdministerUsing, scriptId);
-        f.delete();
+        Files.delete(f);
     }
 
     @Test

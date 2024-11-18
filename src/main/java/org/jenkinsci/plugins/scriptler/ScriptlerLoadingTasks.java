@@ -25,8 +25,9 @@ package org.jenkinsci.plugins.scriptler;
 
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jenkinsci.plugins.scriptler.config.Script;
@@ -47,17 +48,22 @@ public final class ScriptlerLoadingTasks {
     @Initializer(after = InitMilestone.PLUGINS_PREPARED)
     public static void synchronizeConfig() throws IOException {
         LOGGER.info("initialize Scriptler");
-        File homeDirectory = ScriptlerManagement.getScriptlerHomeDirectory();
-        if (!homeDirectory.exists()) {
-            boolean dirsDone = homeDirectory.mkdirs();
-            if (!dirsDone) {
-                LOGGER.log(Level.SEVERE, "could not create Scriptler home directory: {0}", homeDirectory);
+        Path homeDirectory = ScriptlerManagement.getScriptlerHomeDirectory2();
+        if (!Files.isDirectory(homeDirectory)) {
+            try {
+                Files.createDirectory(homeDirectory);
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, e, () -> "could not create Scriptler home directory: " + homeDirectory);
             }
         }
 
-        File scriptDirectory = ScriptlerManagement.getScriptDirectory();
-        if (!scriptDirectory.exists() && !scriptDirectory.mkdirs()) {
-            LOGGER.log(Level.SEVERE, "could not create Scriptler scripts directory: {0}", scriptDirectory);
+        Path scriptDirectory = ScriptlerManagement.getScriptDirectory2();
+        if (!Files.isDirectory(scriptDirectory)) {
+            try {
+                Files.createDirectory(scriptDirectory);
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, e, () -> "could not create Scriptler scripts directory: " + scriptDirectory);
+            }
         }
 
         ScriptlerConfiguration cfg = ScriptlerConfiguration.load();
@@ -70,7 +76,7 @@ public final class ScriptlerLoadingTasks {
     @Initializer(after = InitMilestone.JOB_LOADED)
     public static void setupExistingScripts() {
         for (Script script : ScriptlerConfiguration.getConfiguration().getScripts()) {
-            File scriptFile = new File(ScriptlerManagement.getScriptDirectory(), script.getScriptPath());
+            Path scriptFile = ScriptlerManagement.getScriptDirectory2().resolve(script.getScriptPath());
             try {
                 String scriptSource = ScriptHelper.readScriptFromFile(scriptFile);
 

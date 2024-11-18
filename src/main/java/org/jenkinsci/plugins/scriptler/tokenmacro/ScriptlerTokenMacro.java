@@ -51,8 +51,8 @@ public class ScriptlerTokenMacro extends DataBoundTokenMacro {
             channel = remoteFilePath.getChannel();
         }
 
-        Object output =
-                channel.call(new GroovyScript(script.script, Collections.emptyList(), true, listener, null, context));
+        Object output = channel.call(
+                new GroovyScript(script.getScript(), Collections.emptyList(), true, listener, null, context));
 
         return output != null ? output.toString() : "";
     }

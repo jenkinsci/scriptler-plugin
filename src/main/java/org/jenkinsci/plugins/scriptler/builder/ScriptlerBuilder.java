@@ -229,7 +229,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             return false;
         }
 
-        if (!ScriptHelper.isApproved(script.script)) {
+        if (!ScriptHelper.isApproved(script.getScript())) {
             listener.getLogger().println(Messages.scriptNotApprovedYet(script.getName()));
             LOGGER.log(
                     Level.WARNING,
@@ -270,7 +270,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             if (script.onlyMaster) {
                 // When run on master, make build, launcher, listener available to script
                 output = FilePath.localChannel.call(
-                        new GroovyScript(script.script, expandedParams, true, listener, launcher, build));
+                        new GroovyScript(script.getScript(), expandedParams, true, listener, launcher, build));
             } else {
                 VirtualChannel channel = launcher.getChannel();
                 if (channel == null) {
@@ -278,7 +278,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                     listener.getLogger()
                             .println(Messages.scriptExecutionFailed(scriptId) + " - " + Messages.agent_no_channel());
                 } else {
-                    output = channel.call(new GroovyScript(script.script, expandedParams, true, listener));
+                    output = channel.call(new GroovyScript(script.getScript(), expandedParams, true, listener));
                 }
             }
             if (output instanceof Boolean && Boolean.FALSE.equals(output)) {

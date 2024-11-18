@@ -7,9 +7,10 @@ import hudson.model.Computer;
 import hudson.util.StreamTaskListener;
 import jakarta.servlet.ServletException;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,7 +19,6 @@ import java.util.regex.Pattern;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptler.Messages;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
@@ -50,12 +50,12 @@ public class ScriptHelper {
     }
 
     @NonNull
-    public static String readScriptFromFile(@NonNull File file) throws IOException {
-        return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+    public static String readScriptFromFile(@NonNull Path path) throws IOException {
+        return Files.readString(path, StandardCharsets.UTF_8);
     }
 
-    public static void writeScriptToFile(@NonNull File file, @NonNull String script) throws IOException {
-        FileUtils.writeStringToFile(file, script, StandardCharsets.UTF_8);
+    public static void writeScriptToFile(@NonNull Path path, @NonNull String script) throws IOException {
+        Files.writeString(path, script, StandardCharsets.UTF_8);
     }
 
     /**
@@ -73,7 +73,7 @@ public class ScriptHelper {
         }
         Script s = ScriptlerConfiguration.getConfiguration().getScriptById(id);
         if (withSrc && s != null) {
-            File scriptSrc = new File(ScriptlerManagement.getScriptDirectory(), s.getScriptPath());
+            Path scriptSrc = ScriptlerManagement.getScriptDirectory2().resolve(s.getScriptPath());
             try {
                 s.setScript(readScriptFromFile(scriptSrc));
             } catch (IOException e) {
@@ -101,7 +101,7 @@ public class ScriptHelper {
      * @return true if the script was approved or created by a user with RUN_SCRIPT permission
      * @since TODO
      */
-    public static boolean isApproved(String scriptSourceCode) {
+    public static boolean isApproved(@CheckForNull String scriptSourceCode) {
         return isApproved(scriptSourceCode, true);
     }
 
@@ -112,7 +112,11 @@ public class ScriptHelper {
      * @return true if the script is approved
      * @since TODO
      */
-    public static boolean isApproved(String scriptSourceCode, boolean putInApprovalQueueIfNotApprovedYet) {
+    public static boolean isApproved(
+            @CheckForNull String scriptSourceCode, boolean putInApprovalQueueIfNotApprovedYet) {
+        if (scriptSourceCode == null) {
+            return false;
+        }
         try {
             ScriptApproval.get().using(scriptSourceCode, GroovyLanguage.get());
             return true;

@@ -50,7 +50,7 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
     static final String REPOID = "scriptler.git";
 
     public GitScriptlerRepository() {
-        super(ScriptlerManagement.getScriptDirectory());
+        super(ScriptlerManagement.getScriptDirectory2().toFile());
     }
 
     /**
@@ -101,7 +101,7 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
         super.updateWorkspace(repo);
         final ScriptlerConfiguration cfg =
                 ExtensionList.lookupSingleton(ScriptlerManagement.class).getConfiguration();
-        SyncUtil.syncDirWithCfg(ScriptlerManagement.getScriptDirectory(), cfg);
+        SyncUtil.syncDirWithCfg(ScriptlerManagement.getScriptDirectory2(), cfg);
         cfg.save();
     }
 
