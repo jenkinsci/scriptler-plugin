@@ -47,8 +47,8 @@ import org.jenkinsci.plugins.scriptler.util.UIHelper;
 import org.kohsuke.stapler.*;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -64,10 +64,10 @@ import java.util.logging.Logger;
 @Extension
 public class ScriptlerManagement extends ManagementLink implements RootAction {
 
-    private final static Logger LOGGER = Logger.getLogger(ScriptlerManagement.class.getName());
-    private final static String MASTER = "(master)";
-    private final static String ALL = "(all)";
-    private final static String ALL_SLAVES = "(all slaves)";
+    private static final Logger LOGGER = Logger.getLogger(ScriptlerManagement.class.getName());
+    private static final String MASTER = "(master)";
+    private static final String ALL = "(all)";
+    private static final String ALL_SLAVES = "(all slaves)";
 
     private static final MarkupFormatter INSTANCE = RawHtmlMarkupFormatter.INSTANCE;
 
@@ -158,7 +158,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws IOException
      */
     @RequirePOST
-    public HttpResponse doScriptlerSettings(StaplerRequest res, StaplerResponse rsp, @QueryParameter("disableRemoteCatalog") boolean disableRemoteCatalog) throws IOException {
+    public HttpResponse doScriptlerSettings(StaplerRequest2 res, StaplerResponse2 rsp, @QueryParameter("disableRemoteCatalog") boolean disableRemoteCatalog) throws IOException {
         checkPermission(ScriptlerPermissions.CONFIGURE);
 
         ScriptlerConfiguration cfg = getConfiguration();
@@ -183,7 +183,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws IOException
      */
     @RequirePOST
-    public HttpResponse doDownloadScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("catalog") String catalogName) throws IOException {
+    public HttpResponse doDownloadScript(StaplerRequest2 req, StaplerResponse2 rsp, @QueryParameter("id") String id, @QueryParameter("catalog") String catalogName) throws IOException {
         checkPermission(ScriptlerPermissions.CONFIGURE);
 
         ScriptlerConfiguration c = getConfiguration();
@@ -238,7 +238,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws ServletException
      */
     @RequirePOST
-    public HttpResponse doScriptAdd(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("name") String name, @QueryParameter("comment") String comment, @QueryParameter("script") String script,
+    public HttpResponse doScriptAdd(StaplerRequest2 req, StaplerResponse2 rsp, @QueryParameter("id") String id, @QueryParameter("name") String name, @QueryParameter("comment") String comment, @QueryParameter("script") String script,
             @QueryParameter("nonAdministerUsing") boolean nonAdministerUsing, @QueryParameter("onlyMaster") boolean onlyMaster, String originCatalogName, String originId) throws IOException, ServletException {
 
         checkPermission(ScriptlerPermissions.CONFIGURE);
@@ -329,7 +329,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws IOException
      */
     @RequirePOST
-    public HttpResponse doRemoveScript(StaplerRequest res, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException {
+    public HttpResponse doRemoveScript(StaplerRequest2 res, StaplerResponse2 rsp, @QueryParameter("id") String id) throws IOException {
         checkPermission(ScriptlerPermissions.CONFIGURE);
 
         // remove the file
@@ -368,7 +368,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws ServletException
      */
     @RequirePOST
-    public HttpResponse doUploadScript(StaplerRequest req) throws IOException, ServletException {
+    public HttpResponse doUploadScript(StaplerRequest2 req) throws IOException, ServletException {
         checkPermission(ScriptlerPermissions.CONFIGURE);
         try {
             
@@ -439,7 +439,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws IOException
      * @throws ServletException
      */
-    public void doRunScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException, ServletException {
+    public void doRunScript(StaplerRequest2 req, StaplerResponse2 rsp, @QueryParameter("id") String id) throws IOException, ServletException {
         checkPermission(ScriptlerPermissions.RUN_SCRIPTS);
 
         Script script = ScriptHelper.getScript(id, true);
@@ -485,7 +485,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws ServletException
      */
     @RequirePOST
-    public void doTriggerScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id, @QueryParameter("script") String scriptSrc, @QueryParameter("node") String node) throws IOException, ServletException {
+    public void doTriggerScript(StaplerRequest2 req, StaplerResponse2 rsp, @QueryParameter("id") String id, @QueryParameter("script") String scriptSrc, @QueryParameter("node") String node) throws IOException, ServletException {
         checkPermission(ScriptlerPermissions.RUN_SCRIPTS);
 
         final List<Parameter> parameters = UIHelper.extractParameters(req.getSubmittedForm());
@@ -545,7 +545,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws ServletException
      */
     @RequirePOST
-    public void doRun(StaplerRequest req, StaplerResponse rsp, @QueryParameter(fixEmpty = true) String script,
+    public void doRun(StaplerRequest2 req, StaplerResponse2 rsp, @QueryParameter(fixEmpty = true) String script,
             @QueryParameter(fixEmpty = true) String node, @QueryParameter(fixEmpty = true) String contentType)
             throws IOException, ServletException {
 
@@ -591,7 +591,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     }
 
     @NonNull
-    private Collection<Parameter> prepareParameters(StaplerRequest req, Script tempScript) {
+    private Collection<Parameter> prepareParameters(StaplerRequest2 req, Script tempScript) {
         // retain default parameter values
         Map<String, Parameter> params = new HashMap<>();
         for (Parameter param : tempScript.getParameters()) {
@@ -638,7 +638,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws IOException
      * @throws ServletException
      */
-    public void doShowScript(StaplerRequest req, StaplerResponse rsp, @AncestorInPath Item item, @QueryParameter("id") String id) throws IOException, ServletException {
+    public void doShowScript(StaplerRequest2 req, StaplerResponse2 rsp, @AncestorInPath Item item, @QueryParameter("id") String id) throws IOException, ServletException {
         // action directly accessible to any people configuring job, so use a more lenient permission check
         Jenkins jenkins = Jenkins.get();
         if (!jenkins.hasAnyPermission(ScriptlerPermissions.RUN_SCRIPTS, ScriptlerPermissions.CONFIGURE)) {
@@ -662,7 +662,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @throws IOException
      * @throws ServletException
      */
-    public void doEditScript(StaplerRequest req, StaplerResponse rsp, @QueryParameter("id") String id) throws IOException, ServletException {
+    public void doEditScript(StaplerRequest2 req, StaplerResponse2 rsp, @QueryParameter("id") String id) throws IOException, ServletException {
         checkPermission(ScriptlerPermissions.CONFIGURE);
     
         Script script = ScriptHelper.getScript(id, true);

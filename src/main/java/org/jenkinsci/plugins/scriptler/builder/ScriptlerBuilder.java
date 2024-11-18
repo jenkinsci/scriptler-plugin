@@ -43,11 +43,11 @@ import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.Stapler;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
@@ -65,7 +65,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
     private static final AtomicInteger CURRENT_ID = new AtomicInteger();
     private static final long serialVersionUID = 1L;
 
-    private final static Logger LOGGER = Logger.getLogger(ScriptlerBuilder.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ScriptlerBuilder.class.getName());
 
     // this is only used to identify the builder if a user without privileges modifies the job.
     private final String builderId;
@@ -154,9 +154,9 @@ public class ScriptlerBuilder extends Builder implements Serializable {
     }
 
     private @CheckForNull Project<?, ?> retrieveProjectUsingCurrentRequest(){
-        StaplerRequest currentRequest = Stapler.getCurrentRequest();
+        StaplerRequest2 currentRequest = Stapler.getCurrentRequest2();
         if(currentRequest != null) {
-            Project<?, ?> project = Stapler.getCurrentRequest().findAncestorObject(Project.class);
+            Project<?, ?> project = Stapler.getCurrentRequest2().findAncestorObject(Project.class);
             if (project != null) {
                 return project;
             }
@@ -346,7 +346,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         }
 
         @Override
-        public ScriptlerBuilder newInstance(StaplerRequest req, JSONObject formData) {
+        public ScriptlerBuilder newInstance(StaplerRequest2 req, JSONObject formData) {
             ScriptlerBuilder builder = null;
             String builderId = formData.optString("builderId");
             String id = formData.optString("scriptlerScriptId");
@@ -432,7 +432,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         }
 
         @Override
-        public void generateResponse(StaplerRequest req, StaplerResponse rsp, Object node) throws IOException, ServletException {
+        public void generateResponse(StaplerRequest2 req, StaplerResponse2 rsp, Object node) throws IOException, ServletException {
             if (FormApply.isApply(req)) {
                 StringBuilder scriptBuilder = new StringBuilder();
                 for (Map.Entry<String, String> error : fieldToMessage.entrySet()) {
