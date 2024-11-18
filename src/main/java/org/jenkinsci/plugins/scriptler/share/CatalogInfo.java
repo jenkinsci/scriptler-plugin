@@ -1,11 +1,10 @@
 package org.jenkinsci.plugins.scriptler.share;
 
 import java.text.MessageFormat;
-
 import org.apache.commons.lang.StringUtils;
 
 public class CatalogInfo {
-    
+
     public final String name;
     public final String catalogLocation;
     public final String scriptDownloadUrl;
@@ -13,7 +12,7 @@ public class CatalogInfo {
 
     /**
      * Holds the informations used to connect to a catalog location
-     * 
+     *
      * @param name
      *            symbolic name of the catalog, must be unique.
      * @param catLocation
@@ -41,7 +40,4 @@ public class CatalogInfo {
         }
         return MessageFormat.format(scriptDetailUrl.trim(), scriptName, id);
     }
-    
-    
-
 }

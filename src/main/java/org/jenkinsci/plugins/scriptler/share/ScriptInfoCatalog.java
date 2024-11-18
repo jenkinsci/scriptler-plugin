@@ -2,7 +2,6 @@ package org.jenkinsci.plugins.scriptler.share;
 
 import hudson.ExtensionList;
 import hudson.ExtensionPoint;
-
 import java.util.ArrayList;
 import java.util.List;
 

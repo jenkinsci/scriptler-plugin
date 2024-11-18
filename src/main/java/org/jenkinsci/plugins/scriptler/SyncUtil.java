@@ -1,13 +1,11 @@
 package org.jenkinsci.plugins.scriptler;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.jenkinsci.plugins.scriptler.config.Script;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
@@ -16,13 +14,12 @@ import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
 
 public class SyncUtil {
 
-    private final static Logger LOGGER = Logger.getLogger(SyncUtil.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SyncUtil.class.getName());
 
-    private SyncUtil() {
-    }
+    private SyncUtil() {}
 
     /**
-     * 
+     *
      * @param scriptDirectory
      * @param cfg
      *            must be saved (by caller) after finishing this all sync
@@ -41,11 +38,17 @@ public class SyncUtil {
                     List<Parameter> parameters = info.getParameters().stream()
                             .map(name -> new Parameter(name, null))
                             .collect(Collectors.toList());
-                    cfg.addOrReplace(new Script(file.getName(), info.getName(), info.getComment(), false, parameters, false));
+                    cfg.addOrReplace(
+                            new Script(file.getName(), info.getName(), info.getComment(), false, parameters, false));
                 } else {
-                    cfg.addOrReplace(new Script(file.getName(), file.getName(), Messages.script_loaded_from_directory(), false, Collections.emptyList(), false));
+                    cfg.addOrReplace(new Script(
+                            file.getName(),
+                            file.getName(),
+                            Messages.script_loaded_from_directory(),
+                            false,
+                            Collections.emptyList(),
+                            false));
                 }
-
             }
         }
 
@@ -87,5 +90,4 @@ public class SyncUtil {
 
         return fileList;
     }
-
 }

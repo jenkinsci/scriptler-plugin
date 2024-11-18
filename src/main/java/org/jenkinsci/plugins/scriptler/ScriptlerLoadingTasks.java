@@ -25,21 +25,19 @@ package org.jenkinsci.plugins.scriptler;
 
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
-import org.jenkinsci.plugins.scriptler.config.Script;
-import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
-import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jenkinsci.plugins.scriptler.config.Script;
+import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
+import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
 
 public final class ScriptlerLoadingTasks {
 
-    private final static Logger LOGGER = Logger.getLogger(ScriptlerLoadingTasks.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ScriptlerLoadingTasks.class.getName());
 
-    private ScriptlerLoadingTasks() {
-    }
+    private ScriptlerLoadingTasks() {}
 
     /**
      * Checks if all available scripts on the system are in the config and if all configured files are physically on the filesystem.

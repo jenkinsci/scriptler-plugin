@@ -1,23 +1,20 @@
 /**
- * 
+ *
  */
 package org.jenkinsci.plugins.scriptler.git;
 
 import hudson.Extension;
-
-import java.io.IOException;
-
 import jakarta.inject.Inject;
-
+import java.io.IOException;
 import org.eclipse.jgit.transport.ReceivePack;
 import org.eclipse.jgit.transport.UploadPack;
 import org.jenkinsci.plugins.gitserver.RepositoryResolver;
 
 /**
  * Exposes this repository over SSH.
- * 
+ *
  * @author Dominik Bartholdi (imod)
- * 
+ *
  */
 @Extension
 public class GitScriptlerRepositorySSHAccess extends RepositoryResolver {
@@ -30,8 +27,7 @@ public class GitScriptlerRepositorySSHAccess extends RepositoryResolver {
      */
     @Override
     public ReceivePack createReceivePack(String fullRepositoryName) throws IOException {
-        if (isMine(fullRepositoryName))
-            return repo.createReceivePack(repo.openRepository());
+        if (isMine(fullRepositoryName)) return repo.createReceivePack(repo.openRepository());
         return null;
     }
 
@@ -40,16 +36,14 @@ public class GitScriptlerRepositorySSHAccess extends RepositoryResolver {
      */
     @Override
     public UploadPack createUploadPack(String fullRepositoryName) throws IOException {
-        if (isMine(fullRepositoryName))
-            return new UploadPack(repo.openRepository());
+        if (isMine(fullRepositoryName)) return new UploadPack(repo.openRepository());
         return null;
     }
 
     private boolean isMine(String name) {
         // Depending on the Git URL the client uses, we may or may not get leading '/'.
         // For example, server:userContent.git vs ssh://server/scriptler.git
-        if (name.startsWith("/"))
-            name = name.substring(1);
+        if (name.startsWith("/")) name = name.substring(1);
         return name.equals(GitScriptlerRepository.REPOID);
     }
 }

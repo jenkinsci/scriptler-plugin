@@ -3,17 +3,14 @@ package org.jenkinsci.plugins.scriptler.share.gh;
 import hudson.Extension;
 import hudson.ExtensionList;
 import hudson.model.DownloadService.Downloadable;
-
 import java.io.IOException;
-
 import net.sf.json.JSONObject;
-
 import org.jenkinsci.plugins.scriptler.share.ScriptInfoList;
 
 /**
  * Gets the GitHub catalog from <a href="http://mirrors.jenkins-ci.org/updates/updates/org.jenkinsci.plugins.scriptler.CentralScriptJsonCatalog.json">jenkins-ci/org.jenkinsci.plugins.scriptler.CentralScriptJsonCatalog.json</a>. This catalog is updated by a background crawler on the
  * Jenkins infrastructure site.
- * 
+ *
  * @author Dominik Bartholdi (imod)
  */
 @Extension

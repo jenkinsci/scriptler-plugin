@@ -4,13 +4,12 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import hudson.util.StreamTaskListener;
 
+import hudson.util.StreamTaskListener;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
-
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.junit.Rule;
 import org.junit.Test;
@@ -71,7 +70,6 @@ public class GroovyScriptTest {
 
         tpe.shutdown();
         tpe.awaitTermination(60, SECONDS);
-
     }
 
     private Runnable createWork(final int number) {
@@ -79,7 +77,8 @@ public class GroovyScriptTest {
             public void run() {
                 ByteArrayOutputStream sos = new ByteArrayOutputStream();
 
-                newInstance(sos, "out.print arg", new Parameter("arg", "number " + number)).call();
+                newInstance(sos, "out.print arg", new Parameter("arg", "number " + number))
+                        .call();
                 errorCollector.checkThat("number " + number, is(sos.toString()));
             }
         };

@@ -7,16 +7,14 @@ import hudson.model.TaskListener;
 import hudson.remoting.Channel;
 import hudson.remoting.ChannelClosedException;
 import hudson.remoting.VirtualChannel;
-
+import java.io.IOException;
+import java.util.Collections;
 import org.jenkinsci.plugins.scriptler.Messages;
 import org.jenkinsci.plugins.scriptler.config.Script;
 import org.jenkinsci.plugins.scriptler.util.GroovyScript;
 import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
-
-import java.io.IOException;
-import java.util.Collections;
 
 /**
  * TokenMacro that allows the execution of a scriptler script an any arbitrary location supporting TokenMacros e.g. <code>${SCRIPTLER, scriptId="superscript.groovy"}</code>
@@ -30,7 +28,8 @@ public class ScriptlerTokenMacro extends DataBoundTokenMacro {
     public String scriptId;
 
     @Override
-    public String evaluate(AbstractBuild<?, ?> context, TaskListener listener, String macroName) throws MacroEvaluationException, IOException, InterruptedException {
+    public String evaluate(AbstractBuild<?, ?> context, TaskListener listener, String macroName)
+            throws MacroEvaluationException, IOException, InterruptedException {
 
         final Script script = ScriptHelper.getScript(scriptId, true);
         if (script == null) {
@@ -52,7 +51,8 @@ public class ScriptlerTokenMacro extends DataBoundTokenMacro {
             channel = remoteFilePath.getChannel();
         }
 
-        Object output = channel.call(new GroovyScript(script.script, Collections.emptyList(), true, listener, null, context));
+        Object output =
+                channel.call(new GroovyScript(script.script, Collections.emptyList(), true, listener, null, context));
 
         return output != null ? output.toString() : "";
     }
@@ -61,5 +61,4 @@ public class ScriptlerTokenMacro extends DataBoundTokenMacro {
     public boolean acceptsMacroName(String macroName) {
         return macroName.equals("SCRIPTLER");
     }
-
 }

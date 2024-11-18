@@ -1,39 +1,34 @@
-
 package org.jenkinsci.plugins.scriptler.restapi;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.net.URL;
-import java.util.Collections;
-import org.htmlunit.HttpMethod;
-import org.htmlunit.WebRequest;
-import org.htmlunit.html.*;
-//import org.htmlunit.javascript.host.URL;
 import hudson.ExtensionList;
 import hudson.Functions;
 import hudson.model.FileParameterValue.FileItemImpl;
-
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
 import org.apache.commons.fileupload.FileItem;
+import org.htmlunit.FailingHttpStatusCodeException;
+import org.htmlunit.HttpMethod;
+import org.htmlunit.Page;
+import org.htmlunit.WebRequest;
+import org.htmlunit.html.*;
 import org.htmlunit.util.NameValuePair;
-import org.jenkinsci.plugins.scriptler.ScriptlerManagementHelper;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
+import org.jenkinsci.plugins.scriptler.ScriptlerManagementHelper;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
 import org.junit.*;
 import org.jvnet.hudson.test.BuildWatcher;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
-
-import org.htmlunit.FailingHttpStatusCodeException;
-import org.htmlunit.Page;
 
 public class ScriptlerRestApiTest {
 
@@ -56,50 +51,50 @@ public class ScriptlerRestApiTest {
         parameters.add(new Parameter("arg2", "scriptler"));
         scriptler.getConfiguration().getScriptById(SCRIPT_ID).setParameters(parameters);
     }
-    
+
     private void saveFile(ScriptlerManagementHelper helper, String scriptId, String scriptContent) throws Exception {
         Path f = Files.createTempFile("script", "-temp");
         Files.writeString(f, scriptContent);
         FileItem fi = new FileItemImpl(f.toFile());
         helper.saveScript(fi, true, scriptId);
     }
-    
+
     @Test
     @Issue("SECURITY-691")
-    public void fixFolderTraversalThroughScriptId() throws Exception{
+    public void fixFolderTraversalThroughScriptId() throws Exception {
         ScriptlerManagement scriptler = ExtensionList.lookupSingleton(ScriptlerManagement.class);
         ScriptlerManagementHelper helper = new ScriptlerManagementHelper(scriptler);
-        
+
         String maliciousCode = "print 'hello'";
-    
+
         // will be just aside scriptler.xml
         assertSaveFileFail(helper, "../clickOnMe", maliciousCode);
 
-        if(Functions.isWindows()){
+        if (Functions.isWindows()) {
             // will be used as relative inside the folder
             saveFile(helper, "/directlyInDiskRoot", maliciousCode);
-            
+
             assertSaveFileFail(helper, "//directlyInDiskRoot", maliciousCode);
-    
+
             // C:\ + ...
             String rootLetter = new File(".").getAbsolutePath().substring(0, 3);
             assertSaveFileFail(helper, rootLetter + "directlyInDiskRoot", maliciousCode);
-        }else{
+        } else {
             assertSaveFileFail(helper, "/directlyInDiskRoot", maliciousCode);
         }
     }
-    
-    private void assertSaveFileFail(ScriptlerManagementHelper helper, String scriptId, String scriptContent) throws Exception {
-        try{
+
+    private void assertSaveFileFail(ScriptlerManagementHelper helper, String scriptId, String scriptContent)
+            throws Exception {
+        try {
             // will be just aside scriptler.xml
             saveFile(helper, scriptId, scriptContent);
             fail();
-        }
-        catch(IOException e){
+        } catch (IOException e) {
             assertTrue(e.getMessage().contains("Invalid file path received"));
         }
     }
-    
+
     @Test
     public void testSuccessWithDefaults() throws Exception {
 
@@ -119,7 +114,7 @@ public class ScriptlerRestApiTest {
         JenkinsRule.WebClient webClient = j.createWebClient();
         HtmlPage runScriptPage = webClient.goTo("scriptler/runScript?id=dummy.groovy");
         HtmlForm triggerscript = runScriptPage.getFormByName("triggerscript");
-        HtmlTextArea script = (HtmlTextArea)runScriptPage.getElementByName("script");
+        HtmlTextArea script = (HtmlTextArea) runScriptPage.getElementByName("script");
         script.setText("print \"welcome, $arg1 and $arg2!\"");
 
         HtmlPage page = j.submit(triggerscript);
@@ -155,7 +150,7 @@ public class ScriptlerRestApiTest {
             if (!configurationFile.exists()) {
                 fail("The configuration file was deleted");
             }
-            assert(e.getResponse().getContentAsString().contains("Invalid file path received: " + path));
+            assert (e.getResponse().getContentAsString().contains("Invalid file path received: " + path));
         }
     }
 }

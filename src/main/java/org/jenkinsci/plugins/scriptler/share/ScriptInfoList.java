@@ -11,5 +11,4 @@ public class ScriptInfoList {
     public ScriptInfo[] getList() {
         return list;
     }
-
 }

@@ -23,12 +23,13 @@
  */
 package org.jenkinsci.plugins.scriptler.config;
 
+import com.thoughtworks.xstream.XStream;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.BulkChange;
 import hudson.XmlFile;
 import hudson.model.Saveable;
 import hudson.model.listeners.SaveableListener;
 import hudson.util.XStream2;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,24 +38,19 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
 import org.jenkinsci.plugins.scriptler.ScriptlerPermissions;
 import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
 import org.jenkinsci.plugins.scriptler.util.ByIdSorter;
-
-import com.thoughtworks.xstream.XStream;
 import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.DoNotUse;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
-
 public final class ScriptlerConfiguration extends ScriptSet implements Saveable {
 
-    private final static Logger LOGGER = Logger.getLogger(ScriptlerConfiguration.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ScriptlerConfiguration.class.getName());
 
     // keep to avoid loading issues with older version
     @Deprecated
@@ -85,8 +81,7 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
     }
 
     public synchronized void save() throws IOException {
-        if (BulkChange.contains(this))
-            return;
+        if (BulkChange.contains(this)) return;
         getXmlFile().write(this);
         SaveableListener.fireOnChange(this, getXmlFile());
     }
@@ -159,11 +154,11 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
     }
 
     @Restricted(DoNotUse.class) // for Jelly view
-    public List<ScriptAndApproved> getSortedScripts(){
+    public List<ScriptAndApproved> getSortedScripts() {
         List<Script> sortedScripts;
-        if(Jenkins.get().hasPermission(ScriptlerPermissions.CONFIGURE)){
+        if (Jenkins.get().hasPermission(ScriptlerPermissions.CONFIGURE)) {
             sortedScripts = new ArrayList<>(this.getScripts());
-        }else{
+        } else {
             sortedScripts = new ArrayList<>(this.getUserScripts());
         }
 
@@ -173,7 +168,7 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
         for (Script script : sortedScripts) {
             Script scriptWithSrc = ScriptHelper.getScript(script.getId(), true);
             Boolean approved = null;
-            if(scriptWithSrc != null && scriptWithSrc.script != null){
+            if (scriptWithSrc != null && scriptWithSrc.script != null) {
                 approved = ScriptHelper.isApproved(scriptWithSrc.script, false);
             }
             result.add(new ScriptAndApproved(script, approved));

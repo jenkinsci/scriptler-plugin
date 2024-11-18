@@ -3,6 +3,8 @@
  */
 package org.jenkinsci.plugins.scriptler.builder;
 
+import static hudson.util.QuotedStringTokenizer.quote;
+
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
@@ -24,6 +26,13 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormApply;
 import hudson.util.XStream2;
+import jakarta.servlet.ServletException;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import jenkins.util.xstream.CriticalXStreamException;
 import net.sf.json.JSONArray;
@@ -47,16 +56,6 @@ import org.kohsuke.stapler.StaplerRequest2;
 import org.kohsuke.stapler.StaplerResponse2;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 
-import jakarta.servlet.ServletException;
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static hudson.util.QuotedStringTokenizer.quote;
-
 /**
  * @author Dominik Bartholdi (imod)
  *
@@ -71,6 +70,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
     private final String builderId;
     private final String scriptId;
     private final boolean propagateParams;
+
     @NonNull
     private final List<Parameter> parameters;
 
@@ -83,7 +83,8 @@ public class ScriptlerBuilder extends Builder implements Serializable {
     }
 
     @DataBoundConstructor
-    public ScriptlerBuilder(String builderId, String scriptId, boolean propagateParams, @NonNull List<Parameter> parameters) {
+    public ScriptlerBuilder(
+            String builderId, String scriptId, boolean propagateParams, @NonNull List<Parameter> parameters) {
         this.builderId = builderId;
         this.scriptId = scriptId;
         this.parameters = new ArrayList<>(parameters);
@@ -105,19 +106,23 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         return errors;
     }
 
-    private void checkPermission(@NonNull Map<String, String> errors){
-        if(Jenkins.get().hasPermission(Jenkins.RUN_SCRIPTS)){
+    private void checkPermission(@NonNull Map<String, String> errors) {
+        if (Jenkins.get().hasPermission(Jenkins.RUN_SCRIPTS)) {
             // user has right to add / edit Scripler steps
             return;
         }
 
         Project<?, ?> project = retrieveProjectUsingCurrentRequest();
-        if(project != null){
-            if(!hasSameScriptlerBuilderInProject(project, this)){
-                if(StringUtils.isBlank(builderId)){
-                    errors.put("builderId", "As the given builder does not have ID, it must be equals to one of the existing builder that does not have ID");
-                }else{
-                    errors.put("builderId", "The builderId must correspond to an existing builder of that project since the user does not have the rights to add/edit Scriptler step");
+        if (project != null) {
+            if (!hasSameScriptlerBuilderInProject(project, this)) {
+                if (StringUtils.isBlank(builderId)) {
+                    errors.put(
+                            "builderId",
+                            "As the given builder does not have ID, it must be equals to one of the existing builder that does not have ID");
+                } else {
+                    errors.put(
+                            "builderId",
+                            "The builderId must correspond to an existing builder of that project since the user does not have the rights to add/edit Scriptler step");
                 }
             }
         }
@@ -138,10 +143,11 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         return this;
     }
 
-    private boolean hasSameScriptlerBuilderInProject(@NonNull Project<?, ?> project, @NonNull ScriptlerBuilder targetBuilder){
+    private boolean hasSameScriptlerBuilderInProject(
+            @NonNull Project<?, ?> project, @NonNull ScriptlerBuilder targetBuilder) {
         List<ScriptlerBuilder> allScriptlerBuilders = _getAllScriptlerBuildersFromProject(project);
         for (ScriptlerBuilder builder : allScriptlerBuilders) {
-            if(targetBuilder.equals(builder)){
+            if (targetBuilder.equals(builder)) {
                 return true;
             }
         }
@@ -149,13 +155,13 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         return false;
     }
 
-    private @NonNull List<ScriptlerBuilder> _getAllScriptlerBuildersFromProject(@NonNull Project<?, ?> project){
+    private @NonNull List<ScriptlerBuilder> _getAllScriptlerBuildersFromProject(@NonNull Project<?, ?> project) {
         return project.getBuildersList().getAll(ScriptlerBuilder.class);
     }
 
-    private @CheckForNull Project<?, ?> retrieveProjectUsingCurrentRequest(){
+    private @CheckForNull Project<?, ?> retrieveProjectUsingCurrentRequest() {
         StaplerRequest2 currentRequest = Stapler.getCurrentRequest2();
-        if(currentRequest != null) {
+        if (currentRequest != null) {
             Project<?, ?> project = Stapler.getCurrentRequest2().findAncestorObject(Project.class);
             if (project != null) {
                 return project;
@@ -197,12 +203,15 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
         if (script == null) {
             if (StringUtils.isBlank(scriptId)) {
-                LOGGER.log(Level.WARNING, "The script id was blank for the build {0}:{1}", new Object[]{build.getProject().getName(), build.getDisplayName()});
+                LOGGER.log(Level.WARNING, "The script id was blank for the build {0}:{1}", new Object[] {
+                    build.getProject().getName(), build.getDisplayName()
+                });
                 listener.getLogger().println(Messages.scriptNotDefined());
             } else {
-                LOGGER.log(Level.WARNING, "The source corresponding to the scriptId {0} was not found (missing file ?) for the build {1}:{2}",
-                        new Object[]{scriptId, build.getProject().getName(), build.getDisplayName()}
-                        );
+                LOGGER.log(
+                        Level.WARNING,
+                        "The source corresponding to the scriptId {0} was not found (missing file ?) for the build {1}:{2}",
+                        new Object[] {scriptId, build.getProject().getName(), build.getDisplayName()});
                 listener.getLogger().println(Messages.scriptNotFound(scriptId));
             }
             return false;
@@ -211,23 +220,30 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         boolean isOk = false;
         if (!script.nonAdministerUsing) {
             listener.getLogger().println(Messages.scriptNotUsableInBuildStep(script.getName()));
-            LOGGER.log(Level.WARNING, "The script [{0} ({1})] is not allowed to be executed in a build, check its configuration. It concerns the build [{2}:{3}]",
-                    new Object[]{script.getName(), script.getId(), build.getProject().getName(), build.getDisplayName()}
-                    );
+            LOGGER.log(
+                    Level.WARNING,
+                    "The script [{0} ({1})] is not allowed to be executed in a build, check its configuration. It concerns the build [{2}:{3}]",
+                    new Object[] {
+                        script.getName(), script.getId(), build.getProject().getName(), build.getDisplayName()
+                    });
             return false;
         }
 
-        if(!ScriptHelper.isApproved(script.script)){
+        if (!ScriptHelper.isApproved(script.script)) {
             listener.getLogger().println(Messages.scriptNotApprovedYet(script.getName()));
-            LOGGER.log(Level.WARNING, "The script [{0} ({1})] is not approved yet, consider asking your administrator to approve it. It concerns the build [{2}:{3}]",
-                    new Object[]{script.getName(), script.getId(), build.getProject().getName(), build.getDisplayName()}
-                    );
+            LOGGER.log(
+                    Level.WARNING,
+                    "The script [{0} ({1})] is not approved yet, consider asking your administrator to approve it. It concerns the build [{2}:{3}]",
+                    new Object[] {
+                        script.getName(), script.getId(), build.getProject().getName(), build.getDisplayName()
+                    });
             return false;
         }
 
         try {
 
-            // expand the parameters before passing these to the execution, this is to allow any token macro to resolve parameter values
+            // expand the parameters before passing these to the execution, this is to allow any token macro to resolve
+            // parameter values
             List<Parameter> expandedParams = new LinkedList<>();
 
             if (propagateParams) {
@@ -237,23 +253,30 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                 } else {
                     final List<ParameterValue> jobParams = paramsAction.getParameters();
                     for (ParameterValue parameterValue : jobParams) {
-                        // pass the params to the token expander in a way that these get expanded by environment variables (params are also environment variables)
-                        expandedParams.add(new Parameter(parameterValue.getName(), TokenMacro.expandAll(build, listener, "${" + parameterValue.getName() + "}", false, null)));
+                        // pass the params to the token expander in a way that these get expanded by environment
+                        // variables (params are also environment variables)
+                        expandedParams.add(new Parameter(
+                                parameterValue.getName(),
+                                TokenMacro.expandAll(
+                                        build, listener, "${" + parameterValue.getName() + "}", false, null)));
                     }
                 }
             }
             for (Parameter parameter : parameters) {
-                expandedParams.add(new Parameter(parameter.getName(), TokenMacro.expandAll(build, listener, parameter.getValue())));
+                expandedParams.add(new Parameter(
+                        parameter.getName(), TokenMacro.expandAll(build, listener, parameter.getValue())));
             }
             final Object output;
             if (script.onlyMaster) {
                 // When run on master, make build, launcher, listener available to script
-                output = FilePath.localChannel.call(new GroovyScript(script.script, expandedParams, true, listener, launcher, build));
+                output = FilePath.localChannel.call(
+                        new GroovyScript(script.script, expandedParams, true, listener, launcher, build));
             } else {
                 VirtualChannel channel = launcher.getChannel();
                 if (channel == null) {
                     output = null;
-                    listener.getLogger().println(Messages.scriptExecutionFailed(scriptId) + " - " + Messages.agent_no_channel());
+                    listener.getLogger()
+                            .println(Messages.scriptExecutionFailed(scriptId) + " - " + Messages.agent_no_channel());
                 } else {
                     output = channel.call(new GroovyScript(script.script, expandedParams, true, listener));
                 }
@@ -271,23 +294,21 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         return isOk;
     }
 
-    private static String generateBuilderId(){
+    private static String generateBuilderId() {
         return System.currentTimeMillis() + "_" + CURRENT_ID.addAndGet(1);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
         ScriptlerBuilder that = (ScriptlerBuilder) o;
 
-        return Objects.equals(propagateParams, that.propagateParams) &&
-                Objects.equals(builderId, that.builderId) &&
-                Objects.equals(scriptId, that.scriptId) &&
-                Objects.equals(parameters, that.parameters);
+        return Objects.equals(propagateParams, that.propagateParams)
+                && Objects.equals(builderId, that.builderId)
+                && Objects.equals(scriptId, that.scriptId)
+                && Objects.equals(parameters, that.parameters);
     }
 
     @Override
@@ -306,7 +327,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
      * Process the class regularly but add a check after that
      */
     @SuppressWarnings("unused") // discovered dynamically
-    public static final class ConverterImpl extends XStream2.PassthruConverter<ScriptlerBuilder>{
+    public static final class ConverterImpl extends XStream2.PassthruConverter<ScriptlerBuilder> {
         public ConverterImpl(XStream2 xstream) {
             super(xstream);
         }
@@ -315,7 +336,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         protected void callback(ScriptlerBuilder obj, UnmarshallingContext context) {
             Map<String, String> errors = obj.checkGenericData();
 
-            if(!errors.isEmpty()){
+            if (!errors.isEmpty()) {
                 ConversionException conversionException = new ConversionException("Validation failed");
                 for (Map.Entry<String, String> error : errors.entrySet()) {
                     conversionException.add(error.getKey(), error.getValue());
@@ -328,7 +349,6 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
-
 
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {
@@ -357,9 +377,9 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                 builder = new ScriptlerBuilder(builderId, id, inPropagateParams, params);
             }
 
-            if(builder != null){
+            if (builder != null) {
                 Map<String, String> errors = builder.checkGenericData();
-                if(!errors.isEmpty()){
+                if (!errors.isEmpty()) {
                     throw new MultipleErrorFormValidation(errors);
                 }
             }
@@ -419,7 +439,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             this.fieldToMessage = fieldToMessage;
         }
 
-        private String getAggregatedMessage(){
+        private String getAggregatedMessage() {
             List<String> errorMessageList = new ArrayList<>();
             for (Map.Entry<String, String> error : fieldToMessage.entrySet()) {
                 errorMessageList.add(buildMessageForField(error.getKey(), error.getValue()));
@@ -427,12 +447,13 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             return StringUtils.join(errorMessageList, ", ");
         }
 
-        private String buildMessageForField(String fieldName, String fieldMessage){
+        private String buildMessageForField(String fieldName, String fieldMessage) {
             return fieldName + ": " + fieldMessage;
         }
 
         @Override
-        public void generateResponse(StaplerRequest2 req, StaplerResponse2 rsp, Object node) throws IOException, ServletException {
+        public void generateResponse(StaplerRequest2 req, StaplerResponse2 rsp, Object node)
+                throws IOException, ServletException {
             if (FormApply.isApply(req)) {
                 StringBuilder scriptBuilder = new StringBuilder();
                 for (Map.Entry<String, String> error : fieldToMessage.entrySet()) {
@@ -440,14 +461,12 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                     scriptBuilder
                             .append("notificationBar.show(")
                             .append(quote(errorMessage))
-                            .append(",notificationBar.ERROR)")
-                    ;
+                            .append(",notificationBar.ERROR)");
                 }
 
-                FormApply.applyResponse(scriptBuilder.toString())
-                        .generateResponse(req, rsp, node);
+                FormApply.applyResponse(scriptBuilder.toString()).generateResponse(req, rsp, node);
             } else {
-                new Failure(getAggregatedMessage()).generateResponse(req,rsp,node);
+                new Failure(getAggregatedMessage()).generateResponse(req, rsp, node);
             }
         }
     }
