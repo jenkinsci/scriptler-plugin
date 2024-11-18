@@ -16,7 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;;
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
