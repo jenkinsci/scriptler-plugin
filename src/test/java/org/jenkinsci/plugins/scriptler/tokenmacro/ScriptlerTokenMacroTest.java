@@ -1,17 +1,15 @@
 package org.jenkinsci.plugins.scriptler.tokenmacro;
 
 import hudson.ExtensionList;
-import hudson.model.FreeStyleBuild;
 import hudson.model.FileParameterValue.FileItemImpl;
+import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.util.StreamTaskListener;
-
 import java.io.File;
-
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.FileUtils;
-import org.jenkinsci.plugins.scriptler.ScriptlerManagementHelper;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
+import org.jenkinsci.plugins.scriptler.ScriptlerManagementHelper;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -39,6 +37,5 @@ public class ScriptlerTokenMacroTest {
         final StreamTaskListener listener = StreamTaskListener.fromStdout();
 
         Assert.assertEquals("hello world 1", TokenMacro.expand(b, listener, "${SCRIPTLER,scriptId=\"dummy.groovy\"}"));
-
     }
 }

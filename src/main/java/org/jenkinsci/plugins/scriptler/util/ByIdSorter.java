@@ -25,15 +25,15 @@ package org.jenkinsci.plugins.scriptler.util;
 
 import java.io.Serializable;
 import java.util.Comparator;
-
 import org.jenkinsci.plugins.scriptler.config.NamedResource;
 
 /**
  * @author imod
- * 
+ *
  */
 public class ByIdSorter implements Comparator<NamedResource>, Serializable {
     public int compare(NamedResource o1, NamedResource o2) {
         return o1.getId().compareTo(o2.getId());
-    };
+    }
+    ;
 }

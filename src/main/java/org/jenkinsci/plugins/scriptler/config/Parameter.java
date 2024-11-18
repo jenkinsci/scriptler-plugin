@@ -1,10 +1,9 @@
 package org.jenkinsci.plugins.scriptler.config;
 
-import net.sf.json.JSONObject;
-import org.kohsuke.stapler.DataBoundConstructor;
-
 import java.io.Serializable;
 import java.util.*;
+import net.sf.json.JSONObject;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 public class Parameter implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -31,7 +30,7 @@ public class Parameter implements Serializable {
         this.name = name;
         this.value = value;
     }
-    
+
     public String getName() {
         return name;
     }
@@ -47,14 +46,11 @@ public class Parameter implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
         Parameter parameter = (Parameter) o;
-        return Objects.equals(name, parameter.name) &&
-                Objects.equals(value, parameter.value);
+        return Objects.equals(name, parameter.name) && Objects.equals(value, parameter.value);
     }
 
     @Override

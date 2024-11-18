@@ -6,6 +6,9 @@ import groovy.lang.Script;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
+import java.io.PrintStream;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import jenkins.model.Jenkins;
 import jenkins.security.MasterToSlaveCallable;
 import jenkins.security.Roles;
@@ -15,28 +18,27 @@ import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.jenkinsci.remoting.Role;
 import org.jenkinsci.remoting.RoleChecker;
 
-import java.io.PrintStream;
-import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 /**
  * Inspired by hudson.util.RemotingDiagnostics.Script, but adding parameters.
  */
 public class GroovyScript extends MasterToSlaveCallable<Object, RuntimeException> {
     private static final long serialVersionUID = 1L;
     private final String script;
+
     @NonNull
     private final Collection<Parameter> parameters;
+
     private final boolean failWithException;
     private final TaskListener listener;
-    private transient final AbstractBuild<?, ?> build;
-    private transient final Launcher launcher;
+    private final transient AbstractBuild<?, ?> build;
+    private final transient Launcher launcher;
     private transient ClassLoader cl;
 
     @SuppressWarnings("unchecked")
     private static Map<String, ConcurrentLinkedQueue<Script>> cache = Collections.synchronizedMap(new LRUMap(10));
 
     private static final Set<String> DEFAULT_VARIABLES = new HashSet<>();
+
     static {
         DEFAULT_VARIABLES.add("out");
         DEFAULT_VARIABLES.add("build");
@@ -53,7 +55,13 @@ public class GroovyScript extends MasterToSlaveCallable<Object, RuntimeException
      * @param launcher the launcher
      * @param build the current build
      */
-    public GroovyScript(String script, @NonNull Collection<Parameter> parameters, boolean failWithException, TaskListener listener, Launcher launcher, AbstractBuild<?, ?> build) {
+    public GroovyScript(
+            String script,
+            @NonNull Collection<Parameter> parameters,
+            boolean failWithException,
+            TaskListener listener,
+            Launcher launcher,
+            AbstractBuild<?, ?> build) {
         this.script = script;
         this.parameters = new ArrayList<>(parameters);
         this.failWithException = failWithException;
@@ -64,13 +72,17 @@ public class GroovyScript extends MasterToSlaveCallable<Object, RuntimeException
     }
 
     /**
-     * Constructor 
+     * Constructor
      * @param script the script to be executed
      * @param parameters the parameters to be passed to the script
      * @param failWithException should the job fail with an exception
      * @param listener access to logging via listener
      */
-    public GroovyScript(String script, @NonNull Collection<Parameter> parameters, boolean failWithException, TaskListener listener) {
+    public GroovyScript(
+            String script,
+            @NonNull Collection<Parameter> parameters,
+            boolean failWithException,
+            TaskListener listener) {
         this(script, parameters, failWithException, listener, null, null);
     }
 
@@ -98,8 +110,8 @@ public class GroovyScript extends MasterToSlaveCallable<Object, RuntimeException
         // set default variables
         shell.setVariable("out", logger);
         shell.setVariable("listener", listener);
-        if(build != null) shell.setVariable("build", build);
-        if(launcher != null) shell.setVariable("launcher", launcher);
+        if (build != null) shell.setVariable("build", build);
+        if (launcher != null) shell.setVariable("launcher", launcher);
 
         ConcurrentLinkedQueue<Script> scriptPool = cache.get(script);
         if (scriptPool == null) {
@@ -139,9 +151,9 @@ public class GroovyScript extends MasterToSlaveCallable<Object, RuntimeException
 
     @Override
     public void checkRoles(RoleChecker roleChecker) throws SecurityException {
-        if(launcher != null && build != null){
+        if (launcher != null && build != null) {
             roleChecker.check(this, Roles.MASTER);
-        }else{
+        } else {
             roleChecker.check(this, Role.UNKNOWN);
         }
     }

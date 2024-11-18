@@ -24,7 +24,6 @@
 package org.jenkinsci.plugins.scriptler.config;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-
 import java.util.*;
 
 public class Script implements Comparable<Script>, NamedResource {
@@ -35,6 +34,7 @@ public class Script implements Comparable<Script>, NamedResource {
     public final String originCatalog;
     public final String originScript;
     public final String originDate;
+
     @NonNull
     private final List<Parameter> parameters;
 
@@ -54,7 +54,13 @@ public class Script implements Comparable<Script>, NamedResource {
     /**
      * used to create/update a new script in the UI
      */
-    public Script(String id, String name, String comment, boolean nonAdministerUsing, @NonNull List<Parameter> parameters, boolean onlyMaster) {
+    public Script(
+            String id,
+            String name,
+            String comment,
+            boolean nonAdministerUsing,
+            @NonNull List<Parameter> parameters,
+            boolean onlyMaster) {
         this(id, name, comment, true, null, null, null, nonAdministerUsing, parameters, onlyMaster);
     }
 
@@ -67,9 +73,17 @@ public class Script implements Comparable<Script>, NamedResource {
 
     /**
      * Constructor to create a script imported from a foreign catalog.
-     * 
+     *
      */
-    public Script(String id, String name, String comment, boolean available, String originCatalog, String originScript, String originDate, @NonNull List<Parameter> parameters) {
+    public Script(
+            String id,
+            String name,
+            String comment,
+            boolean available,
+            String originCatalog,
+            String originScript,
+            String originDate,
+            @NonNull List<Parameter> parameters) {
         this(id, name, comment, available, originCatalog, originScript, originDate, false, parameters, false);
     }
 
@@ -77,14 +91,43 @@ public class Script implements Comparable<Script>, NamedResource {
     /**
      * used to merge scripts
      */
-    public Script(String id, String name, String comment, String originCatalog, String originScript, String originDate, boolean nonAdministerUsing, @NonNull List<Parameter> parameters, boolean onlyMaster) {
-        this(id, name, comment, true, originCatalog, originScript, originDate, nonAdministerUsing, parameters, onlyMaster);
+    public Script(
+            String id,
+            String name,
+            String comment,
+            String originCatalog,
+            String originScript,
+            String originDate,
+            boolean nonAdministerUsing,
+            @NonNull List<Parameter> parameters,
+            boolean onlyMaster) {
+        this(
+                id,
+                name,
+                comment,
+                true,
+                originCatalog,
+                originScript,
+                originDate,
+                nonAdministerUsing,
+                parameters,
+                onlyMaster);
     }
-    
+
     /**
      * used to merge scripts
      */
-    public Script(String id, String name, String comment, boolean available, String originCatalog, String originScript, String originDate, boolean nonAdministerUsing, @NonNull List<Parameter> parameters, boolean onlyMaster) {
+    public Script(
+            String id,
+            String name,
+            String comment,
+            boolean available,
+            String originCatalog,
+            String originScript,
+            String originDate,
+            boolean nonAdministerUsing,
+            @NonNull List<Parameter> parameters,
+            boolean onlyMaster) {
         this.id = id;
         this.name = name;
         this.comment = comment;
@@ -98,12 +141,22 @@ public class Script implements Comparable<Script>, NamedResource {
     }
 
     public Script copy() {
-        return new Script(id, name, comment, available, originCatalog, originScript, originDate, nonAdministerUsing, parameters, onlyMaster);
+        return new Script(
+                id,
+                name,
+                comment,
+                available,
+                originCatalog,
+                originScript,
+                originDate,
+                nonAdministerUsing,
+                parameters,
+                onlyMaster);
     }
-    
+
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.jvnet.hudson.plugins.scriptler.config.NamedResource#getName()
      */
     public String getName() {
@@ -134,7 +187,7 @@ public class Script implements Comparable<Script>, NamedResource {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
     public int compareTo(Script o) {
@@ -146,7 +199,17 @@ public class Script implements Comparable<Script>, NamedResource {
      */
     public Object readResolve() {
         if (id == null) {
-            return new Script(name, name, comment, available, originCatalog, originScript, originDate, nonAdministerUsing, parameters, onlyMaster);
+            return new Script(
+                    name,
+                    name,
+                    comment,
+                    available,
+                    originCatalog,
+                    originScript,
+                    originDate,
+                    nonAdministerUsing,
+                    parameters,
+                    onlyMaster);
         }
         return this;
     }
@@ -167,7 +230,7 @@ public class Script implements Comparable<Script>, NamedResource {
      */
     @Override
     public int hashCode() {
-       return Objects.hash(id);
+        return Objects.hash(id);
     }
 
     /**

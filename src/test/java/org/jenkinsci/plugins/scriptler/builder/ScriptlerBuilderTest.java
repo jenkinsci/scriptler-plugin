@@ -23,22 +23,31 @@
  */
 package org.jenkinsci.plugins.scriptler.builder;
 
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.*;
+
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import hudson.ExtensionList;
+import hudson.model.FileParameterValue;
+import hudson.model.FreeStyleProject;
+import hudson.model.Item;
+import hudson.model.Project;
+import java.io.File;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.util.*;
+import jenkins.model.Jenkins;
+import net.sf.json.JSONObject;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.io.FileUtils;
 import org.htmlunit.FailingHttpStatusCodeException;
 import org.htmlunit.HttpMethod;
 import org.htmlunit.WebRequest;
 import org.htmlunit.html.HtmlPage;
 import org.htmlunit.util.NameValuePair;
 import org.htmlunit.xml.XmlPage;
-import hudson.ExtensionList;
-import hudson.model.FileParameterValue;
-import hudson.model.FreeStyleProject;
-import hudson.model.Item;
-import hudson.model.Project;
-import jenkins.model.Jenkins;
-import net.sf.json.JSONObject;
-import nl.jqno.equalsverifier.EqualsVerifier;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.io.FileUtils;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagementHelper;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
@@ -48,16 +57,6 @@ import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
-
-import edu.umd.cs.findbugs.annotations.CheckForNull;
-import java.io.File;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.util.*;
-
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.*;
 
 /**
  * Warning: a user without RUN_SCRIPT can currently only clone an existing builder INSIDE a project.
@@ -88,7 +87,8 @@ public class ScriptlerBuilderTest {
         setupScript(helper, SCRIPT_NOT_USABLE, false);
     }
 
-    private void setupScript(ScriptlerManagementHelper helper, String scriptId, boolean nonAdministerUsing) throws Exception {
+    private void setupScript(ScriptlerManagementHelper helper, String scriptId, boolean nonAdministerUsing)
+            throws Exception {
         File f = new File(scriptId);
         FileUtils.writeStringToFile(f, "print 'Hello World!'");
         FileItem fi = new FileParameterValue.FileItemImpl(f);
@@ -107,42 +107,58 @@ public class ScriptlerBuilderTest {
 
         JenkinsRule.WebClient wc = j.createWebClient();
 
-        WebRequest request = new WebRequest(new URL(j.getURL() + project.getShortUrl() + "configSubmit"), HttpMethod.POST);
+        WebRequest request =
+                new WebRequest(new URL(j.getURL() + project.getShortUrl() + "configSubmit"), HttpMethod.POST);
 
         final String projectName = project.getName();
-        request.setRequestParameters(Arrays.asList(new NameValuePair("json", JSONObject.fromObject(
-                new HashMap<String, Object>() {{
-                    put("name", projectName);
-                    put("builder", new HashMap<String, Object>() {{
-                        put("kind", ScriptlerBuilder.class.getName());
-                        put("builderId", "");
-                        put("scriptlerScriptId", SCRIPT_USABLE_1);
-                        put("propagateParams", true);
-                        put("defineParams", new HashMap<String, List<Map<String, String>>>() {{
-                            put("parameters", Arrays.asList(
-                                    new HashMap<String, String>() {{
-                                        put("name", "param1");
-                                        put("value", "value1");
-                                    }},
-                                    new HashMap<String, String>() {{
-                                        put("name", "param2");
-                                        put("value", "value2");
-                                    }}
-                            ));
-                        }});
-                    }});
-                }}
-        ).toString())));
+        request.setRequestParameters(Arrays.asList(new NameValuePair(
+                "json",
+                JSONObject.fromObject(new HashMap<String, Object>() {
+                            {
+                                put("name", projectName);
+                                put("builder", new HashMap<String, Object>() {
+                                    {
+                                        put("kind", ScriptlerBuilder.class.getName());
+                                        put("builderId", "");
+                                        put("scriptlerScriptId", SCRIPT_USABLE_1);
+                                        put("propagateParams", true);
+                                        put("defineParams", new HashMap<String, List<Map<String, String>>>() {
+                                            {
+                                                put(
+                                                        "parameters",
+                                                        Arrays.asList(
+                                                                new HashMap<String, String>() {
+                                                                    {
+                                                                        put("name", "param1");
+                                                                        put("value", "value1");
+                                                                    }
+                                                                },
+                                                                new HashMap<String, String>() {
+                                                                    {
+                                                                        put("name", "param2");
+                                                                        put("value", "value2");
+                                                                    }
+                                                                }));
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        })
+                        .toString())));
         HtmlPage page = wc.getPage(request);
         j.assertGoodStatus(page);
 
-        ScriptlerBuilder scriptlerBuilder = refreshProject(project).getBuildersList().get(ScriptlerBuilder.class);
+        ScriptlerBuilder scriptlerBuilder =
+                refreshProject(project).getBuildersList().get(ScriptlerBuilder.class);
         assertNotNull(scriptlerBuilder);
         assertNotNull(scriptlerBuilder.getBuilderId());
         assertEquals(SCRIPT_USABLE_1, scriptlerBuilder.getScriptId());
         assertEquals(true, scriptlerBuilder.isPropagateParams());
         assertThat(scriptlerBuilder.getParametersList(), hasSize(2));
-        assertThat(scriptlerBuilder.getParametersList(), hasItems(new Parameter("param1", "value1"), new Parameter("param2", "value2")));
+        assertThat(
+                scriptlerBuilder.getParametersList(),
+                hasItems(new Parameter("param1", "value1"), new Parameter("param2", "value2")));
     }
 
     @Test
@@ -151,39 +167,43 @@ public class ScriptlerBuilderTest {
 
         JenkinsRule.WebClient wc = j.createWebClient();
 
-        WebRequest request = new WebRequest(new URL(j.getURL() + project.getShortUrl() + "configSubmit"), HttpMethod.POST);
+        WebRequest request =
+                new WebRequest(new URL(j.getURL() + project.getShortUrl() + "configSubmit"), HttpMethod.POST);
 
         String xml = retrieveXmlConfigForProject(wc, project);
-        String modifiedXml = xml.replace("<builders/>", "" +
-                "<builders>\n" +
-                "  <org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder>\n" +
-                "    <builderId></builderId>\n" +
-                "    <scriptId>" + SCRIPT_USABLE_1 + "</scriptId>\n" +
-                "    <propagateParams>true</propagateParams>\n" +
-                "    <parameters>\n" +
-                "      <org.jenkinsci.plugins.scriptler.config.Parameter>\n" +
-                "        <name>param1</name>\n" +
-                "        <value>value1</value>\n" +
-                "      </org.jenkinsci.plugins.scriptler.config.Parameter>\n" +
-                "      <org.jenkinsci.plugins.scriptler.config.Parameter>\n" +
-                "        <name>param2</name>\n" +
-                "        <value>value2</value>\n" +
-                "      </org.jenkinsci.plugins.scriptler.config.Parameter>\n" +
-                "    </parameters>\n" +
-                "  </org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder>\n" +
-                "</builders>"
-        );
+        String modifiedXml = xml.replace(
+                "<builders/>",
+                "" + "<builders>\n"
+                        + "  <org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder>\n"
+                        + "    <builderId></builderId>\n"
+                        + "    <scriptId>"
+                        + SCRIPT_USABLE_1 + "</scriptId>\n" + "    <propagateParams>true</propagateParams>\n"
+                        + "    <parameters>\n"
+                        + "      <org.jenkinsci.plugins.scriptler.config.Parameter>\n"
+                        + "        <name>param1</name>\n"
+                        + "        <value>value1</value>\n"
+                        + "      </org.jenkinsci.plugins.scriptler.config.Parameter>\n"
+                        + "      <org.jenkinsci.plugins.scriptler.config.Parameter>\n"
+                        + "        <name>param2</name>\n"
+                        + "        <value>value2</value>\n"
+                        + "      </org.jenkinsci.plugins.scriptler.config.Parameter>\n"
+                        + "    </parameters>\n"
+                        + "  </org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder>\n"
+                        + "</builders>");
 
         HtmlPage page = postXmlConfigForProject(wc, project, modifiedXml);
         j.assertGoodStatus(page);
 
-        ScriptlerBuilder scriptlerBuilder = refreshProject(project).getBuildersList().get(ScriptlerBuilder.class);
+        ScriptlerBuilder scriptlerBuilder =
+                refreshProject(project).getBuildersList().get(ScriptlerBuilder.class);
         assertNotNull(scriptlerBuilder);
         assertTrue(scriptlerBuilder.getBuilderId().equals(""));
         assertEquals(SCRIPT_USABLE_1, scriptlerBuilder.getScriptId());
         assertEquals(true, scriptlerBuilder.isPropagateParams());
         assertThat(scriptlerBuilder.getParametersList(), hasSize(2));
-        assertThat(scriptlerBuilder.getParametersList(), hasItems(new Parameter("param1", "value1"), new Parameter("param2", "value2")));
+        assertThat(
+                scriptlerBuilder.getParametersList(),
+                hasItems(new Parameter("param1", "value1"), new Parameter("param2", "value2")));
     }
 
     @Test
@@ -192,10 +212,15 @@ public class ScriptlerBuilderTest {
         j.jenkins.setCrumbIssuer(null);
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
-                .grant(Jenkins.ADMINISTER).everywhere().to("admin")
-                .grant(Jenkins.RUN_SCRIPTS).everywhere().to("scripter")
-                .grant(Jenkins.READ, Item.READ, Item.CONFIGURE).everywhere().toEveryone()
-        );
+                .grant(Jenkins.ADMINISTER)
+                .everywhere()
+                .to("admin")
+                .grant(Jenkins.RUN_SCRIPTS)
+                .everywhere()
+                .to("scripter")
+                .grant(Jenkins.READ, Item.READ, Item.CONFIGURE)
+                .everywhere()
+                .toEveryone());
 
         checkModificationThroughWebUI("");
         checkModificationThroughWebUI("another-id");
@@ -233,10 +258,13 @@ public class ScriptlerBuilderTest {
             JenkinsRule.WebClient wc = j.createWebClient().login("user");
 
             // if the builderId is empty when passed to web ui, a generated one is used
-            String builderIdGenerated = !builderId.equals("") ? builderId : project.getBuildersList().get(ScriptlerBuilder.class).getBuilderId();
+            String builderIdGenerated = !builderId.equals("")
+                    ? builderId
+                    : project.getBuildersList().get(ScriptlerBuilder.class).getBuilderId();
 
             { // can edit description (or other field)
-                HtmlPage page = postConfigWithOneBuilderLikeWebUI(wc, project, "desc_2", builderIdGenerated, SCRIPT_USABLE_2);
+                HtmlPage page =
+                        postConfigWithOneBuilderLikeWebUI(wc, project, "desc_2", builderIdGenerated, SCRIPT_USABLE_2);
                 j.assertGoodStatus(page);
 
                 verifyDescriptionChanged(wc, project, "desc_1", "desc_2");
@@ -244,12 +272,24 @@ public class ScriptlerBuilderTest {
 
             { // cannot add new
                 try {
-                    // builderID + "random-id" => to generate a new builderId that does not exist in the existing project
-                    postConfigWithMultipleBuildersLikeWebUI(wc, project, null, builderIdGenerated, SCRIPT_USABLE_2, builderIdGenerated + "random-id", SCRIPT_USABLE_3);
+                    // builderID + "random-id" => to generate a new builderId that does not exist in the existing
+                    // project
+                    postConfigWithMultipleBuildersLikeWebUI(
+                            wc,
+                            project,
+                            null,
+                            builderIdGenerated,
+                            SCRIPT_USABLE_2,
+                            builderIdGenerated + "random-id",
+                            SCRIPT_USABLE_3);
                     fail();
                 } catch (FailingHttpStatusCodeException e) {
                     assertEquals(400, e.getStatusCode());
-                    assertTrue(e.getResponse().getContentAsString().contains("builderId: The builderId must correspond to an existing builder of that project since the user does not have the rights to add/edit Scriptler step"));
+                    assertTrue(
+                            e.getResponse()
+                                    .getContentAsString()
+                                    .contains(
+                                            "builderId: The builderId must correspond to an existing builder of that project since the user does not have the rights to add/edit Scriptler step"));
                 }
 
                 verifyBuilderNotPresent(wc, project, SCRIPT_USABLE_3);
@@ -262,7 +302,11 @@ public class ScriptlerBuilderTest {
                     fail();
                 } catch (FailingHttpStatusCodeException e) {
                     assertEquals(400, e.getStatusCode());
-                    assertTrue(e.getResponse().getContentAsString().contains("builderId: The builderId must correspond to an existing builder of that project since the user does not have the rights to add/edit Scriptler step"));
+                    assertTrue(
+                            e.getResponse()
+                                    .getContentAsString()
+                                    .contains(
+                                            "builderId: The builderId must correspond to an existing builder of that project since the user does not have the rights to add/edit Scriptler step"));
                 }
 
                 verifyBuilderNotPresent(wc, project, SCRIPT_USABLE_3);
@@ -271,7 +315,8 @@ public class ScriptlerBuilderTest {
 
             { // add a clone (CLONE_NOTE: see note in class javadoc)
                 assertEquals(1, getNumberOfScriptlerBuilder(project));
-                HtmlPage page = postConfigWithMultipleBuildersLikeWebUI(wc, project, null, builderIdGenerated, SCRIPT_USABLE_2, builderIdGenerated, SCRIPT_USABLE_2);
+                HtmlPage page = postConfigWithMultipleBuildersLikeWebUI(
+                        wc, project, null, builderIdGenerated, SCRIPT_USABLE_2, builderIdGenerated, SCRIPT_USABLE_2);
                 j.assertGoodStatus(page);
 
                 assertEquals(2, getNumberOfScriptlerBuilder(project));
@@ -286,10 +331,15 @@ public class ScriptlerBuilderTest {
         j.jenkins.setCrumbIssuer(null);
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
-                .grant(Jenkins.ADMINISTER).everywhere().to("admin")
-                .grant(Jenkins.RUN_SCRIPTS).everywhere().to("scripter")
-                .grant(Jenkins.READ, Item.READ, Item.CONFIGURE).everywhere().toEveryone()
-        );
+                .grant(Jenkins.ADMINISTER)
+                .everywhere()
+                .to("admin")
+                .grant(Jenkins.RUN_SCRIPTS)
+                .everywhere()
+                .to("scripter")
+                .grant(Jenkins.READ, Item.READ, Item.CONFIGURE)
+                .everywhere()
+                .toEveryone());
 
         checkScriptModification();
         checkScriptCreation();
@@ -298,7 +348,8 @@ public class ScriptlerBuilderTest {
     private void checkScriptModification() throws Exception {
         FreeStyleProject project = j.createFreeStyleProject("test-modification");
         project.setDescription("desc_0");
-        project.getBuildersList().add(new ScriptlerBuilder("random-id", SCRIPT_USABLE_1, false, Collections.emptyList()));
+        project.getBuildersList()
+                .add(new ScriptlerBuilder("random-id", SCRIPT_USABLE_1, false, Collections.emptyList()));
         project.getBuildersList().add(new ScriptlerBuilder("", SCRIPT_USABLE_4, false, Collections.emptyList()));
 
         // only one in this scenario
@@ -391,7 +442,11 @@ public class ScriptlerBuilderTest {
                 fail();
             } catch (FailingHttpStatusCodeException e) {
                 assertEquals(400, e.getStatusCode());
-                assertTrue(e.getResponse().getContentAsString().contains("scriptId: The script is not allowed to be executed in a build, check its configuration!"));
+                assertTrue(
+                        e.getResponse()
+                                .getContentAsString()
+                                .contains(
+                                        "scriptId: The script is not allowed to be executed in a build, check its configuration!"));
             }
 
             verifyNoBuilder(wc, project);
@@ -410,7 +465,11 @@ public class ScriptlerBuilderTest {
                 fail();
             } catch (FailingHttpStatusCodeException e) {
                 assertEquals(400, e.getStatusCode());
-                assertTrue(e.getResponse().getContentAsString().contains("scriptId: The script is not allowed to be executed in a build, check its configuration!"));
+                assertTrue(
+                        e.getResponse()
+                                .getContentAsString()
+                                .contains(
+                                        "scriptId: The script is not allowed to be executed in a build, check its configuration!"));
             }
 
             verifyBuilderNotPresent(wc, project, SCRIPT_NOT_USABLE);
@@ -452,44 +511,52 @@ public class ScriptlerBuilderTest {
     }
 
     private HtmlPage postConfigWithOneBuilderLikeWebUI(
-            JenkinsRule.WebClient wc, final FreeStyleProject project,
+            JenkinsRule.WebClient wc,
+            final FreeStyleProject project,
             @CheckForNull final String newDescription,
-            final String builderId, final String scriptId
-    ) throws Exception {
+            final String builderId,
+            final String scriptId)
+            throws Exception {
         return postConfigWithMultipleBuildersLikeWebUI(wc, project, newDescription, builderId, scriptId);
     }
 
     private HtmlPage postConfigWithMultipleBuildersLikeWebUI(
-            JenkinsRule.WebClient wc, final FreeStyleProject project,
+            JenkinsRule.WebClient wc,
+            final FreeStyleProject project,
             @CheckForNull final String newDescription,
-            final String... builderScriptAlternateId
-    ) throws Exception {
+            final String... builderScriptAlternateId)
+            throws Exception {
         assertTrue(builderScriptAlternateId.length % 2 == 0);
 
         final List<Map<String, Object>> builders = new ArrayList<>();
         for (int i = 0; i < builderScriptAlternateId.length; i += 2) {
             final int fi = i;
-            builders.add(new HashMap<String, Object>() {{
-                put("kind", ScriptlerBuilder.class.getName());
-                put("builderId", builderScriptAlternateId[fi]);
-                put("scriptlerScriptId", builderScriptAlternateId[fi + 1]);
-                put("propagateParams", true);
-            }});
+            builders.add(new HashMap<String, Object>() {
+                {
+                    put("kind", ScriptlerBuilder.class.getName());
+                    put("builderId", builderScriptAlternateId[fi]);
+                    put("scriptlerScriptId", builderScriptAlternateId[fi + 1]);
+                    put("propagateParams", true);
+                }
+            });
         }
 
         final String description = newDescription != null ? newDescription : project.getDescription();
 
-        WebRequest request = new WebRequest(new URL(j.getURL() + project.getShortUrl() + "configSubmit"), HttpMethod.POST);
+        WebRequest request =
+                new WebRequest(new URL(j.getURL() + project.getShortUrl() + "configSubmit"), HttpMethod.POST);
         request.setRequestParameters(Arrays.asList(
                 new NameValuePair("description", description),
-                new NameValuePair("json", JSONObject.fromObject(
-                        new HashMap<String, Object>() {{
-                            put("name", project.getName());
-                            put("description", description);
-                            put("builder", builders);
-                        }}
-                ).toString())
-        ));
+                new NameValuePair(
+                        "json",
+                        JSONObject.fromObject(new HashMap<String, Object>() {
+                                    {
+                                        put("name", project.getName());
+                                        put("description", description);
+                                        put("builder", builders);
+                                    }
+                                })
+                                .toString())));
 
         return wc.getPage(request);
     }
@@ -505,7 +572,8 @@ public class ScriptlerBuilderTest {
         assertFalse(xml.contains("ScriptlerBuilder"));
     }
 
-    private void verifyBuilderPresent(JenkinsRule.WebClient wc, FreeStyleProject project, String scriptId) throws Exception {
+    private void verifyBuilderPresent(JenkinsRule.WebClient wc, FreeStyleProject project, String scriptId)
+            throws Exception {
         _assertBuilderWithScriptId(project, scriptId);
         project = refreshProject(project);
         _assertBuilderWithScriptId(project, scriptId);
@@ -514,7 +582,8 @@ public class ScriptlerBuilderTest {
         assertTrue(xmlVerification.contains(scriptId));
     }
 
-    private void verifyBuilderNotPresent(JenkinsRule.WebClient wc, FreeStyleProject project, String scriptId) throws Exception {
+    private void verifyBuilderNotPresent(JenkinsRule.WebClient wc, FreeStyleProject project, String scriptId)
+            throws Exception {
         _assertNoBuilderWithScriptId(project, scriptId);
         project = refreshProject(project);
         _assertNoBuilderWithScriptId(project, scriptId);
@@ -552,16 +621,19 @@ public class ScriptlerBuilderTest {
         return wc.getPage(request);
     }
 
-    private static final String XML_SINGLE_BUILDER_TEMPLATE = "" +
-            "  <org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder>\n" +
-            "    <builderId>%s</builderId>\n" +
-            "    <scriptId>%s</scriptId>\n" +
-            "  </org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder>";
+    private static final String XML_SINGLE_BUILDER_TEMPLATE =
+            "" + "  <org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder>\n"
+                    + "    <builderId>%s</builderId>\n"
+                    + "    <scriptId>%s</scriptId>\n"
+                    + "  </org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder>";
 
-    private void canChangeScriptUsingConfigXml(JenkinsRule.WebClient wc, FreeStyleProject project, String currentScriptId, String desiredScriptId) throws Exception {
+    private void canChangeScriptUsingConfigXml(
+            JenkinsRule.WebClient wc, FreeStyleProject project, String currentScriptId, String desiredScriptId)
+            throws Exception {
         String xml = retrieveXmlConfigForProject(wc, project);
         assertTrue(xml.contains(currentScriptId));
-        String modifiedXml = xml.replace("<scriptId>" + currentScriptId + "</scriptId>", "<scriptId>" + desiredScriptId + "</scriptId>");
+        String modifiedXml = xml.replace(
+                "<scriptId>" + currentScriptId + "</scriptId>", "<scriptId>" + desiredScriptId + "</scriptId>");
 
         HtmlPage p = postXmlConfigForProject(wc, project, modifiedXml);
         j.assertGoodStatus(p);
@@ -572,10 +644,13 @@ public class ScriptlerBuilderTest {
         }
     }
 
-    private void cannotChangeScriptUsingConfigXml(JenkinsRule.WebClient wc, FreeStyleProject project, String currentScriptId, String desiredScriptId) throws Exception {
+    private void cannotChangeScriptUsingConfigXml(
+            JenkinsRule.WebClient wc, FreeStyleProject project, String currentScriptId, String desiredScriptId)
+            throws Exception {
         String xml = retrieveXmlConfigForProject(wc, project);
         assertTrue(xml.contains(currentScriptId));
-        String modifiedXml = xml.replace("<scriptId>" + currentScriptId + "</scriptId>", "<scriptId>" + desiredScriptId + "</scriptId>");
+        String modifiedXml = xml.replace(
+                "<scriptId>" + currentScriptId + "</scriptId>", "<scriptId>" + desiredScriptId + "</scriptId>");
 
         try {
             postXmlConfigForProject(wc, project, modifiedXml);
@@ -588,22 +663,27 @@ public class ScriptlerBuilderTest {
         verifyBuilderNotPresent(wc, project, desiredScriptId);
     }
 
-    private HtmlPage _addScriptUsingConfigXml(JenkinsRule.WebClient wc, FreeStyleProject project, String builderId, String scriptId) throws Exception {
+    private HtmlPage _addScriptUsingConfigXml(
+            JenkinsRule.WebClient wc, FreeStyleProject project, String builderId, String scriptId) throws Exception {
         String xml = retrieveXmlConfigForProject(wc, project);
         String modifiedXml;
         if (xml.contains("<builders/>")) {
             // no builder, we can replace the whole block
-            modifiedXml = xml.replace("<builders/>", "<builders>" + String.format(XML_SINGLE_BUILDER_TEMPLATE, builderId, scriptId) + "</builders>");
+            modifiedXml = xml.replace(
+                    "<builders/>",
+                    "<builders>" + String.format(XML_SINGLE_BUILDER_TEMPLATE, builderId, scriptId) + "</builders>");
         } else {
             // existing builder, we replace only the closing tag
             assertTrue(xml.contains("</builders>"));
-            modifiedXml = xml.replace("</builders>", String.format(XML_SINGLE_BUILDER_TEMPLATE, builderId, scriptId) + "</builders>");
+            modifiedXml = xml.replace(
+                    "</builders>", String.format(XML_SINGLE_BUILDER_TEMPLATE, builderId, scriptId) + "</builders>");
         }
 
         return postXmlConfigForProject(wc, project, modifiedXml);
     }
 
-    private void canAddScriptUsingConfigXml(JenkinsRule.WebClient wc, FreeStyleProject project, String builderId, String scriptId) throws Exception {
+    private void canAddScriptUsingConfigXml(
+            JenkinsRule.WebClient wc, FreeStyleProject project, String builderId, String scriptId) throws Exception {
         int countBefore = getNumberOfScriptlerBuilder(project);
 
         HtmlPage page = _addScriptUsingConfigXml(wc, project, builderId, scriptId);
@@ -615,7 +695,8 @@ public class ScriptlerBuilderTest {
         assertEquals(countAfter, countBefore + 1);
     }
 
-    private void cannotAddScriptUsingConfigXml(JenkinsRule.WebClient wc, FreeStyleProject project, String builderId, String scriptId) throws Exception {
+    private void cannotAddScriptUsingConfigXml(
+            JenkinsRule.WebClient wc, FreeStyleProject project, String builderId, String scriptId) throws Exception {
         int countBefore = getNumberOfScriptlerBuilder(project);
 
         try {
@@ -639,21 +720,29 @@ public class ScriptlerBuilderTest {
         return j.jenkins.getItemByFullName(project.getFullName(), FreeStyleProject.class);
     }
 
-    private void canChangeDescriptionUsingConfigXml(JenkinsRule.WebClient wc, FreeStyleProject project, String currentDescription, String desiredDescription) throws Exception {
+    private void canChangeDescriptionUsingConfigXml(
+            JenkinsRule.WebClient wc, FreeStyleProject project, String currentDescription, String desiredDescription)
+            throws Exception {
         HtmlPage p = _changeDescriptionUsingConfigXml(wc, project, currentDescription, desiredDescription);
         j.assertGoodStatus(p);
 
         verifyDescriptionChanged(wc, project, currentDescription, desiredDescription);
     }
 
-    private HtmlPage _changeDescriptionUsingConfigXml(JenkinsRule.WebClient wc, FreeStyleProject project, String currentDescription, String desiredDescription) throws Exception {
+    private HtmlPage _changeDescriptionUsingConfigXml(
+            JenkinsRule.WebClient wc, FreeStyleProject project, String currentDescription, String desiredDescription)
+            throws Exception {
         String xml = retrieveXmlConfigForProject(wc, project);
-        String modifiedXml = xml.replace("<description>" + currentDescription + "</description>", "<description>" + desiredDescription + "</description>");
+        String modifiedXml = xml.replace(
+                "<description>" + currentDescription + "</description>",
+                "<description>" + desiredDescription + "</description>");
 
         return postXmlConfigForProject(wc, project, modifiedXml);
     }
 
-    private void verifyDescriptionChanged(JenkinsRule.WebClient wc, FreeStyleProject project, String currentDescription, String desiredDescription) throws Exception {
+    private void verifyDescriptionChanged(
+            JenkinsRule.WebClient wc, FreeStyleProject project, String currentDescription, String desiredDescription)
+            throws Exception {
         assertEquals(project.getDescription(), desiredDescription);
         project = refreshProject(project);
         assertEquals(project.getDescription(), desiredDescription);

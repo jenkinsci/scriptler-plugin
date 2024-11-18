@@ -1,15 +1,13 @@
 package org.jenkinsci.plugins.scriptler.util;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-
-import org.jenkinsci.plugins.scriptler.config.Parameter;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+import org.jenkinsci.plugins.scriptler.config.Parameter;
 
 public class UIHelper {
 

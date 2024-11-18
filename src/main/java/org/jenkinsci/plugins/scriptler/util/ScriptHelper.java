@@ -1,10 +1,11 @@
 package org.jenkinsci.plugins.scriptler.util;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
 import hudson.model.Computer;
 import hudson.util.StreamTaskListener;
-
+import jakarta.servlet.ServletException;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -14,14 +15,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import edu.umd.cs.findbugs.annotations.CheckForNull;;
-import jakarta.servlet.ServletException;
-
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptler.Messages;
@@ -37,16 +33,17 @@ import org.jenkinsci.plugins.scriptsecurity.scripts.UnapprovedUsageException;
 import org.jenkinsci.plugins.scriptsecurity.scripts.languages.GroovyLanguage;
 
 /**
- * 
+ *
  * @author Dominik Bartholdi (imod)
- * 
+ *
  */
 public class ScriptHelper {
 
-    private final static Logger LOGGER = Logger.getLogger(ScriptHelper.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ScriptHelper.class.getName());
 
     private static final Pattern SCRIPT_META_PATTERN = Pattern.compile(".*BEGIN META(.+?)END META.*", Pattern.DOTALL);
     private static final Map<String, Class<?>> JSON_CLASS_MAPPING = new HashMap<>();
+
     static {
         JSON_CLASS_MAPPING.put("authors", Author.class);
         JSON_CLASS_MAPPING.put("parameters", Parameter.class);
@@ -63,7 +60,7 @@ public class ScriptHelper {
 
     /**
      * Loads the script information.
-     * 
+     *
      * @param id
      *            the id of the script
      * @param withSrc
@@ -85,25 +82,29 @@ public class ScriptHelper {
         }
         return s;
     }
-    
+
     /**
      * @since TODO
      */
-    public static void putScriptInApprovalQueueIfRequired(String scriptSourceCode){
+    public static void putScriptInApprovalQueueIfRequired(String scriptSourceCode) {
         // we cannot use sandbox since the script is potentially sent to slaves
         // and the sandbox mode is not meant to be used with remoting
-        ScriptApproval.get().configuring(scriptSourceCode, GroovyLanguage.get(), ApprovalContext.create().withCurrentUser());
+        ScriptApproval.get()
+                .configuring(
+                        scriptSourceCode,
+                        GroovyLanguage.get(),
+                        ApprovalContext.create().withCurrentUser());
     }
-    
+
     /**
      * @param scriptSourceCode Source code that must be approved
      * @return true if the script was approved or created by a user with RUN_SCRIPT permission
      * @since TODO
      */
-    public static boolean isApproved(String scriptSourceCode){
+    public static boolean isApproved(String scriptSourceCode) {
         return isApproved(scriptSourceCode, true);
     }
-    
+
     /**
      * @param scriptSourceCode Source code that must be approved
      * @param putInApprovalQueueIfNotApprovedYet true means we try to know if the user has permission
@@ -111,21 +112,19 @@ public class ScriptHelper {
      * @return true if the script is approved
      * @since TODO
      */
-    public static boolean isApproved(String scriptSourceCode, boolean putInApprovalQueueIfNotApprovedYet){
-        try{
+    public static boolean isApproved(String scriptSourceCode, boolean putInApprovalQueueIfNotApprovedYet) {
+        try {
             ScriptApproval.get().using(scriptSourceCode, GroovyLanguage.get());
             return true;
-        }
-        catch(UnapprovedUsageException e){
-            if(putInApprovalQueueIfNotApprovedYet){
+        } catch (UnapprovedUsageException e) {
+            if (putInApprovalQueueIfNotApprovedYet) {
                 // in case there is some ways that are not covered
                 putScriptInApprovalQueueIfRequired(scriptSourceCode);
-                try{
+                try {
                     ScriptApproval.get().using(scriptSourceCode, GroovyLanguage.get());
                     // user has permission to approve the script
                     return true;
-                }
-                catch(UnapprovedUsageException e2){
+                } catch (UnapprovedUsageException e2) {
                     // user does not have the permission to approve the script
                 }
             }
@@ -133,7 +132,8 @@ public class ScriptHelper {
         }
     }
 
-    public static String runScript(String[] slaves, String scriptTxt, @NonNull Collection<Parameter> parameters) throws IOException, ServletException {
+    public static String runScript(String[] slaves, String scriptTxt, @NonNull Collection<Parameter> parameters)
+            throws IOException, ServletException {
         StringBuffer output = new StringBuffer();
         for (String slave : slaves) {
             LOGGER.log(Level.FINE, "here is the node -> " + slave);
@@ -147,7 +147,7 @@ public class ScriptHelper {
 
     /**
      * Runs the execution on a given slave.
-     * 
+     *
      * @param node
      *            where to run the script.
      * @param scriptTxt
@@ -156,7 +156,8 @@ public class ScriptHelper {
      * @throws IOException
      * @throws ServletException
      */
-    public static String runScript(String node, String scriptTxt, @NonNull Collection<Parameter> parameters) throws IOException, ServletException {
+    public static String runScript(String node, String scriptTxt, @NonNull Collection<Parameter> parameters)
+            throws IOException, ServletException {
 
         Object output = "[no output]";
         ByteArrayOutputStream sos = new ByteArrayOutputStream();
@@ -165,16 +166,20 @@ public class ScriptHelper {
             try {
                 Computer comp = Jenkins.get().getComputer(node);
                 if (comp == null && "(master)".equals(node)) {
-                    output = FilePath.localChannel.call(new GroovyScript(scriptTxt, parameters, false, new StreamTaskListener(sos, StandardCharsets.UTF_8)));
+                    output = FilePath.localChannel.call(new GroovyScript(
+                            scriptTxt, parameters, false, new StreamTaskListener(sos, StandardCharsets.UTF_8)));
                 } else if (comp == null) {
                     output = Messages.node_not_found(node) + "\n";
                 } else {
                     if (comp.getChannel() == null) {
                         output = Messages.node_not_online(node) + "\n";
-                    }
-
-                    else {
-                        output = comp.getChannel().call(new GroovyScript(scriptTxt, parameters, false, new StreamTaskListener(sos, StandardCharsets.UTF_8)));
+                    } else {
+                        output = comp.getChannel()
+                                .call(new GroovyScript(
+                                        scriptTxt,
+                                        parameters,
+                                        false,
+                                        new StreamTaskListener(sos, StandardCharsets.UTF_8)));
                     }
                 }
 
@@ -187,7 +192,7 @@ public class ScriptHelper {
 
     /**
      * Returns the meta info of a script body, the meta info has to follow the convention at https://github.com/jenkinsci/jenkins-scripts/tree/master/scriptler
-     * 
+     *
      * @param fullScriptBody
      *            the script to extract the meta info from
      * @return <code>null</code> if no meta info found

@@ -3,7 +3,6 @@ package org.jenkinsci.plugins.scriptler.share;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-
 import org.jenkinsci.plugins.scriptler.config.NamedResource;
 
 public class ScriptInfo implements NamedResource {
@@ -106,8 +105,7 @@ public class ScriptInfo implements NamedResource {
     public static class Author {
         private String name;
 
-        public Author() {
-        }
+        public Author() {}
 
         public Author(String name) {
             this.name = name;
@@ -125,8 +123,7 @@ public class ScriptInfo implements NamedResource {
     public static class Parameter {
         private String name;
 
-        public Parameter() {
-        }
+        public Parameter() {}
 
         public Parameter(String name) {
             this.name = name;

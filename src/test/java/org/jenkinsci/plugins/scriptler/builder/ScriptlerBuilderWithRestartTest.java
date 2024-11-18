@@ -23,17 +23,28 @@
  */
 package org.jenkinsci.plugins.scriptler.builder;
 
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+
+import hudson.ExtensionList;
+import hudson.model.FileParameterValue;
+import hudson.model.FreeStyleProject;
+import java.io.File;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import net.sf.json.JSONObject;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.io.FileUtils;
 import org.htmlunit.HttpMethod;
 import org.htmlunit.WebRequest;
 import org.htmlunit.html.HtmlPage;
 import org.htmlunit.util.NameValuePair;
 import org.htmlunit.xml.XmlPage;
-import hudson.ExtensionList;
-import hudson.model.FileParameterValue;
-import hudson.model.FreeStyleProject;
-import net.sf.json.JSONObject;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.io.FileUtils;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagementHelper;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
@@ -42,18 +53,6 @@ import org.junit.Test;
 import org.junit.runners.model.Statement;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.RestartableJenkinsRule;
-
-import java.io.File;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertThat;
 
 /**
  * Warning: a user without RUN_SCRIPT can currently only clone an existing builder INSIDE a project.
@@ -73,7 +72,8 @@ public class ScriptlerBuilderWithRestartTest {
     @Test
     public void configRoundtrip() {
         r.addStep(new Statement() {
-            @Override public void evaluate() throws Throwable {
+            @Override
+            public void evaluate() throws Throwable {
                 r.j.jenkins.setCrumbIssuer(null);
 
                 ScriptlerManagement scriptler = ExtensionList.lookupSingleton(ScriptlerManagement.class);
@@ -89,32 +89,45 @@ public class ScriptlerBuilderWithRestartTest {
 
                 JenkinsRule.WebClient wc = r.j.createWebClient();
 
-                WebRequest request = new WebRequest(new URL(r.j.getURL() + project.getShortUrl() + "configSubmit"), HttpMethod.POST);
+                WebRequest request =
+                        new WebRequest(new URL(r.j.getURL() + project.getShortUrl() + "configSubmit"), HttpMethod.POST);
 
                 final String projectName = project.getName();
-                request.setRequestParameters(Arrays.asList(new NameValuePair("json", JSONObject.fromObject(
-                        new HashMap<String, Object>() {{
-                            put("name", projectName);
-                            put("builder", new HashMap<String, Object>() {{
-                                put("kind", ScriptlerBuilder.class.getName());
-                                put("builderId", "");
-                                put("scriptlerScriptId", SCRIPT_USABLE_1);
-                                put("propagateParams", true);
-                                put("defineParams", new HashMap<String, List<Map<String, String>>>() {{
-                                    put("parameters", Arrays.asList(
-                                            new HashMap<String, String>() {{
-                                                put("name", "param1");
-                                                put("value", "value1");
-                                            }},
-                                            new HashMap<String, String>() {{
-                                                put("name", "param2");
-                                                put("value", "value2");
-                                            }}
-                                    ));
-                                }});
-                            }});
-                        }}
-                ).toString())));
+                request.setRequestParameters(Arrays.asList(new NameValuePair(
+                        "json",
+                        JSONObject.fromObject(new HashMap<String, Object>() {
+                                    {
+                                        put("name", projectName);
+                                        put("builder", new HashMap<String, Object>() {
+                                            {
+                                                put("kind", ScriptlerBuilder.class.getName());
+                                                put("builderId", "");
+                                                put("scriptlerScriptId", SCRIPT_USABLE_1);
+                                                put("propagateParams", true);
+                                                put("defineParams", new HashMap<String, List<Map<String, String>>>() {
+                                                    {
+                                                        put(
+                                                                "parameters",
+                                                                Arrays.asList(
+                                                                        new HashMap<String, String>() {
+                                                                            {
+                                                                                put("name", "param1");
+                                                                                put("value", "value1");
+                                                                            }
+                                                                        },
+                                                                        new HashMap<String, String>() {
+                                                                            {
+                                                                                put("name", "param2");
+                                                                                put("value", "value2");
+                                                                            }
+                                                                        }));
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                })
+                                .toString())));
                 HtmlPage page = wc.getPage(request);
                 r.j.assertGoodStatus(page);
 
@@ -124,12 +137,15 @@ public class ScriptlerBuilderWithRestartTest {
                 assertEquals(SCRIPT_USABLE_1, scriptlerBuilder.getScriptId());
                 assertEquals(true, scriptlerBuilder.isPropagateParams());
                 assertThat(scriptlerBuilder.getParametersList(), hasSize(2));
-                assertThat(scriptlerBuilder.getParametersList(), hasItems(new Parameter("param1", "value1"), new Parameter("param2", "value2")));
+                assertThat(
+                        scriptlerBuilder.getParametersList(),
+                        hasItems(new Parameter("param1", "value1"), new Parameter("param2", "value2")));
             }
         });
 
         r.addStep(new Statement() {
-            @Override public void evaluate() throws Throwable {
+            @Override
+            public void evaluate() throws Throwable {
                 FreeStyleProject p = r.j.jenkins.getItemByFullName("test", FreeStyleProject.class);
 
                 ScriptlerBuilder scriptlerBuilder = p.getBuildersList().get(ScriptlerBuilder.class);
@@ -138,12 +154,15 @@ public class ScriptlerBuilderWithRestartTest {
                 assertEquals(SCRIPT_USABLE_1, scriptlerBuilder.getScriptId());
                 assertEquals(true, scriptlerBuilder.isPropagateParams());
                 assertThat(scriptlerBuilder.getParametersList(), hasSize(2));
-                assertThat(scriptlerBuilder.getParametersList(), hasItems(new Parameter("param1", "value1"), new Parameter("param2", "value2")));
+                assertThat(
+                        scriptlerBuilder.getParametersList(),
+                        hasItems(new Parameter("param1", "value1"), new Parameter("param2", "value2")));
             }
         });
     }
 
-    private void setupScript(ScriptlerManagementHelper helper, String scriptId, boolean nonAdministerUsing) throws Exception {
+    private void setupScript(ScriptlerManagementHelper helper, String scriptId, boolean nonAdministerUsing)
+            throws Exception {
         File f = new File(scriptId);
         FileUtils.writeStringToFile(f, "print 'Hello World!'");
         FileItem fi = new FileParameterValue.FileItemImpl(f);
@@ -154,7 +173,8 @@ public class ScriptlerBuilderWithRestartTest {
     @Test
     public void configRoundtripConfigXml() {
         r.addStep(new Statement() {
-            @Override public void evaluate() throws Throwable {
+            @Override
+            public void evaluate() throws Throwable {
                 r.j.jenkins.setCrumbIssuer(null);
 
                 ScriptlerManagement scriptler = ExtensionList.lookupSingleton(ScriptlerManagement.class);
@@ -174,25 +194,25 @@ public class ScriptlerBuilderWithRestartTest {
                 r.j.assertGoodStatus(xmlPage);
                 String xml = xmlPage.getWebResponse().getContentAsString();
 
-                String modifiedXml = xml.replace("<builders/>", "" +
-                        "<builders>\n" +
-                        "  <org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder>\n" +
-                        "    <builderId></builderId>\n" +
-                        "    <scriptId>" + SCRIPT_USABLE_1 + "</scriptId>\n" +
-                        "    <propagateParams>true</propagateParams>\n" +
-                        "    <parameters>\n" +
-                        "      <org.jenkinsci.plugins.scriptler.config.Parameter>\n" +
-                        "        <name>param1</name>\n" +
-                        "        <value>value1</value>\n" +
-                        "      </org.jenkinsci.plugins.scriptler.config.Parameter>\n" +
-                        "      <org.jenkinsci.plugins.scriptler.config.Parameter>\n" +
-                        "        <name>param2</name>\n" +
-                        "        <value>value2</value>\n" +
-                        "      </org.jenkinsci.plugins.scriptler.config.Parameter>\n" +
-                        "    </parameters>\n" +
-                        "  </org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder>\n" +
-                        "</builders>"
-                );
+                String modifiedXml = xml.replace(
+                        "<builders/>",
+                        "" + "<builders>\n"
+                                + "  <org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder>\n"
+                                + "    <builderId></builderId>\n"
+                                + "    <scriptId>"
+                                + SCRIPT_USABLE_1 + "</scriptId>\n" + "    <propagateParams>true</propagateParams>\n"
+                                + "    <parameters>\n"
+                                + "      <org.jenkinsci.plugins.scriptler.config.Parameter>\n"
+                                + "        <name>param1</name>\n"
+                                + "        <value>value1</value>\n"
+                                + "      </org.jenkinsci.plugins.scriptler.config.Parameter>\n"
+                                + "      <org.jenkinsci.plugins.scriptler.config.Parameter>\n"
+                                + "        <name>param2</name>\n"
+                                + "        <value>value2</value>\n"
+                                + "      </org.jenkinsci.plugins.scriptler.config.Parameter>\n"
+                                + "    </parameters>\n"
+                                + "  </org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder>\n"
+                                + "</builders>");
 
                 WebRequest request = new WebRequest(new URL(project.getAbsoluteUrl() + "config.xml"), HttpMethod.POST);
                 request.setRequestBody(modifiedXml);
@@ -207,12 +227,15 @@ public class ScriptlerBuilderWithRestartTest {
                 assertEquals(SCRIPT_USABLE_1, scriptlerBuilder.getScriptId());
                 assertEquals(true, scriptlerBuilder.isPropagateParams());
                 assertThat(scriptlerBuilder.getParametersList(), hasSize(2));
-                assertThat(scriptlerBuilder.getParametersList(), hasItems(new Parameter("param1", "value1"), new Parameter("param2", "value2")));
+                assertThat(
+                        scriptlerBuilder.getParametersList(),
+                        hasItems(new Parameter("param1", "value1"), new Parameter("param2", "value2")));
             }
         });
 
         r.addStep(new Statement() {
-            @Override public void evaluate() throws Throwable {
+            @Override
+            public void evaluate() throws Throwable {
                 FreeStyleProject p = r.j.jenkins.getItemByFullName("test", FreeStyleProject.class);
 
                 ScriptlerBuilder scriptlerBuilder = p.getBuildersList().get(ScriptlerBuilder.class);
@@ -221,7 +244,9 @@ public class ScriptlerBuilderWithRestartTest {
                 assertEquals(SCRIPT_USABLE_1, scriptlerBuilder.getScriptId());
                 assertEquals(true, scriptlerBuilder.isPropagateParams());
                 assertThat(scriptlerBuilder.getParametersList(), hasSize(2));
-                assertThat(scriptlerBuilder.getParametersList(), hasItems(new Parameter("param1", "value1"), new Parameter("param2", "value2")));
+                assertThat(
+                        scriptlerBuilder.getParametersList(),
+                        hasItems(new Parameter("param1", "value1"), new Parameter("param2", "value2")));
             }
         });
     }

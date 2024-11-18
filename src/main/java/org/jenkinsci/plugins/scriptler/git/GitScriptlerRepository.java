@@ -1,12 +1,12 @@
 /**
- * 
+ *
  */
 package org.jenkinsci.plugins.scriptler.git;
 
 import hudson.Extension;
 import hudson.ExtensionList;
 import hudson.model.RootAction;
-
+import jakarta.inject.Inject;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -16,11 +16,7 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import jakarta.inject.Inject;
-
 import jenkins.model.Jenkins;
-
 import org.eclipse.jgit.api.AddCommand;
 import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
@@ -40,13 +36,13 @@ import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
 
 /**
  * Exposes Git repository at http://server/jenkins/scriptler.git
- * 
+ *
  * @author Dominik Bartholdi (imod)
- * 
+ *
  */
 @Extension
 public class GitScriptlerRepository extends FileBackedHttpGitRepository implements RootAction {
-    private final static Logger LOGGER = Logger.getLogger(GitScriptlerRepository.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GitScriptlerRepository.class.getName());
 
     @Inject
     public SSHD sshd;
@@ -103,14 +99,15 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
     @Override
     protected void updateWorkspace(Repository repo) throws IOException, GitAPIException {
         super.updateWorkspace(repo);
-        final ScriptlerConfiguration cfg = ExtensionList.lookupSingleton(ScriptlerManagement.class).getConfiguration();
+        final ScriptlerConfiguration cfg =
+                ExtensionList.lookupSingleton(ScriptlerManagement.class).getConfiguration();
         SyncUtil.syncDirWithCfg(ScriptlerManagement.getScriptDirectory(), cfg);
         cfg.save();
     }
 
     /**
      * adds and commits a single file to this git repo
-     * 
+     *
      * @param fileName
      *            must be relative to repo root dir
      */
@@ -132,7 +129,7 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
 
     /**
      * adds and commits a single file to this git repo
-     * 
+     *
      * @param fileName
      *            must be relative to repo root dir
      */
@@ -157,7 +154,12 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
         final Git git = new Git(repo);
         if (repo.getRepositoryState().canResetHead()) {
             try {
-                return git.reset().setMode(ResetType.HARD).setRef("master").call().getObjectId().name();
+                return git.reset()
+                        .setMode(ResetType.HARD)
+                        .setRef("master")
+                        .call()
+                        .getObjectId()
+                        .name();
             } catch (CheckoutConflictException e) {
                 throw new IOException("not able to perform a hard reset", e);
             } catch (GitAPIException e) {
@@ -172,7 +174,12 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
         try {
             // TODO find a way to limit the number of log entries - e.g. ..log().addRange(...).call()
             for (RevCommit c : new Git(this.openRepository()).log().call()) {
-                msgs.add(new LogInfo(c.getName(), c.getAuthorIdent().getName(), c.getCommitterIdent().getName(), new Date(c.getCommitTime() * 1000L), c.getFullMessage()));
+                msgs.add(new LogInfo(
+                        c.getName(),
+                        c.getAuthorIdent().getName(),
+                        c.getCommitterIdent().getName(),
+                        new Date(c.getCommitTime() * 1000L),
+                        c.getFullMessage()));
             }
         } catch (NoHeadException e) {
             throw new IOException("not able to retrieve git log", e);

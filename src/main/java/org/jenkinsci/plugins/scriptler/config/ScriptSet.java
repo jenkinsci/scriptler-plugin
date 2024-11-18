@@ -27,12 +27,11 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Logger;
-
 import org.apache.commons.lang.StringUtils;
 
 /**
  * @author imod
- * 
+ *
  */
 public class ScriptSet {
     private static final Logger LOGGER = Logger.getLogger(ScriptSet.class.getName());
@@ -70,10 +69,22 @@ public class ScriptSet {
     private Script merge(Script origin, Script newScript) {
         String name = StringUtils.isEmpty(newScript.name) ? origin.name : newScript.name;
         String comment = StringUtils.isEmpty(newScript.comment) ? origin.comment : newScript.comment;
-        String originCatalog = StringUtils.isEmpty(newScript.originCatalog) ? origin.originCatalog : newScript.originCatalog;
-        String originScript = StringUtils.isEmpty(newScript.originScript) ? origin.originScript : newScript.originScript;
+        String originCatalog =
+                StringUtils.isEmpty(newScript.originCatalog) ? origin.originCatalog : newScript.originCatalog;
+        String originScript =
+                StringUtils.isEmpty(newScript.originScript) ? origin.originScript : newScript.originScript;
         String originDate = StringUtils.isEmpty(newScript.originDate) ? origin.originDate : newScript.originDate;
-        return new Script(newScript.getId(), name, comment, newScript.available, originCatalog, originScript, originDate, newScript.nonAdministerUsing, newScript.getParameters(), newScript.onlyMaster);
+        return new Script(
+                newScript.getId(),
+                name,
+                comment,
+                newScript.available,
+                originCatalog,
+                originScript,
+                originDate,
+                newScript.nonAdministerUsing,
+                newScript.getParameters(),
+                newScript.onlyMaster);
     }
 
     public final Set<Script> getScripts() {
@@ -94,5 +105,4 @@ public class ScriptSet {
         scriptSet.clear();
         scriptSet.addAll(scripts);
     }
-
 }
