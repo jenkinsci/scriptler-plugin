@@ -4,8 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
-import org.apache.commons.io.FileUtils;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfo;
 import org.junit.Test;
@@ -14,7 +15,8 @@ public class ScriptHelperTest {
 
     @Test
     public void testGetJson() throws Exception {
-        final String content = FileUtils.readFileToString(new File("src/test/resources/parsing_test.groovy"));
+        final String content =
+                Files.readString(Paths.get("src/test/resources/parsing_test.groovy"), StandardCharsets.UTF_8);
         assertTrue("no content from file", StringUtils.isNotBlank(content));
 
         final ScriptInfo info = ScriptHelper.extractScriptInfo(content);

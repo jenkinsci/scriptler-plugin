@@ -33,15 +33,17 @@ import hudson.model.FileParameterValue;
 import hudson.model.FreeStyleProject;
 import hudson.model.Item;
 import hudson.model.Project;
-import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.io.FileUtils;
 import org.htmlunit.FailingHttpStatusCodeException;
 import org.htmlunit.HttpMethod;
 import org.htmlunit.WebRequest;
@@ -89,11 +91,11 @@ public class ScriptlerBuilderTest {
 
     private void setupScript(ScriptlerManagementHelper helper, String scriptId, boolean nonAdministerUsing)
             throws Exception {
-        File f = new File(scriptId);
-        FileUtils.writeStringToFile(f, "print 'Hello World!'");
-        FileItem fi = new FileParameterValue.FileItemImpl(f);
+        Path f = Paths.get(scriptId);
+        Files.writeString(f, "print 'Hello World!'", StandardCharsets.UTF_8);
+        FileItem fi = new FileParameterValue.FileItemImpl(f.toFile());
         helper.saveScript(fi, nonAdministerUsing, scriptId);
-        f.delete();
+        Files.delete(f);
     }
 
     @Test

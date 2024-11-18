@@ -78,7 +78,7 @@ public class ScriptSet {
                 newScript.getId(),
                 name,
                 comment,
-                newScript.available,
+                newScript.isAvailable(),
                 originCatalog,
                 originScript,
                 originDate,

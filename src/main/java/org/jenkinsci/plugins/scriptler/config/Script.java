@@ -23,6 +23,7 @@
  */
 package org.jenkinsci.plugins.scriptler.config;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.*;
 
@@ -38,12 +39,12 @@ public class Script implements Comparable<Script>, NamedResource {
     @NonNull
     private final List<Parameter> parameters;
 
-    public boolean available = true;
+    private boolean available;
 
     /**
      * script is only transient, because it will not be saved in the xml but on the file system. Therefore it has to be materialized before usage!
      */
-    public transient String script;
+    private transient String script;
 
     // User with Scriptler/RUN_SCRIPT permission can add/edit Scriptler step in projects
     public final boolean nonAdministerUsing;
@@ -167,8 +168,17 @@ public class Script implements Comparable<Script>, NamedResource {
         return id;
     }
 
+    public boolean isAvailable() {
+        return available;
+    }
+
     public void setAvailable(boolean available) {
         this.available = available;
+    }
+
+    @CheckForNull
+    public String getScript() {
+        return script;
     }
 
     public void setScript(String script) {

@@ -36,6 +36,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
@@ -296,9 +300,10 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         final String finalFileName = fixFileName(originCatalogName, id);
 
         // save (overwrite) the file/script
-        File newScriptFile = new File(getScriptDirectory(), finalFileName);
+        Path scriptDirectory = getScriptDirectory2();
+        Path newScriptFile = scriptDirectory.resolve(finalFileName);
 
-        if (!Util.isDescendant(getScriptDirectory(), newScriptFile)) {
+        if (!Util.isDescendant(scriptDirectory.toFile(), newScriptFile.toFile())) {
             LOGGER.log(
                     Level.WARNING,
                     "Folder traversal detected, file path received: {0}, after fixing: {1}",
@@ -376,17 +381,21 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         checkPermission(ScriptlerPermissions.CONFIGURE);
 
         // remove the file
-        File scriptDirectory = getScriptDirectory();
-        File oldScript = new File(scriptDirectory, id);
-        if (!Util.isDescendant(scriptDirectory, oldScript)) {
+        Path scriptDirectory = getScriptDirectory2();
+        Path oldScript = scriptDirectory.resolve(id);
+        if (!Util.isDescendant(scriptDirectory.toFile(), oldScript.toFile())) {
             LOGGER.log(
                     Level.WARNING,
                     "Folder traversal detected, file path received: {0}, after fixing: {1}",
                     new Object[] {id, oldScript});
             throw new Failure("Invalid file path received: " + id);
         }
-        if (!oldScript.delete() && oldScript.exists()) {
-            throw new Failure("not able to delete " + oldScript.getAbsolutePath());
+        try {
+            Files.delete(oldScript);
+        } catch (IOException e) {
+            Failure failure = new Failure("not able to delete " + oldScript);
+            failure.initCause(e);
+            throw failure;
         }
 
         try {
@@ -441,7 +450,12 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         // upload can only be to/from local catalog
         String fixedFileName = fixFileName(null, fileName);
 
-        File fixedFile = new File(fixedFileName);
+        Path fixedFile;
+        try {
+            fixedFile = Paths.get(fixedFileName);
+        } catch (InvalidPathException e) {
+            throw new IOException("Invalid file path received: " + fileName, e);
+        }
 
         if (fixedFile.isAbsolute()) {
             LOGGER.log(
@@ -451,10 +465,10 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             throw new IOException("Invalid file path received: " + fileName);
         }
 
-        File rootDir = getScriptDirectory();
-        final File f = new File(rootDir, fixedFileName);
+        Path rootDir = getScriptDirectory2();
+        final Path f = rootDir.resolve(fixedFileName);
 
-        if (!Util.isDescendant(rootDir, new File(rootDir, fixedFileName))) {
+        if (!Util.isDescendant(rootDir.toFile(), f.toFile())) {
             LOGGER.log(
                     Level.WARNING,
                     "Folder traversal detected, file path received: {0}, after fixing: {1}. Seems to be an attempt to use folder escape.",
@@ -462,7 +476,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             throw new IOException("Invalid file path received: " + fileName);
         }
 
-        fileItem.write(f);
+        fileItem.write(f.toFile());
 
         commitFileToGitRepo(fixedFileName);
 
@@ -499,13 +513,13 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             // TODO check if we cannot do better here
             throw new IOException(Messages.scriptNotFound(id));
         }
-        if (script.script == null) {
+        if (script.getScript() == null) {
             req.setAttribute("scriptNotFound", true);
         } else {
             boolean canByPassScriptApproval = Jenkins.get().hasPermission(Jenkins.RUN_SCRIPTS);
 
             // we do not want user with approval right to auto-approve script when landing on that page
-            if (!ScriptHelper.isApproved(script.script, false)) {
+            if (!ScriptHelper.isApproved(script.getScript(), false)) {
                 req.setAttribute("notApprovedYet", true);
             }
 
@@ -557,7 +571,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             return;
         }
 
-        String originalScriptSourceCode = originalScript.script;
+        String originalScriptSourceCode = originalScript.getScript();
 
         Script tempScript = originalScript.copy();
         if (originalScriptSourceCode != null && originalScriptSourceCode.equals(scriptSrc)) {
@@ -633,7 +647,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
         if (script == null) {
             // use original script
-            script = tempScript.script;
+            script = tempScript.getScript();
         }
 
         if (!ScriptHelper.isApproved(script)) {
@@ -738,13 +752,13 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         checkPermission(ScriptlerPermissions.CONFIGURE);
 
         Script script = ScriptHelper.getScript(id, true);
-        if (script == null || script.script == null) {
+        if (script == null || script.getScript() == null) {
             req.setAttribute("scriptNotFound", true);
         } else {
             boolean canByPassScriptApproval = Jenkins.get().hasPermission(Jenkins.RUN_SCRIPTS);
 
             // we do not want user with approval right to auto-approve script when landing on that page
-            if (!ScriptHelper.isApproved(script.script, false)) {
+            if (!ScriptHelper.isApproved(script.getScript(), false)) {
                 req.setAttribute("notApprovedYet", true);
             }
 
@@ -826,16 +840,32 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     }
 
     /**
-     * returns the directory where the script files get stored
-     *
-     * @return the script directory
+     * @deprecated Use {@link #getScriptDirectory2()} instead.
      */
+    @Deprecated(since = "380")
     public static File getScriptDirectory() {
         return new File(getScriptlerHomeDirectory(), "scripts");
     }
 
+    /**
+     * returns the directory where the script files get stored
+     *
+     * @return the script directory
+     */
+    public static Path getScriptDirectory2() {
+        return getScriptlerHomeDirectory2().resolve("scripts");
+    }
+
+    /**
+     * @deprecated Use {@link #getScriptlerHomeDirectory2()} instead.
+     */
+    @Deprecated(since = "380")
     public static File getScriptlerHomeDirectory() {
-        return new File(Jenkins.get().getRootDir(), "scriptler");
+        return getScriptlerHomeDirectory2().toFile();
+    }
+
+    public static Path getScriptlerHomeDirectory2() {
+        return Jenkins.get().getRootDir().toPath().resolve("scriptler");
     }
 
     private void checkPermission(Permission permission) {

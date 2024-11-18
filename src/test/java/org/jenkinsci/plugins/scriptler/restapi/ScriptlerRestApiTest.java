@@ -6,11 +6,11 @@ import static org.junit.Assert.fail;
 import hudson.ExtensionList;
 import hudson.Functions;
 import hudson.model.FileParameterValue.FileItemImpl;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -70,17 +70,14 @@ public class ScriptlerRestApiTest {
         // will be just aside scriptler.xml
         assertSaveFileFail(helper, "../clickOnMe", maliciousCode);
 
-        if (Functions.isWindows()) {
-            // will be used as relative inside the folder
-            saveFile(helper, "/directlyInDiskRoot", maliciousCode);
+        assertSaveFileFail(helper, "/directlyInDiskRoot", maliciousCode);
 
+        if (Functions.isWindows()) {
             assertSaveFileFail(helper, "//directlyInDiskRoot", maliciousCode);
 
             // C:\ + ...
-            String rootLetter = new File(".").getAbsolutePath().substring(0, 3);
+            String rootLetter = Paths.get(".").toRealPath().getRoot().toString();
             assertSaveFileFail(helper, rootLetter + "directlyInDiskRoot", maliciousCode);
-        } else {
-            assertSaveFileFail(helper, "/directlyInDiskRoot", maliciousCode);
         }
     }
 
@@ -132,8 +129,8 @@ public class ScriptlerRestApiTest {
     @Test
     @Issue("SECURITY-3205")
     public void fixFolderTraversalThroughDeleteScript() throws Exception {
-        File configurationFile = ScriptlerConfiguration.getXmlFile().getFile();
-        String path = "../" + configurationFile.getName();
+        Path configurationFile = ScriptlerConfiguration.getXmlFile().getFile().toPath();
+        String path = "../" + configurationFile.getFileName();
 
         try (JenkinsRule.WebClient webClient = j.createWebClient()) {
             URL rootUrl = new URL(webClient.getContextPath() + "scriptler/removeScript");
@@ -147,7 +144,7 @@ public class ScriptlerRestApiTest {
                 // some other kind of error that we're not checking for
                 throw e;
             }
-            if (!configurationFile.exists()) {
+            if (!Files.exists(configurationFile)) {
                 fail("The configuration file was deleted");
             }
             assert (e.getResponse().getContentAsString().contains("Invalid file path received: " + path));
