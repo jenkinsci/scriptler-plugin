@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" ?>
 
 	<!--
 		The MIT License Copyright (c) 2010, Dominik Bartholdi Permission is
@@ -46,7 +47,7 @@
 					<f:checkbox name="nonAdministerUsing" />
 				</f:entry>
                 <f:entry title="${%Restriction}" description="${%RestrictionDescription}">
-                    <f:checkbox name="onlyMaster" checked="${script.onlyMaster}" />
+                    <f:checkbox name="onlyController" checked="${script.onlyController}" />
 		</f:entry>
 				<f:entry title="${%Script}">
 					<textarea id="script" name="script" class="${h.isUnitTest ? '' : 'script'}"/>

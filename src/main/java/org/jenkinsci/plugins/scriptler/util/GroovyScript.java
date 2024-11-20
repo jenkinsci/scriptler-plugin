@@ -7,6 +7,7 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import java.io.PrintStream;
+import java.io.Serial;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import jenkins.model.Jenkins;
@@ -22,7 +23,9 @@ import org.jenkinsci.remoting.RoleChecker;
  * Inspired by hudson.util.RemotingDiagnostics.Script, but adding parameters.
  */
 public class GroovyScript extends MasterToSlaveCallable<Object, RuntimeException> {
+    @Serial
     private static final long serialVersionUID = 1L;
+
     private final String script;
 
     @NonNull
@@ -35,7 +38,7 @@ public class GroovyScript extends MasterToSlaveCallable<Object, RuntimeException
     private transient ClassLoader cl;
 
     @SuppressWarnings("unchecked")
-    private static Map<String, ConcurrentLinkedQueue<Script>> cache = Collections.synchronizedMap(new LRUMap(10));
+    private static final Map<String, ConcurrentLinkedQueue<Script>> cache = Collections.synchronizedMap(new LRUMap(10));
 
     private static final Set<String> DEFAULT_VARIABLES = new HashSet<>();
 
@@ -47,7 +50,7 @@ public class GroovyScript extends MasterToSlaveCallable<Object, RuntimeException
     }
 
     /**
-     * This constructor can only be used when the script is executed on the master, because launcher and build can not be transered to a slave and the therefore the execution will fail
+     * This constructor can only be used when the script is executed on the controller, because launcher and build can not be transferred to an agent and the execution will fail
      * @param script the script to be executed
      * @param parameters the parameters to be passed to the script
      * @param failWithException should the job fail with an exception
@@ -101,7 +104,7 @@ public class GroovyScript extends MasterToSlaveCallable<Object, RuntimeException
         for (Parameter param : parameters) {
             final String paramName = param.getName();
             if (DEFAULT_VARIABLES.contains(paramName)) {
-                logger.println(Messages.skipParamter(paramName));
+                logger.println(Messages.skipParameter(paramName));
             } else {
                 shell.setVariable(paramName, param.getValue());
             }
@@ -159,6 +162,7 @@ public class GroovyScript extends MasterToSlaveCallable<Object, RuntimeException
     }
 
     private static final class ScriptlerExecutionException extends RuntimeException {
+        @Serial
         private static final long serialVersionUID = 1L;
 
         public ScriptlerExecutionException(Throwable cause) {

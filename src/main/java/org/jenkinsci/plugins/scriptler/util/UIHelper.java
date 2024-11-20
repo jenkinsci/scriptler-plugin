@@ -1,15 +1,15 @@
 package org.jenkinsci.plugins.scriptler.util;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 
-public class UIHelper {
+public final class UIHelper {
+
+    private UIHelper() {}
 
     /**
      * Extracts the parameters from the given request
@@ -20,29 +20,28 @@ public class UIHelper {
      */
     @NonNull
     public static List<Parameter> extractParameters(JSONObject json) {
-        List<Parameter> parameters = Collections.emptyList();
         final JSONObject defineParams = json.optJSONObject("defineParams");
-        if (defineParams != null && !defineParams.isNullObject()) {
-            JSONObject argsObj = defineParams.optJSONObject("parameters");
-            if (argsObj == null) {
-                JSONArray argsArrayObj = defineParams.optJSONArray("parameters");
-                if (argsArrayObj != null) {
-                    parameters = mapJsonArray(argsArrayObj, Parameter::new);
-                }
-            } else {
-                Parameter param = new Parameter(argsObj);
-                parameters = Collections.singletonList(param);
-            }
+        if (defineParams == null || defineParams.isNullObject()) {
+            // no parameters defined
+            return List.of();
         }
-        return parameters;
+
+        final List<Object> argsArray = Optional.<List<Object>>ofNullable(defineParams.optJSONArray("parameters"))
+                .orElseGet(() -> {
+                    JSONObject argsObj = defineParams.optJSONObject("parameters");
+                    if (argsObj == null) {
+                        return List.of();
+                    }
+                    return List.of(argsObj);
+                });
+        return mapJsonArray(argsArray, Parameter::new);
     }
 
-    private static <T> List<T> mapJsonArray(JSONArray array, Function<JSONObject, T> mapper) {
-        List<T> list = new ArrayList<>(array.size());
-        for (Object value : array) {
-            assert JSONObject.class.isAssignableFrom(value.getClass());
-            list.add(mapper.apply((JSONObject) value));
-        }
-        return list;
+    private static <T> List<T> mapJsonArray(List<Object> array, Function<JSONObject, T> mapper) {
+        return array.stream()
+                .filter(JSONObject.class::isInstance)
+                .map(JSONObject.class::cast)
+                .map(mapper)
+                .toList();
     }
 }

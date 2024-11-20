@@ -1,1 +1,18 @@
-{"builderId":"","defineParams":{"parameters":[{"name":"param1","value":"value1"},{"name":"param2","value":"value2"}]},"kind":"org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder$DescriptorImpl","scriptlerScriptId":"bulkDeleteBuilds.groovy","stapler-class":"org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder"}
+{
+  "builderId": "",
+  "defineParams": {
+    "parameters": [
+      {
+        "name": "param1",
+        "value": "value1"
+      },
+      {
+        "name": "param2",
+        "value": "value2"
+      }
+    ]
+  },
+  "kind": "org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder$DescriptorImpl",
+  "scriptlerScriptId": "bulkDeleteBuilds.groovy",
+  "stapler-class": "org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder"
+}

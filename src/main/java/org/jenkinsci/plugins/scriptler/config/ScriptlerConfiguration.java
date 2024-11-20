@@ -31,6 +31,8 @@ import hudson.model.Saveable;
 import hudson.model.listeners.SaveableListener;
 import hudson.util.XStream2;
 import java.io.IOException;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
@@ -47,36 +49,34 @@ import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.DoNotUse;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
-public final class ScriptlerConfiguration extends ScriptSet implements Saveable {
+public final class ScriptlerConfiguration extends ScriptSet implements Saveable, Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private static final Logger LOGGER = Logger.getLogger(ScriptlerConfiguration.class.getName());
 
-    // keep to avoid loading issues with older version
-    @Deprecated
-    private transient List<CatalogInfo> catalogInfos = new ArrayList<>();
-
-    private boolean disbableRemoteCatalog = false;
-
     /**
-     * /!\ keep to avoid loading issues with older version
-     * The regular permission required is Scriptler/RunScripts now
-     * @deprecated no need to replace them, Script Security is used now
+     * @deprecated Use {@link #disableRemoteCatalog} instead.
      */
-    @Deprecated
-    private boolean allowRunScriptPermission = false;
+    @Deprecated(since = "381")
+    private Boolean disbableRemoteCatalog = false;
 
-    /**
-     * /!\ keep to avoid loading issues with older version
-     * The regular permission required is Scriptler/Configure now
-     * @deprecated no need to replace them, Script Security is used now
-     */
-    @Deprecated
-    private boolean allowRunScriptEdit = false;
+    private boolean disableRemoteCatalog = false;
 
     public ScriptlerConfiguration(SortedSet<Script> scripts) {
         if (scripts != null) {
             setScripts(scripts);
         }
+    }
+
+    @Serial
+    @SuppressWarnings({"deprecated", "java:S1874"})
+    private Object readResolve() {
+        if (disbableRemoteCatalog != null) {
+            disableRemoteCatalog = disbableRemoteCatalog;
+            disbableRemoteCatalog = null;
+        }
+        return this;
     }
 
     public synchronized void save() throws IOException {
@@ -99,12 +99,11 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
             // As it might be that we have an unsorted set, we ensure the
             // sorting at load time.
             ScriptlerConfiguration sc = (ScriptlerConfiguration) f.read();
-            SortedSet<Script> sorted = new TreeSet<>(new ByIdSorter());
-            sorted.addAll(sc.getScripts());
+            SortedSet<Script> sorted = new TreeSet<>(sc.getScripts());
             sc.setScripts(sorted);
             return sc;
         } else {
-            return new ScriptlerConfiguration(new TreeSet<>(new ByIdSorter()));
+            return new ScriptlerConfiguration(new TreeSet<>());
         }
     }
 
@@ -132,28 +131,28 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
         XSTREAM.alias("org.jvnet.hudson.plugins.scriptler.util.ByNameSorter", ByIdSorter.class);
     }
 
+    public boolean isDisableRemoteCatalog() {
+        return disableRemoteCatalog;
+    }
+
+    public void setDisableRemoteCatalog(boolean disableRemoteCatalog) {
+        this.disableRemoteCatalog = disableRemoteCatalog;
+    }
+
+    /**
+     * @deprecated Use {@link #isDisableRemoteCatalog()} instead.
+     */
+    @Deprecated(since = "381")
     public boolean isDisbableRemoteCatalog() {
-        return disbableRemoteCatalog;
+        return isDisableRemoteCatalog();
     }
 
-    public void setDisbableRemoteCatalog(boolean disbableRemoteCatalog) {
-        this.disbableRemoteCatalog = disbableRemoteCatalog;
-    }
-
-    public void setAllowRunScriptEdit(boolean allowRunScriptEdit) {
-        this.allowRunScriptEdit = allowRunScriptEdit;
-    }
-
-    public void setAllowRunScriptPermission(boolean allowRunScriptPermission) {
-        this.allowRunScriptPermission = allowRunScriptPermission;
-    }
-
-    public boolean isAllowRunScriptEdit() {
-        return allowRunScriptEdit;
-    }
-
-    public boolean isAllowRunScriptPermission() {
-        return allowRunScriptPermission;
+    /**
+     * @deprecated Use {@link #setDisableRemoteCatalog(boolean)} instead.
+     */
+    @Deprecated(since = "381")
+    public void setDisbableRemoteCatalog(boolean disableRemoteCatalog) {
+        setDisableRemoteCatalog(disableRemoteCatalog);
     }
 
     @Restricted(DoNotUse.class) // for Jelly view
@@ -171,8 +170,8 @@ public final class ScriptlerConfiguration extends ScriptSet implements Saveable 
         for (Script script : sortedScripts) {
             Script scriptWithSrc = ScriptHelper.getScript(script.getId(), true);
             Boolean approved = null;
-            if (scriptWithSrc != null && scriptWithSrc.getScript() != null) {
-                approved = ScriptHelper.isApproved(scriptWithSrc.getScript(), false);
+            if (scriptWithSrc != null && scriptWithSrc.getScriptText() != null) {
+                approved = ScriptHelper.isApproved(scriptWithSrc.getScriptText(), false);
             }
             result.add(new ScriptAndApproved(script, approved));
         }

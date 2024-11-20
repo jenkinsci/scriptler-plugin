@@ -1,40 +1,44 @@
 package org.jenkinsci.plugins.scriptler.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
+
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
-import junit.framework.TestCase;
+import java.util.Objects;
+import java.util.stream.Stream;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
-import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-public class UIHelperTest extends TestCase {
-    public void testExtractParameters1() throws Exception {
-        JSONObject json = getJsonFromFile("/simple1.json");
-        final Collection<Parameter> extractParameters = UIHelper.extractParameters(json);
-        assertNotNull("no parameters extracted", extractParameters);
-        assertEquals("not all params extracted", 2, extractParameters.size());
+class UIHelperTest {
+    static Stream<Arguments> filesAndExpectedParameters() {
+        return Stream.of(arguments("simple1", 2), arguments("simple2", 2), arguments("JENKINS-13518", 0));
     }
 
-    public void testExtractParameters2() throws Exception {
-        JSONObject json = getJsonFromFile("/simple2.json");
+    @ParameterizedTest
+    @MethodSource("filesAndExpectedParameters")
+    void testExtractParameters(String fileName, int expectedParameters) throws Exception {
+        JSONObject json = getJsonFromFile("/" + fileName + ".json");
         final Collection<Parameter> extractParameters = UIHelper.extractParameters(json);
-        assertNotNull("no parameters extracted", extractParameters);
-        assertEquals("not all params extracted", 2, extractParameters.size());
+        assertNotNull(extractParameters, "no parameters extracted");
+        assertEquals(expectedParameters, extractParameters.size(), "not all params extracted");
     }
 
-    public void testExtractParameters_JENKINS_13518() throws Exception {
-        JSONObject json = getJsonFromFile("/JENKINS-13518.json");
-        final Collection<Parameter> extractParameters = UIHelper.extractParameters(json);
-        assertNotNull("no parameters extracted", extractParameters);
-        assertEquals("not all params extracted", 0, extractParameters.size());
-    }
-
-    private JSONObject getJsonFromFile(String resource) throws IOException {
-        InputStream is = UIHelperTest.class.getResourceAsStream(resource);
-        String jsonTxt = IOUtils.toString(is);
-        JSONObject json = (JSONObject) JSONSerializer.toJSON(jsonTxt);
-        return json;
+    private JSONObject getJsonFromFile(String resource) throws IOException, URISyntaxException {
+        URL url = UIHelperTest.class.getResource(resource);
+        final Path path = Paths.get(Objects.requireNonNull(url).toURI());
+        String jsonTxt = Files.readString(path, StandardCharsets.UTF_8);
+        return (JSONObject) JSONSerializer.toJSON(jsonTxt);
     }
 }

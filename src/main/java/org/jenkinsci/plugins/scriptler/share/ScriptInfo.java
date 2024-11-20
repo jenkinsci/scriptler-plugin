@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.scriptler.share;
 
+import hudson.Util;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -21,6 +22,10 @@ public class ScriptInfo implements NamedResource {
         return name;
     }
 
+    public String getNonNullName() {
+        return Util.fixNull(name);
+    }
+
     public void addAuthor(Author author) {
         if (authors == null) {
             authors = new ArrayList<>();
@@ -29,19 +34,19 @@ public class ScriptInfo implements NamedResource {
     }
 
     public List<String> getParameters() {
-        return parameters == null ? new ArrayList<>() : parameters;
+        return parameters == null ? List.of() : List.copyOf(parameters);
     }
 
     public void setParameters(List<String> parameters) {
-        this.parameters = parameters;
+        this.parameters = new ArrayList<>(parameters);
     }
 
     public void setAuthors(List<Author> authors) {
-        this.authors = authors;
+        this.authors = new ArrayList<>(authors);
     }
 
     public List<Author> getAuthors() {
-        return authors == null ? new ArrayList<>() : authors;
+        return authors == null ? List.of() : List.copyOf(authors);
     }
 
     @Override
@@ -138,9 +143,6 @@ public class ScriptInfo implements NamedResource {
         }
     }
 
-    public static final Comparator<ScriptInfo> COMPARATOR_BY_NAME = (ScriptInfo a, ScriptInfo b) -> {
-        String nameA = a.getName() != null ? a.getName() : "";
-        String nameB = b.getName() != null ? b.getName() : "";
-        return nameA.compareToIgnoreCase(nameB);
-    };
+    public static final Comparator<ScriptInfo> COMPARATOR_BY_NAME =
+            Comparator.comparing(ScriptInfo::getNonNullName, String.CASE_INSENSITIVE_ORDER);
 }

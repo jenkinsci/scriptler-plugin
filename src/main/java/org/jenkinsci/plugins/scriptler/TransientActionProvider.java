@@ -9,6 +9,7 @@ import java.util.Collections;
 import jenkins.model.TransientActionFactory;
 
 @Extension
+@SuppressWarnings("rawtypes")
 public class TransientActionProvider extends TransientActionFactory<Job> {
     @Override
     public Class<Job> type() {

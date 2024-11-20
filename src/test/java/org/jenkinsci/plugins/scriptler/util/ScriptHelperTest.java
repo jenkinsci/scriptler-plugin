@@ -1,26 +1,25 @@
 package org.jenkinsci.plugins.scriptler.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfo;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ScriptHelperTest {
+class ScriptHelperTest {
 
     @Test
-    public void testGetJson() throws Exception {
+    void testGetJson() throws Exception {
         final String content =
                 Files.readString(Paths.get("src/test/resources/parsing_test.groovy"), StandardCharsets.UTF_8);
-        assertTrue("no content from file", StringUtils.isNotBlank(content));
+        assertFalse(content.isBlank(), "no content from file");
 
         final ScriptInfo info = ScriptHelper.extractScriptInfo(content);
-        assertNotNull("ScriptInfo is null", info);
+        assertNotNull(info, "ScriptInfo is null");
         assertEquals("1.300", info.getCore());
         assertEquals("print hello", info.getName());
         assertEquals("some cool comment", info.getComment());

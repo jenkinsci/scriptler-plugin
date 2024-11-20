@@ -1,45 +1,42 @@
 package org.jenkinsci.plugins.scriptler.util;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import hudson.util.StreamTaskListener;
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadPoolExecutor;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ErrorCollector;
+import org.junit.jupiter.api.Test;
+import org.opentest4j.MultipleFailuresError;
 
-public class GroovyScriptTest {
-
-    @Rule
-    public ErrorCollector errorCollector = new ErrorCollector();
-
+class GroovyScriptTest {
     @Test
-    public void scriptReturnFalse() {
+    void scriptReturnFalse() {
         ByteArrayOutputStream sos = new ByteArrayOutputStream();
         GroovyScript gs = newInstance(sos, "return false");
         Object result = gs.call();
         assertTrue(sos.toString().contains("Result:   false"));
-        assertEquals(false, result);
+        assertEquals(Boolean.FALSE, result);
     }
 
     @Test
-    public void scriptReturnTrue() {
+    void scriptReturnTrue() {
         ByteArrayOutputStream sos = new ByteArrayOutputStream();
         GroovyScript gs = newInstance(sos, "return true");
         Object result = gs.call();
         assertTrue(sos.toString().contains("Result:   true"));
-        assertEquals(true, result);
+        assertEquals(Boolean.TRUE, result);
     }
 
     @Test
-    public void helloWorld() {
+    void helloWorld() {
         ByteArrayOutputStream sos = new ByteArrayOutputStream();
         GroovyScript gs = newInstance(sos, "out.print(\"HelloWorld\")");
         Object result = gs.call();
@@ -48,7 +45,7 @@ public class GroovyScriptTest {
     }
 
     @Test
-    public void repeatedInvocation() {
+    void repeatedInvocation() {
         ByteArrayOutputStream sos = new ByteArrayOutputStream();
 
         newInstance(sos, "out.print arg", new Parameter("arg", "firstOne")).call();
@@ -60,37 +57,47 @@ public class GroovyScriptTest {
     }
 
     @Test
-    public void threadSafety() throws InterruptedException {
+    void threadSafety() throws InterruptedException {
         ArrayBlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(100);
         ThreadPoolExecutor tpe = new ThreadPoolExecutor(5, 5, 10, SECONDS, workQueue);
+        List<AssertionError> assertionErrors = new CopyOnWriteArrayList<>();
 
         for (int i = 0; i < 100; i++) {
-            tpe.submit(createWork(i));
+            tpe.submit(createWork(assertionErrors, i));
         }
 
         tpe.shutdown();
         tpe.awaitTermination(60, SECONDS);
+
+        if (!assertionErrors.isEmpty()) {
+            // borrowed from JUnit 5's assertAll() method
+            MultipleFailuresError error = new MultipleFailuresError(null, assertionErrors);
+            assertionErrors.forEach(error::addSuppressed);
+            throw error;
+        }
     }
 
-    private Runnable createWork(final int number) {
-        return new Runnable() {
-            public void run() {
-                ByteArrayOutputStream sos = new ByteArrayOutputStream();
+    private Runnable createWork(final List<AssertionError> assertionErrors, final int number) {
+        return () -> {
+            ByteArrayOutputStream sos = new ByteArrayOutputStream();
 
-                newInstance(sos, "out.print arg", new Parameter("arg", "number " + number))
-                        .call();
-                errorCollector.checkThat("number " + number, is(sos.toString()));
+            newInstance(sos, "out.print arg", new Parameter("arg", "number " + number))
+                    .call();
+            try {
+                assertEquals("number " + number, sos.toString(StandardCharsets.UTF_8));
+            } catch (AssertionError e) {
+                assertionErrors.add(e);
             }
         };
     }
 
     private GroovyScript newInstance(ByteArrayOutputStream sos, String scriptSource, Parameter... params) {
-        GroovyScript gs = new GroovyScript(scriptSource, Arrays.asList(params), true, new StreamTaskListener(sos)) {
+        return new GroovyScript(
+                scriptSource, Arrays.asList(params), true, new StreamTaskListener(sos, StandardCharsets.UTF_8)) {
             @Override
             public ClassLoader getClassLoader() {
                 return Thread.currentThread().getContextClassLoader();
             }
         };
-        return gs;
     }
 }
