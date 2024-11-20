@@ -1,16 +1,24 @@
 package org.jenkinsci.plugins.scriptler;
 
-import org.apache.commons.fileupload.FileItem;
+import hudson.ExtensionList;
+import hudson.model.FileParameterValue;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import org.apache.commons.fileupload2.core.FileItem;
 
-public class ScriptlerManagementHelper {
+public final class ScriptlerManagementHelper {
 
-    private final ScriptlerManagement scriptler;
+    private ScriptlerManagementHelper() {}
 
-    public ScriptlerManagementHelper(ScriptlerManagement scriptler) {
-        this.scriptler = scriptler;
-    }
+    public static void saveScript(String scriptId, String contents, boolean nonAdministerUsing) throws IOException {
+        final ScriptlerManagement scriptler = ExtensionList.lookupSingleton(ScriptlerManagement.class);
 
-    public void saveScript(FileItem file, boolean nonAdministerUsing, String fileName) throws Exception {
-        scriptler.saveScript(file, nonAdministerUsing, fileName);
+        Path f = Files.createTempFile("script", "-temp.groovy");
+        Files.writeString(f, contents, StandardCharsets.UTF_8);
+        FileItem<?> fi = new FileParameterValue.FileItemImpl2(f.toFile());
+        scriptler.saveScript(fi, nonAdministerUsing, scriptId);
+        Files.delete(f);
     }
 }

@@ -10,12 +10,12 @@ import jakarta.inject.Inject;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.StreamSupport;
 import jenkins.model.Jenkins;
 import org.eclipse.jgit.api.AddCommand;
 import org.eclipse.jgit.api.CommitCommand;
@@ -25,6 +25,7 @@ import org.eclipse.jgit.api.RmCommand;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoHeadException;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.jenkinsci.main.modules.sshd.SSHD;
@@ -35,7 +36,7 @@ import org.jenkinsci.plugins.scriptler.SyncUtil;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
 
 /**
- * Exposes Git repository at http://server/jenkins/scriptler.git
+ * Exposes Git repository at <code>/scriptler.git</code>
  *
  * @author Dominik Bartholdi (imod)
  *
@@ -47,6 +48,7 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
     @Inject
     public SSHD sshd;
 
+    private static final int LOG_MAX_COMMITS = 20;
     static final String REPOID = "scriptler.git";
 
     public GitScriptlerRepository() {
@@ -112,18 +114,18 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
      *            must be relative to repo root dir
      */
     public void addSingleFileToRepo(String fileName) {
-        try {
-            Git git = new Git(this.openRepository());
+        try (Repository r = openRepository()) {
+            Git git = new Git(r);
             AddCommand cmd = git.add();
             cmd.addFilepattern(fileName);
             cmd.call();
 
             CommitCommand co = git.commit();
-            co.setAuthor("Scriptler/" + Jenkins.getAuthentication().getName(), "noreply@jenkins-ci.org");
+            co.setAuthor("Scriptler/" + Jenkins.getAuthentication2().getName(), "noreply@jenkins-ci.org");
             co.setMessage("update script via WebUI: " + fileName);
             co.call();
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "failed to add/commit " + fileName + " into Git repository", e);
+            LOGGER.log(Level.SEVERE, e, () -> "failed to add/commit " + fileName + " into Git repository");
         }
     }
 
@@ -134,71 +136,58 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
      *            must be relative to repo root dir
      */
     public void rmSingleFileToRepo(String fileName) {
-        try {
-            Git git = new Git(this.openRepository());
+        try (Repository r = openRepository()) {
+            Git git = new Git(r);
             RmCommand cmd = git.rm();
             cmd.addFilepattern(fileName);
             cmd.call();
 
             CommitCommand co = git.commit();
-            co.setAuthor("Scriptler/" + Jenkins.getAuthentication().getName(), "noreply@jenkins-ci.org");
+            co.setAuthor("Scriptler/" + Jenkins.getAuthentication2().getName(), "noreply@jenkins-ci.org");
             co.setMessage("remove script via WebUI: " + fileName);
             co.call();
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "failed to remove " + fileName + " from Git repository", e);
+            LOGGER.log(Level.SEVERE, e, () -> "failed to remove " + fileName + " from Git repository");
         }
     }
 
-    public String hardReset() throws IOException {
-        final Repository repo = this.openRepository();
-        final Git git = new Git(repo);
-        if (repo.getRepositoryState().canResetHead()) {
-            try {
-                return git.reset()
-                        .setMode(ResetType.HARD)
-                        .setRef("master")
-                        .call()
-                        .getObjectId()
-                        .name();
-            } catch (CheckoutConflictException e) {
-                throw new IOException("not able to perform a hard reset", e);
-            } catch (GitAPIException e) {
-                throw new IOException("problem executing reset command", e);
+    public void hardReset() throws IOException {
+        try (Repository r = this.openRepository()) {
+            final Git git = new Git(r);
+            if (r.getRepositoryState().canResetHead()) {
+                try {
+                    git.reset().setMode(ResetType.HARD).setRef("master").call();
+                } catch (CheckoutConflictException e) {
+                    throw new IOException("not able to perform a hard reset", e);
+                } catch (GitAPIException e) {
+                    throw new IOException("problem executing reset command", e);
+                }
             }
         }
-        return "";
     }
 
     public Collection<LogInfo> getLog() throws IOException {
-        Collection<LogInfo> msgs = new ArrayList<>();
-        try {
-            // TODO find a way to limit the number of log entries - e.g. ..log().addRange(...).call()
-            for (RevCommit c : new Git(this.openRepository()).log().call()) {
-                msgs.add(new LogInfo(
-                        c.getName(),
-                        c.getAuthorIdent().getName(),
-                        c.getCommitterIdent().getName(),
-                        new Date(c.getCommitTime() * 1000L),
-                        c.getFullMessage()));
-            }
+        try (Repository r = openRepository()) {
+            Iterable<RevCommit> commits =
+                    new Git(r).log().setMaxCount(LOG_MAX_COMMITS).call();
+            return StreamSupport.stream(commits.spliterator(), false)
+                    .map(LogInfo::new)
+                    .toList();
         } catch (NoHeadException e) {
             throw new IOException("not able to retrieve git log", e);
         } catch (GitAPIException e) {
             throw new IOException("problem executing log command", e);
         }
-        return msgs;
     }
 
-    public static class LogInfo {
-        public final String name, author, committer, msg;
-        public final Date commitTime;
-
-        public LogInfo(String name, String author, String committer, Date commitTime, String msg) {
-            this.name = name;
-            this.author = author;
-            this.committer = committer;
-            this.commitTime = commitTime;
-            this.msg = msg;
+    public record LogInfo(String name, PersonIdent author, PersonIdent committer, Date commitTime, String msg) {
+        public LogInfo(RevCommit c) {
+            this(
+                    c.getName(),
+                    c.getAuthorIdent(),
+                    c.getCommitterIdent(),
+                    new Date(c.getCommitTime() * 1000L),
+                    c.getFullMessage());
         }
     }
 }

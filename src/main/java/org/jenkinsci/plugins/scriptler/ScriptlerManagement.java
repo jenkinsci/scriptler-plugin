@@ -42,11 +42,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import jenkins.model.Jenkins;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.fileupload2.core.FileItem;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.jenkinsci.plugins.scriptler.config.Script;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
@@ -68,9 +69,16 @@ import org.kohsuke.stapler.interceptor.RequirePOST;
 public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     private static final Logger LOGGER = Logger.getLogger(ScriptlerManagement.class.getName());
+    private static final String INVALID_PATH = "Invalid file path received: ";
+    private static final String INDEX = "index";
+    private static final String NOT_APPROVED_YET = "notApprovedYet";
+    private static final String CAN_BYPASS_APPROVAL = "canByPassScriptApproval";
+    private static final String SCRIPT = "script";
     private static final String MASTER = "(master)";
+    private static final String CONTROLLER = "(controller)";
     private static final String ALL = "(all)";
     private static final String ALL_SLAVES = "(all slaves)";
+    private static final String ALL_AGENTS = "(all agents)";
 
     private static final MarkupFormatter INSTANCE = RawHtmlMarkupFormatter.INSTANCE;
 
@@ -123,7 +131,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     }
 
     public boolean disableRemoteCatalog() {
-        return getConfiguration().isDisbableRemoteCatalog();
+        return getConfiguration().isDisableRemoteCatalog();
     }
 
     /*
@@ -154,12 +162,6 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * save the scriptler 'global' settings (on settings screen, not global Jenkins config)
-     *
-     * @param res
-     * @param rsp
-     * @param disableRemoteCatalog
-     * @return
-     * @throws IOException
      */
     @RequirePOST
     public HttpResponse doScriptlerSettings(
@@ -170,7 +172,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         checkPermission(ScriptlerPermissions.CONFIGURE);
 
         ScriptlerConfiguration cfg = getConfiguration();
-        cfg.setDisbableRemoteCatalog(disableRemoteCatalog);
+        cfg.setDisableRemoteCatalog(disableRemoteCatalog);
         cfg.save();
 
         return new HttpRedirect("settings");
@@ -188,7 +190,6 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @param catalogName
      *            the catalog to download the file from
      * @return same forward as from <code>doScriptAdd</code>
-     * @throws IOException
      */
     @RequirePOST
     public HttpResponse doDownloadScript(
@@ -200,8 +201,8 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         checkPermission(ScriptlerPermissions.CONFIGURE);
 
         ScriptlerConfiguration c = getConfiguration();
-        if (c.isDisbableRemoteCatalog()) {
-            return new HttpRedirect("index");
+        if (c.isDisableRemoteCatalog()) {
+            return new HttpRedirect(INDEX);
         }
 
         for (ScriptInfoCatalog<ScriptInfo> scriptInfoCatalog : getCatalogs()) {
@@ -225,7 +226,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     }
 
     /**
-     * Saves a script snipplet as file to the system.
+     * Saves a script snippet as file to the system.
      *
      * @param req
      *            response
@@ -241,15 +242,13 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      *            script code
      * @param nonAdministerUsing
      *            allow usage in Scriptler build step
-     * @param onlyMaster
-     *            this script is only allwoed to run on the master node
+     * @param onlyController
+     *            this script is only allowed to run on the controller
      * @param originCatalogName
      *            (optional) the name of the catalog the script is loaded/added from
      * @param originId
      *            (optional) the original id the script had at the catalog
      * @return forward to 'index'
-     * @throws IOException
-     * @throws ServletException
      */
     @RequirePOST
     public HttpResponse doScriptAdd(
@@ -258,9 +257,9 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             @QueryParameter("id") String id,
             @QueryParameter("name") String name,
             @QueryParameter("comment") String comment,
-            @QueryParameter("script") String script,
+            @QueryParameter(SCRIPT) String script,
             @QueryParameter("nonAdministerUsing") boolean nonAdministerUsing,
-            @QueryParameter("onlyMaster") boolean onlyMaster,
+            @QueryParameter("onlyController") boolean onlyController,
             String originCatalogName,
             String originId)
             throws IOException, ServletException {
@@ -270,15 +269,14 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         List<Parameter> parameters = UIHelper.extractParameters(req.getSubmittedForm());
 
         saveScriptAndForward(
-                id, name, comment, script, nonAdministerUsing, onlyMaster, originCatalogName, originId, parameters);
-        return new HttpRedirect("index");
+                id, name, comment, script, nonAdministerUsing, onlyController, originCatalogName, originId, parameters);
+        return new HttpRedirect(INDEX);
     }
 
     /**
      * Save the script details and return the forward to index
      *
      * @return the final name of the saved script - which is also the id of the script!
-     * @throws IOException
      */
     private String saveScriptAndForward(
             String id,
@@ -286,13 +284,13 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             String comment,
             String script,
             boolean nonAdministerUsing,
-            boolean onlyMaster,
+            boolean onlyController,
             String originCatalogName,
             String originId,
             @NonNull List<Parameter> parameters)
             throws IOException {
         script = script == null ? "TODO" : script;
-        if (StringUtils.isEmpty(id)) {
+        if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException("'id' must not be empty!");
         }
 
@@ -308,7 +306,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
                     Level.WARNING,
                     "Folder traversal detected, file path received: {0}, after fixing: {1}",
                     new Object[] {id, finalFileName});
-            throw new IOException("Invalid file path received: " + id);
+            throw new IOException(INVALID_PATH + id);
         }
 
         ScriptHelper.writeScriptToFile(newScriptFile, script);
@@ -317,8 +315,8 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
         ScriptHelper.putScriptInApprovalQueueIfRequired(script);
 
-        Script newScript = null;
-        if (!StringUtils.isEmpty(originId)) {
+        final Script newScript;
+        if (originId != null && !originId.isEmpty()) {
             newScript = new Script(
                     finalFileName,
                     displayName,
@@ -330,7 +328,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
                     parameters);
         } else {
             // save (overwrite) the meta information
-            newScript = new Script(finalFileName, displayName, comment, nonAdministerUsing, parameters, onlyMaster);
+            newScript = new Script(finalFileName, displayName, comment, nonAdministerUsing, parameters, onlyController);
         }
         ScriptlerConfiguration cfg = getConfiguration();
         cfg.addOrReplace(newScript);
@@ -340,8 +338,6 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * adds/commits the given file to the local git repo - file must be written to scripts directory!
-     *
-     * @param finalFileName
      */
     private void commitFileToGitRepo(final String finalFileName) {
         getGitRepo().addSingleFileToRepo(finalFileName);
@@ -353,8 +349,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     /**
      * Triggers a hard reset on the git repo
-     * @return redirects to the repo entry page at <code>http://jenkins.orga.com/scriptler.git</code>
-     * @throws IOException
+     * @return redirects to the repo entry page at <code>/scriptler.git</code>
      */
     @RequirePOST
     public HttpResponse doHardResetGit() throws IOException {
@@ -373,7 +368,6 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @param id
      *            the id of the file to be removed
      * @return forward to 'index'
-     * @throws IOException
      */
     @RequirePOST
     public HttpResponse doRemoveScript(StaplerRequest2 res, StaplerResponse2 rsp, @QueryParameter("id") String id)
@@ -388,7 +382,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
                     Level.WARNING,
                     "Folder traversal detected, file path received: {0}, after fixing: {1}",
                     new Object[] {id, oldScript});
-            throw new Failure("Invalid file path received: " + id);
+            throw new Failure(INVALID_PATH + id);
         }
         try {
             Files.delete(oldScript);
@@ -399,8 +393,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         }
 
         try {
-            final GitScriptlerRepository gitRepo = ExtensionList.lookupSingleton(GitScriptlerRepository.class);
-            gitRepo.rmSingleFileToRepo(id);
+            getGitRepo().rmSingleFileToRepo(id);
         } catch (IllegalStateException e) {
             throw new IOException("failed to update git repo", e);
         }
@@ -410,7 +403,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         cfg.removeScript(id);
         cfg.save();
 
-        return new HttpRedirect("index");
+        return new HttpRedirect(INDEX);
     }
 
     /**
@@ -419,23 +412,21 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @param req
      *            request
      * @return forward to index page.
-     * @throws IOException
-     * @throws ServletException
      */
     @RequirePOST
     public HttpResponse doUploadScript(StaplerRequest2 req) throws IOException, ServletException {
         checkPermission(ScriptlerPermissions.CONFIGURE);
         try {
 
-            FileItem fileItem = req.getFileItem("file");
+            FileItem<?> fileItem = req.getFileItem2("file");
             boolean nonAdministerUsing = req.getSubmittedForm().getBoolean("nonAdministerUsing");
             String fileName = Util.getFileName(fileItem.getName());
-            if (StringUtils.isEmpty(fileName)) {
+            if (fileName.isEmpty()) {
                 return new HttpRedirect(".");
             }
             saveScript(fileItem, nonAdministerUsing, fileName);
 
-            return new HttpRedirect("index");
+            return new HttpRedirect(INDEX);
         } catch (IOException e) {
             throw e;
         } catch (Exception e) {
@@ -446,7 +437,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     /**
      * Protected only for testing
      */
-    /*private*/ void saveScript(FileItem fileItem, boolean nonAdministerUsing, String fileName) throws Exception {
+    /*private*/ void saveScript(FileItem<?> fileItem, boolean nonAdministerUsing, String fileName) throws IOException {
         // upload can only be to/from local catalog
         String fixedFileName = fixFileName(null, fileName);
 
@@ -454,7 +445,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         try {
             fixedFile = Paths.get(fixedFileName);
         } catch (InvalidPathException e) {
-            throw new IOException("Invalid file path received: " + fileName, e);
+            throw new IOException(INVALID_PATH + fileName, e);
         }
 
         if (fixedFile.isAbsolute()) {
@@ -462,7 +453,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
                     Level.WARNING,
                     "Folder traversal detected, file path received: {0}, after fixing: {1}. Seems to be an attempt to use absolute path instead of relative one",
                     new Object[] {fileName, fixedFileName});
-            throw new IOException("Invalid file path received: " + fileName);
+            throw new IOException(INVALID_PATH + fileName);
         }
 
         Path rootDir = getScriptDirectory2();
@@ -473,10 +464,10 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
                     Level.WARNING,
                     "Folder traversal detected, file path received: {0}, after fixing: {1}. Seems to be an attempt to use folder escape.",
                     new Object[] {fileName, fixedFileName});
-            throw new IOException("Invalid file path received: " + fileName);
+            throw new IOException(INVALID_PATH + fileName);
         }
 
-        fileItem.write(f.toFile());
+        fileItem.write(f);
 
         commitFileToGitRepo(fixedFileName);
 
@@ -501,8 +492,6 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      *            response
      * @param id
      *            the id of the script to be executed
-     * @throws IOException
-     * @throws ServletException
      */
     public void doRunScript(StaplerRequest2 req, StaplerResponse2 rsp, @QueryParameter("id") String id)
             throws IOException, ServletException {
@@ -513,27 +502,27 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             // TODO check if we cannot do better here
             throw new IOException(Messages.scriptNotFound(id));
         }
-        if (script.getScript() == null) {
+        if (script.getScriptText() == null) {
             req.setAttribute("scriptNotFound", true);
         } else {
-            boolean canByPassScriptApproval = Jenkins.get().hasPermission(Jenkins.RUN_SCRIPTS);
+            boolean canByPassScriptApproval = Jenkins.get().hasPermission(ScriptlerPermissions.BYPASS_APPROVAL);
 
             // we do not want user with approval right to auto-approve script when landing on that page
-            if (!ScriptHelper.isApproved(script.getScript(), false)) {
-                req.setAttribute("notApprovedYet", true);
+            if (!ScriptHelper.isApproved(script.getScriptText(), false)) {
+                req.setAttribute(NOT_APPROVED_YET, true);
             }
 
-            req.setAttribute("canByPassScriptApproval", canByPassScriptApproval);
+            req.setAttribute(CAN_BYPASS_APPROVAL, canByPassScriptApproval);
         }
 
-        req.setAttribute("script", script);
+        req.setAttribute(SCRIPT, script);
         // set default selection
-        req.setAttribute("currentNode", MASTER);
+        req.setAttribute("currentNode", CONTROLLER);
         req.getView(this, "runScript.jelly").forward(req, rsp);
     }
 
     /**
-     * Trigger/run/execute the script on a slave and show the result/output. The request then gets forward to <code>runScript.jelly</code> (This is usually also where the request came from). The
+     * Trigger/run/execute the script on an agent and show the result/output. The request then gets forward to <code>runScript.jelly</code> (This is usually also where the request came from). The
      * script passed to this method gets restored in the request again (and not loaded from the system). This way one is able to modify the script before execution and reuse the modified version for
      * further executions.
      *
@@ -546,23 +535,21 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @param scriptSrc
      *            the script code (groovy)
      * @param node
-     *            the node, to execute the code on.
-     * @throws IOException
-     * @throws ServletException
+     *            the node to execute the code on.
      */
     @RequirePOST
     public void doTriggerScript(
             StaplerRequest2 req,
             StaplerResponse2 rsp,
             @QueryParameter("id") String id,
-            @QueryParameter("script") String scriptSrc,
+            @QueryParameter(SCRIPT) String scriptSrc,
             @QueryParameter("node") String node)
             throws IOException, ServletException {
         checkPermission(ScriptlerPermissions.RUN_SCRIPTS);
 
         final List<Parameter> parameters = UIHelper.extractParameters(req.getSubmittedForm());
 
-        boolean canByPassScriptApproval = Jenkins.get().hasPermission(Jenkins.RUN_SCRIPTS);
+        boolean canByPassScriptApproval = Jenkins.get().hasPermission(ScriptlerPermissions.BYPASS_APPROVAL);
 
         // set the script info back to the request, to display it together with the output.
         Script originalScript = ScriptHelper.getScript(id, true);
@@ -571,40 +558,40 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             return;
         }
 
-        String originalScriptSourceCode = originalScript.getScript();
+        String originalScriptSourceCode = originalScript.getScriptText();
 
         Script tempScript = originalScript.copy();
         if (originalScriptSourceCode != null && originalScriptSourceCode.equals(scriptSrc)) {
             // not copied by default
-            tempScript.setScript(originalScriptSourceCode);
+            tempScript.setScriptText(originalScriptSourceCode);
         } else {
-            tempScript.setScript(scriptSrc);
+            tempScript.setScriptText(scriptSrc);
             ScriptHelper.putScriptInApprovalQueueIfRequired(scriptSrc);
         }
 
         String output;
         if (ScriptHelper.isApproved(scriptSrc)) {
-            String[] slaves = resolveSlaveNames(node);
-            output = ScriptHelper.runScript(slaves, scriptSrc, parameters);
+            List<String> computers = resolveComputerNames(node);
+            output = ScriptHelper.runScript(computers, scriptSrc, parameters);
         } else {
             LOGGER.log(
                     Level.WARNING,
                     "Script {0} was not approved yet, consider asking your administrator to approve it.",
                     id);
             output = null;
-            req.setAttribute("notApprovedYet", true);
+            req.setAttribute(NOT_APPROVED_YET, true);
         }
 
         tempScript.setParameters(parameters); // show the same parameters to the user
-        req.setAttribute("script", tempScript);
+        req.setAttribute(SCRIPT, tempScript);
         req.setAttribute("currentNode", node);
         req.setAttribute("output", output);
-        req.setAttribute("canByPassScriptApproval", canByPassScriptApproval);
+        req.setAttribute(CAN_BYPASS_APPROVAL, canByPassScriptApproval);
         req.getView(this, "runScript.jelly").forward(req, rsp);
     }
 
     /**
-     * Trigger/run/execute the script on a slave and directly forward the result/output to the response.
+     * Trigger/run/execute the script on an agent and directly forward the result/output to the response.
      *
      * @param req
      *            request
@@ -613,11 +600,9 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @param script
      *            the script code (groovy)
      * @param node
-     *            the node, to execute the code on, defaults to {@value #MASTER}
+     *            the node, to execute the code on, defaults to {@value #CONTROLLER}
      * @param contentType
      *            the contentType to use in the response, defaults to text/plain
-     * @throws IOException
-     * @throws ServletException
      */
     @RequirePOST
     public void doRun(
@@ -635,19 +620,19 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             id = id.substring(1);
         }
 
-        if (StringUtils.isEmpty(id)) {
-            throw new RuntimeException("Please specify a script id. Use /scriptler/run/<yourScriptId>");
+        if (id.isEmpty()) {
+            throw new IOException("Please specify a script id. Use /scriptler/run/<yourScriptId>");
         }
 
         Script tempScript = ScriptHelper.getScript(id, true);
 
         if (tempScript == null) {
-            throw new RuntimeException("Unknown script: " + id + ". Use /scriptler/run/<yourScriptId>");
+            throw new IOException("Unknown script: " + id + ". Use /scriptler/run/<yourScriptId>");
         }
 
         if (script == null) {
             // use original script
-            script = tempScript.getScript();
+            script = tempScript.getScriptText();
         }
 
         if (!ScriptHelper.isApproved(script)) {
@@ -665,11 +650,11 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
         rsp.setContentType(contentType == null ? "text/plain" : contentType);
 
-        final String[] slaves = resolveSlaveNames(node == null ? MASTER : node);
-        if (slaves.length > 1) {
-            rsp.getOutputStream().print(ScriptHelper.runScript(slaves, script, paramArray));
+        final List<String> computers = resolveComputerNames(node == null ? CONTROLLER : node);
+        if (computers.size() > 1) {
+            rsp.getOutputStream().print(ScriptHelper.runScript(computers, script, paramArray));
         } else {
-            rsp.getOutputStream().print(ScriptHelper.runScript(slaves[0], script, paramArray));
+            rsp.getOutputStream().print(ScriptHelper.runScript(computers.get(0), script, paramArray));
         }
     }
 
@@ -690,23 +675,21 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         return params.values();
     }
 
-    private String[] resolveSlaveNames(String nameAlias) {
-        List<String> slaves = null;
-        if (nameAlias.equalsIgnoreCase(ALL) || nameAlias.equalsIgnoreCase(ALL_SLAVES)) {
-            slaves = this.getSlaveNames();
+    private List<String> resolveComputerNames(String nameAlias) {
+        final List<String> computers;
+        if (nameAlias.equalsIgnoreCase(ALL)
+                || nameAlias.equalsIgnoreCase(ALL_AGENTS)
+                || nameAlias.equalsIgnoreCase(ALL_SLAVES)) {
+            computers = getComputerNames();
             if (nameAlias.equalsIgnoreCase(ALL)) {
-                if (!slaves.contains(MASTER)) {
-                    slaves.add(MASTER);
-                }
+                computers.add(CONTROLLER);
             }
-            if (nameAlias.equalsIgnoreCase(ALL_SLAVES)) {
-                // take the master node out of the loop if we said all slaves
-                slaves.remove(MASTER);
-            }
+        } else if (nameAlias.equalsIgnoreCase(MASTER)) {
+            computers = List.of(CONTROLLER);
         } else {
-            slaves = Collections.singletonList(nameAlias);
+            computers = List.of(nameAlias);
         }
-        return slaves.toArray(new String[0]);
+        return computers;
     }
 
     /**
@@ -718,8 +701,6 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      *            response
      * @param id
      *            the id of the script to be loaded in to the show view.
-     * @throws IOException
-     * @throws ServletException
      */
     public void doShowScript(
             StaplerRequest2 req, StaplerResponse2 rsp, @AncestorInPath Item item, @QueryParameter("id") String id)
@@ -731,7 +712,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             parent.checkPermission(Item.CONFIGURE);
         }
         Script script = ScriptHelper.getScript(id, true);
-        req.setAttribute("script", script);
+        req.setAttribute(SCRIPT, script);
         req.getView(this, "show.jelly").forward(req, rsp);
     }
 
@@ -744,66 +725,58 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      *            response
      * @param id
      *            the id of the script to be loaded in to the edit view.
-     * @throws IOException
-     * @throws ServletException
      */
     public void doEditScript(StaplerRequest2 req, StaplerResponse2 rsp, @QueryParameter("id") String id)
             throws IOException, ServletException {
         checkPermission(ScriptlerPermissions.CONFIGURE);
 
         Script script = ScriptHelper.getScript(id, true);
-        if (script == null || script.getScript() == null) {
+        if (script == null || script.getScriptText() == null) {
             req.setAttribute("scriptNotFound", true);
         } else {
-            boolean canByPassScriptApproval = Jenkins.get().hasPermission(Jenkins.RUN_SCRIPTS);
+            boolean canByPassScriptApproval = Jenkins.get().hasPermission(ScriptlerPermissions.BYPASS_APPROVAL);
 
             // we do not want user with approval right to auto-approve script when landing on that page
-            if (!ScriptHelper.isApproved(script.getScript(), false)) {
-                req.setAttribute("notApprovedYet", true);
+            if (!ScriptHelper.isApproved(script.getScriptText(), false)) {
+                req.setAttribute(NOT_APPROVED_YET, true);
             }
 
-            req.setAttribute("canByPassScriptApproval", canByPassScriptApproval);
+            req.setAttribute(CAN_BYPASS_APPROVAL, canByPassScriptApproval);
         }
 
-        req.setAttribute("script", script);
+        req.setAttribute(SCRIPT, script);
         req.getView(this, "edit.jelly").forward(req, rsp);
     }
 
     /**
-     * Gets the names of all configured slaves, regardless whether they are online, including alias of ALL and ALL_SLAVES
-     *
-     * @return list with all slave names
+     * @deprecated Use {@link #getComputerAliases(Script)} instead.
      */
+    @Deprecated(since = "381")
     public List<String> getSlaveAlias(Script script) {
-
-        if (script.onlyMaster) {
-            List<String> slaveNames = new ArrayList<>();
-            slaveNames.add(MASTER);
-            return slaveNames;
-        }
-        final List<String> slaveNames = getSlaveNames();
-        // add 'magic' name for master, so all nodes can be handled the same way
-        if (!slaveNames.contains(MASTER)) {
-            slaveNames.add(0, MASTER);
-        }
-        if (slaveNames.size() > 0) {
-            if (!slaveNames.contains(ALL)) {
-                slaveNames.add(1, ALL);
-            }
-            if (!slaveNames.contains(ALL_SLAVES)) {
-                slaveNames.add(2, ALL_SLAVES);
-            }
-        }
-        return slaveNames;
+        return getComputerAliases(script);
     }
 
-    private List<String> getSlaveNames() {
-        Computer[] computers = Jenkins.get().getComputers();
-        List<String> slaves = new ArrayList<>();
-        for (Computer c : computers) {
-            slaves.add(c.getName());
+    /**
+     * Gets the names of all configured computers, regardless whether they are online, including alias of ALL and ALL_AGENTS
+     *
+     * @return list with all computer names
+     */
+    public List<String> getComputerAliases(Script script) {
+        if (script.onlyController) {
+            return List.of(CONTROLLER);
         }
-        return slaves;
+        final List<String> computerNames = getComputerNames();
+        // add 'magic' name for the controller, so all nodes can be handled the same way
+        computerNames.addAll(0, List.of(CONTROLLER, ALL, ALL_AGENTS));
+        return computerNames;
+    }
+
+    private List<String> getComputerNames() {
+        return Arrays.stream(Jenkins.get().getComputers())
+                // remove the controller's computer as it has an empty name
+                .filter(Predicate.not(Jenkins.MasterComputer.class::isInstance))
+                .map(Computer::getName)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
@@ -811,12 +784,12 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      *
      * @return the catalog
      */
-    public List<? extends ScriptInfoCatalog<ScriptInfo>> getCatalogs() {
+    public List<ScriptInfoCatalog<ScriptInfo>> getCatalogs() {
         return ScriptInfoCatalog.all();
     }
 
-    public ScriptInfoCatalog<? extends ScriptInfo> getCatalogByName(String catalogName) {
-        if (StringUtils.isNotBlank(catalogName)) {
+    public ScriptInfoCatalog<ScriptInfo> getCatalogByName(String catalogName) {
+        if (catalogName != null && !catalogName.isBlank()) {
             for (ScriptInfoCatalog<ScriptInfo> sic : getCatalogs()) {
                 final CatalogInfo info = sic.getInfo();
                 if (catalogName.equals(info.name)) {
@@ -828,7 +801,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     }
 
     public CatalogInfo getCatalogInfoByName(String catalogName) {
-        if (StringUtils.isNotBlank(catalogName)) {
+        if (catalogName != null && !catalogName.isBlank()) {
             for (ScriptInfoCatalog<ScriptInfo> sic : getCatalogs()) {
                 final CatalogInfo info = sic.getInfo();
                 if (catalogName.equals(info.name)) {
@@ -874,14 +847,14 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
     private String fixFileName(String catalogName, String name) {
         if (!name.endsWith(".groovy")) {
-            if (!StringUtils.isEmpty(catalogName)) {
+            if (catalogName != null && !catalogName.isEmpty()) {
                 name += "." + catalogName;
             }
             name += ".groovy";
         }
         // make sure we don't have spaces in the filename
         name = name.replace(" ", "_").trim();
-        LOGGER.fine("set file name to: " + name);
+        LOGGER.log(Level.FINE, "set file name to: {0}", name);
         return name;
     }
 }

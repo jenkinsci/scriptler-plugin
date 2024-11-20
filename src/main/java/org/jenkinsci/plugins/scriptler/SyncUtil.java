@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.jenkinsci.plugins.scriptler.config.Script;
@@ -30,11 +29,7 @@ public class SyncUtil {
     }
 
     /**
-     *
-     * @param scriptDirectory
-     * @param cfg
-     *            must be saved (by caller) after finishing this all sync
-     * @throws IOException
+     * must be saved (by caller) after finishing this all sync
      */
     public static void syncDirWithCfg(Path scriptDirectory, ScriptlerConfiguration cfg) throws IOException {
 
@@ -49,7 +44,7 @@ public class SyncUtil {
                 if (info != null) {
                     List<Parameter> parameters = info.getParameters().stream()
                             .map(name -> new Parameter(name, null))
-                            .collect(Collectors.toList());
+                            .toList();
                     cfg.addOrReplace(new Script(fileName, info.getName(), info.getComment(), false, parameters, false));
                 } else {
                     cfg.addOrReplace(new Script(
@@ -75,7 +70,7 @@ public class SyncUtil {
                 // to no loose parameter configuration if we loose the file
                 unavailableScript.setParameters(s.getParameters());
                 unavailableScripts.add(unavailableScript);
-                LOGGER.info("for repo '" + scriptDirectory + "' " + s + " is not available!");
+                LOGGER.info(() -> "for repo '" + scriptDirectory + "' " + s + " is not available!");
             }
         }
 

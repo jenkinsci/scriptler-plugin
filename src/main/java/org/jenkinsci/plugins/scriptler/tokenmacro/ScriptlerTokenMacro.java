@@ -40,7 +40,7 @@ public class ScriptlerTokenMacro extends DataBoundTokenMacro {
         }
 
         VirtualChannel channel;
-        if (script.onlyMaster) {
+        if (script.onlyController) {
             channel = FilePath.localChannel;
         } else {
             FilePath remoteFilePath = context.getWorkspace();
@@ -52,7 +52,7 @@ public class ScriptlerTokenMacro extends DataBoundTokenMacro {
         }
 
         Object output = channel.call(
-                new GroovyScript(script.getScript(), Collections.emptyList(), true, listener, null, context));
+                new GroovyScript(script.getScriptText(), Collections.emptyList(), true, listener, null, context));
 
         return output != null ? output.toString() : "";
     }

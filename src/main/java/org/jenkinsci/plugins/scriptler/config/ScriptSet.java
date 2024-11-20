@@ -26,16 +26,12 @@ package org.jenkinsci.plugins.scriptler.config;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.logging.Logger;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * @author imod
  *
  */
 public class ScriptSet {
-    private static final Logger LOGGER = Logger.getLogger(ScriptSet.class.getName());
-
     // have it sorted
     protected final Set<Script> scriptSet = new TreeSet<>();
 
@@ -66,14 +62,19 @@ public class ScriptSet {
         }
     }
 
+    private String choose(String preferred, String fallback) {
+        if (preferred == null || preferred.isEmpty()) {
+            return fallback;
+        }
+        return preferred;
+    }
+
     private Script merge(Script origin, Script newScript) {
-        String name = StringUtils.isEmpty(newScript.name) ? origin.name : newScript.name;
-        String comment = StringUtils.isEmpty(newScript.comment) ? origin.comment : newScript.comment;
-        String originCatalog =
-                StringUtils.isEmpty(newScript.originCatalog) ? origin.originCatalog : newScript.originCatalog;
-        String originScript =
-                StringUtils.isEmpty(newScript.originScript) ? origin.originScript : newScript.originScript;
-        String originDate = StringUtils.isEmpty(newScript.originDate) ? origin.originDate : newScript.originDate;
+        String name = choose(newScript.name, origin.name);
+        String comment = choose(newScript.comment, origin.comment);
+        String originCatalog = choose(newScript.originCatalog, origin.originCatalog);
+        String originScript = choose(newScript.originScript, origin.originScript);
+        String originDate = choose(newScript.originDate, origin.originDate);
         return new Script(
                 newScript.getId(),
                 name,
@@ -84,7 +85,7 @@ public class ScriptSet {
                 originDate,
                 newScript.nonAdministerUsing,
                 newScript.getParameters(),
-                newScript.onlyMaster);
+                newScript.onlyController);
     }
 
     public final Set<Script> getScripts() {

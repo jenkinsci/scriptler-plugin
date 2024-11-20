@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" ?>
 
 	<!--
 		The MIT License Copyright (c) 2010, Dominik Bartholdi Permission is
@@ -36,7 +37,7 @@
 			<p />
 			<f:form name="scriptlerSettings" method="post" action="scriptlerSettings">
 				<j:jelly xmlns:j="jelly:core">
-					<f:entry title="${%Disable remote catalog}" help="/plugin/scriptler/help-disableRemoterCatalog.html">
+					<f:entry title="${%Disable remote catalog}" help="/plugin/scriptler/help-disableRemoteCatalog.html">
 						<f:checkbox name="disableRemoteCatalog" checked="${it.disableRemoteCatalog()}" />
 					</f:entry>
 				</j:jelly>

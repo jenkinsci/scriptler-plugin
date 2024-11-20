@@ -1,11 +1,11 @@
 package org.jenkinsci.plugins.scriptler.config;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ScriptTest {
+class ScriptTest {
     @Test
-    public void equalsContract() {
+    void equalsContract() {
         EqualsVerifier.forClass(Script.class)
                 .usingGetClass()
                 .withOnlyTheseFields("id")

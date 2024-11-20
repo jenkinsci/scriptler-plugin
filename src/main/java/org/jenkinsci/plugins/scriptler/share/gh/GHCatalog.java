@@ -4,21 +4,24 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.Extension;
 import hudson.ProxyConfiguration;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.scriptler.share.CatalogInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfoCatalog;
 
 /**
- * Provides access to the scriptler scripts shared at https://github.com/jenkinsci/jenkins-scripts
+ * Provides access to the scriptler scripts shared at <a href="https://github.com/jenkinsci/jenkins-scripts">jenkinsci/jenkins-scripts</a>
  *
  * @author Dominik Bartholdi (imod)
  *
@@ -54,13 +57,13 @@ public class GHCatalog implements ScriptInfoCatalog<ScriptInfo> {
     }
 
     private List<ScriptInfo> getEntries(@CheckForNull Comparator<ScriptInfo> comparator) {
-        ScriptInfo[] scriptInfoArray = new ScriptInfo[0];
+        Collection<ScriptInfo> scriptInfoList = List.of();
         try {
-            scriptInfoArray = CentralScriptJsonCatalog.getCatalog().toList().list;
+            scriptInfoList = CentralScriptJsonCatalog.getCatalog().getScripts();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "not abe to load script infos from GH", e);
         }
-        List<ScriptInfo> sortedScriptInfoList = Arrays.asList(scriptInfoArray);
+        List<ScriptInfo> sortedScriptInfoList = new ArrayList<>(scriptInfoList);
 
         if (comparator != null) sortedScriptInfoList.sort(comparator);
 
@@ -76,10 +79,17 @@ public class GHCatalog implements ScriptInfoCatalog<ScriptInfo> {
     public String getScriptSource(ScriptInfo scriptInfo) {
 
         final String scriptUrl = CATALOG_INFO.getReplacedDownloadUrl(scriptInfo.getName(), scriptInfo.getId());
-        try (InputStream is = ProxyConfiguration.getInputStream(new URL(scriptUrl))) {
-            return IOUtils.toString(is, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "not abe to load script sources from GH for: " + scriptInfo, e);
+        try {
+            HttpClient client = ProxyConfiguration.newHttpClient();
+            HttpRequest request =
+                    ProxyConfiguration.newHttpRequestBuilder(new URI(scriptUrl)).build();
+            return client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8))
+                    .body();
+        } catch (InterruptedException e) {
+            LOGGER.log(Level.SEVERE, e, () -> "not able to load script sources from GH for: " + scriptInfo);
+            Thread.currentThread().interrupt();
+        } catch (IOException | URISyntaxException e) {
+            LOGGER.log(Level.SEVERE, e, () -> "not able to load script sources from GH for: " + scriptInfo);
         }
 
         return null;

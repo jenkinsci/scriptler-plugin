@@ -1,28 +1,29 @@
 package org.jenkinsci.plugins.scriptler.config;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public class Parameter implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
-    private static final String NAME = "name";
-    private static final String VALUE = "value";
-    private static final Set<String> PROPERTY_NAMES =
-            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(NAME, VALUE)));
+
+    private static final String KEY_NAME = "name";
+    private static final String KEY_VALUE = "value";
+    private static final Set<String> PROPERTY_NAMES = Set.of(KEY_NAME, KEY_VALUE);
 
     private final String name;
     private final String value;
 
-    @SuppressWarnings("unchecked") // older untyped API
     public Parameter(JSONObject object) {
         Set<String> keys = object.keySet();
         if (!PROPERTY_NAMES.equals(keys)) {
             throw new IllegalArgumentException("Provided JSONObject does not appear to be a Parameter");
         }
-        name = object.getString(NAME);
-        value = object.getString(VALUE);
+        name = object.getString(KEY_NAME);
+        value = object.getString(KEY_VALUE);
     }
 
     @DataBoundConstructor

@@ -25,9 +25,14 @@ package org.jenkinsci.plugins.scriptler.config;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import hudson.Util;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.*;
 
-public class Script implements Comparable<Script>, NamedResource {
+public class Script implements Comparable<Script>, NamedResource, Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private final String id;
     public final String name;
@@ -44,13 +49,19 @@ public class Script implements Comparable<Script>, NamedResource {
     /**
      * script is only transient, because it will not be saved in the xml but on the file system. Therefore it has to be materialized before usage!
      */
-    private transient String script;
+    private transient String scriptText;
 
     // User with Scriptler/RUN_SCRIPT permission can add/edit Scriptler step in projects
     public final boolean nonAdministerUsing;
 
-    // script is runnable only on Master
-    public final boolean onlyMaster;
+    // script is runnable only on controller
+    public final boolean onlyController;
+
+    /**
+     * @deprecated Use {@link #onlyController} instead.
+     */
+    @Deprecated(since = "381")
+    public final Boolean onlyMaster;
 
     /**
      * used to create/update a new script in the UI
@@ -61,15 +72,15 @@ public class Script implements Comparable<Script>, NamedResource {
             String comment,
             boolean nonAdministerUsing,
             @NonNull List<Parameter> parameters,
-            boolean onlyMaster) {
-        this(id, name, comment, true, null, null, null, nonAdministerUsing, parameters, onlyMaster);
+            boolean onlyController) {
+        this(id, name, comment, true, null, null, null, nonAdministerUsing, parameters, onlyController);
     }
 
     /**
      * used during plugin start to synchronize available scripts
      */
-    public Script(String id, String comment, boolean available, boolean nonAdministerUsing, boolean onlyMaster) {
-        this(id, id, comment, available, null, null, null, nonAdministerUsing, Collections.emptyList(), onlyMaster);
+    public Script(String id, String comment, boolean available, boolean nonAdministerUsing, boolean onlyController) {
+        this(id, id, comment, available, null, null, null, nonAdministerUsing, Collections.emptyList(), onlyController);
     }
 
     /**
@@ -101,7 +112,7 @@ public class Script implements Comparable<Script>, NamedResource {
             String originDate,
             boolean nonAdministerUsing,
             @NonNull List<Parameter> parameters,
-            boolean onlyMaster) {
+            boolean onlyController) {
         this(
                 id,
                 name,
@@ -112,7 +123,7 @@ public class Script implements Comparable<Script>, NamedResource {
                 originDate,
                 nonAdministerUsing,
                 parameters,
-                onlyMaster);
+                onlyController);
     }
 
     /**
@@ -128,7 +139,7 @@ public class Script implements Comparable<Script>, NamedResource {
             String originDate,
             boolean nonAdministerUsing,
             @NonNull List<Parameter> parameters,
-            boolean onlyMaster) {
+            boolean onlyController) {
         this.id = id;
         this.name = name;
         this.comment = comment;
@@ -138,7 +149,8 @@ public class Script implements Comparable<Script>, NamedResource {
         this.originDate = originDate;
         this.nonAdministerUsing = nonAdministerUsing;
         this.parameters = new ArrayList<>(parameters);
-        this.onlyMaster = onlyMaster;
+        this.onlyController = onlyController;
+        this.onlyMaster = null;
     }
 
     public Script copy() {
@@ -152,7 +164,7 @@ public class Script implements Comparable<Script>, NamedResource {
                 originDate,
                 nonAdministerUsing,
                 parameters,
-                onlyMaster);
+                onlyController);
     }
 
     /*
@@ -162,6 +174,10 @@ public class Script implements Comparable<Script>, NamedResource {
      */
     public String getName() {
         return name;
+    }
+
+    public String getNonNullName() {
+        return Util.fixNull(name);
     }
 
     public String getScriptPath() {
@@ -177,12 +193,29 @@ public class Script implements Comparable<Script>, NamedResource {
     }
 
     @CheckForNull
-    public String getScript() {
-        return script;
+    public String getScriptText() {
+        return scriptText;
     }
 
-    public void setScript(String script) {
-        this.script = script;
+    /**
+     * @deprecated Use {@link #getScriptText()} instead.
+     */
+    @CheckForNull
+    @Deprecated(since = "381")
+    public String getScript() {
+        return getScriptText();
+    }
+
+    public void setScriptText(String scriptText) {
+        this.scriptText = scriptText;
+    }
+
+    /**
+     * @deprecated Use {@link #setScriptText(String)} instead.
+     */
+    @Deprecated(since = "381")
+    public void setScript(String scriptText) {
+        setScriptText(scriptText);
     }
 
     public void setParameters(@NonNull List<Parameter> parameters) {
@@ -204,13 +237,11 @@ public class Script implements Comparable<Script>, NamedResource {
         return id.compareTo(o.id);
     }
 
-    /**
-     * Previously we used not to have an id, but only a name.
-     */
+    @Serial
     public Object readResolve() {
-        if (id == null) {
+        if (onlyMaster != null) {
             return new Script(
-                    name,
+                    id,
                     name,
                     comment,
                     available,
@@ -259,9 +290,6 @@ public class Script implements Comparable<Script>, NamedResource {
         return Objects.equals(id, other.id);
     }
 
-    public static final Comparator<Script> COMPARATOR_BY_NAME = (Script a, Script b) -> {
-        String nameA = a.getName() != null ? a.getName() : "";
-        String nameB = b.getName() != null ? b.getName() : "";
-        return nameA.compareToIgnoreCase(nameB);
-    };
+    public static final Comparator<Script> COMPARATOR_BY_NAME =
+            Comparator.comparing(Script::getNonNullName, String.CASE_INSENSITIVE_ORDER);
 }
