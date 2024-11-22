@@ -4,7 +4,7 @@
 package org.jenkinsci.plugins.scriptler.git;
 
 import hudson.Extension;
-import jakarta.inject.Inject;
+import hudson.ExtensionList;
 import java.io.IOException;
 import org.eclipse.jgit.transport.ReceivePack;
 import org.eclipse.jgit.transport.UploadPack;
@@ -19,15 +19,15 @@ import org.jenkinsci.plugins.gitserver.RepositoryResolver;
 @Extension
 public class GitScriptlerRepositorySSHAccess extends RepositoryResolver {
 
-    @Inject
-    GitScriptlerRepository repo;
-
     /**
      * @see org.jenkinsci.plugins.gitserver.RepositoryResolver#createReceivePack(java.lang.String)
      */
     @Override
     public ReceivePack createReceivePack(String fullRepositoryName) throws IOException {
-        if (isMine(fullRepositoryName)) return repo.createReceivePack(repo.openRepository());
+        if (isMine(fullRepositoryName)) {
+            GitScriptlerRepository repo = ExtensionList.lookupSingleton(GitScriptlerRepository.class);
+            return repo.createReceivePack(repo.openRepository());
+        }
         return null;
     }
 
@@ -36,7 +36,10 @@ public class GitScriptlerRepositorySSHAccess extends RepositoryResolver {
      */
     @Override
     public UploadPack createUploadPack(String fullRepositoryName) throws IOException {
-        if (isMine(fullRepositoryName)) return new UploadPack(repo.openRepository());
+        if (isMine(fullRepositoryName)) {
+            GitScriptlerRepository repo = ExtensionList.lookupSingleton(GitScriptlerRepository.class);
+            return new UploadPack(repo.openRepository());
+        }
         return null;
     }
 
