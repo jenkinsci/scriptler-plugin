@@ -7,7 +7,7 @@
             <p>${%blurb}</p>
             <pre>
 ${%git_clone_command(it.httpCloneUrl)}
-<j:if test="${it.sshd.actualPort > 0}">${%git_clone_command(it.sshCloneUrl)}</j:if>
+<j:if test="${it.sshdPort > 0}">${%git_clone_command(it.sshCloneUrl)}</j:if>
             </pre>
             <j:if test="${it.hasPushPermission()}">
                 <p>

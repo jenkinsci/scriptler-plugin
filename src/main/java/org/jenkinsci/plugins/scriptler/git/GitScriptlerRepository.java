@@ -6,7 +6,6 @@ package org.jenkinsci.plugins.scriptler.git;
 import hudson.Extension;
 import hudson.ExtensionList;
 import hudson.model.RootAction;
-import jakarta.inject.Inject;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -34,6 +33,8 @@ import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
 import org.jenkinsci.plugins.scriptler.ScriptlerPermissions;
 import org.jenkinsci.plugins.scriptler.SyncUtil;
 import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 /**
  * Exposes Git repository at <code>/scriptler.git</code>
@@ -44,9 +45,6 @@ import org.jenkinsci.plugins.scriptler.config.ScriptlerConfiguration;
 @Extension
 public class GitScriptlerRepository extends FileBackedHttpGitRepository implements RootAction {
     private static final Logger LOGGER = Logger.getLogger(GitScriptlerRepository.class.getName());
-
-    @Inject
-    public SSHD sshd;
 
     private static final int LOG_MAX_COMMITS = 20;
     static final String REPOID = "scriptler.git";
@@ -80,9 +78,14 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
         return Jenkins.get().getRootUrl() + REPOID;
     }
 
+    @Restricted(NoExternalUse.class)
+    public int getSshdPort() {
+        return SSHD.get().getActualPort();
+    }
+
     public String getSshCloneUrl() throws MalformedURLException {
         String hostname = new URL(Objects.requireNonNull(Jenkins.get().getRootUrl())).getHost();
-        int port = sshd.getActualPort();
+        int port = getSshdPort();
         return "ssh://" + hostname + ":" + port + "/" + REPOID;
     }
 
