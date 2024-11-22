@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:f="/lib/form" xmlns:st="jelly:stapler">
     <l:layout title="">
+        <st:include page="sidepanel.jelly" it="${it.scriptler}"/>
         <l:main-panel>
             <h1>Accessing Scriptler scripts</h1>
             <p>${%blurb}</p>
@@ -12,25 +13,24 @@ ${%git_clone_command(it.httpCloneUrl)}
             <j:if test="${it.hasPushPermission()}">
                 <p>
                     ${%reset}
-                    <f:form method="POST" action="${app.rootUrl}scriptler/hardResetGit">
+                    <f:form method="POST" action="${app.rootUrl}${it.scriptler.urlName}/hardResetGit">
                         <f:submit value="${%Hard reset}"/>
                     </f:form>
                 </p>
             </j:if>
 
-            <!--
-            <f:section title="${%Log}">
+            <div style="padding-top: var(--section-padding)">
+                <h2>${%Log}</h2>
                 <j:forEach items="${it.log}" var="log">
                     <p>
-                        <strong>commit ${log.name}</strong><br/>
-                        <strong>Author:</strong> ${log.author}<br/>
-                        <strong>Committer:</strong> ${log.committer}<br/>
-                        <strong>Date:</strong> ${log.commitTime}<br/>
-                        ${log.msg}
+                        <strong>commit ${log.name()}</strong><br/>
+                        <strong>Author:</strong> ${log.author().name} &amp;lt;${log.author().emailAddress}&amp;gt;<br/>
+                        <strong>Committer:</strong> ${log.committer().name} &amp;lt;${log.committer().emailAddress}&amp;gt;<br/>
+                        <strong>Date:</strong> ${log.commitTime()}<br/>
+                        ${log.msg()}
                     </p>
                 </j:forEach>
-            </f:section>
-            -->
+            </div>
         </l:main-panel>
     </l:layout>
 </j:jelly>
