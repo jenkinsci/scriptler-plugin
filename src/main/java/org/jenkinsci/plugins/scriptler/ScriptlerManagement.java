@@ -57,6 +57,8 @@ import org.jenkinsci.plugins.scriptler.share.ScriptInfo;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfoCatalog;
 import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
 import org.jenkinsci.plugins.scriptler.util.UIHelper;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.*;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
@@ -343,7 +345,8 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         getGitRepo().addSingleFileToRepo(finalFileName);
     }
 
-    private GitScriptlerRepository getGitRepo() {
+    @Restricted(NoExternalUse.class)
+    public GitScriptlerRepository getGitRepo() {
         return ExtensionList.lookupSingleton(GitScriptlerRepository.class);
     }
 

@@ -93,6 +93,10 @@ public class GitScriptlerRepository extends FileBackedHttpGitRepository implemen
         return Jenkins.get().hasPermission(ScriptlerPermissions.CONFIGURE);
     }
 
+    public Object getScriptler() {
+        return ExtensionList.lookupSingleton(ScriptlerManagement.class);
+    }
+
     /**
      * @see org.jenkinsci.plugins.gitserver.FileBackedHttpGitRepository#checkPushPermission()
      */

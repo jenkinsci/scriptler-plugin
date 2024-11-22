@@ -27,22 +27,22 @@ THE SOFTWARE.
   Side panel for Scriptler.
 -->
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
+<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout">
   <l:header />
   <l:side-panel>
     <l:tasks>
+      <j:set var="scriptlerRoot" value="${rootURL}/${it.urlName}"/>
       <j:if test="${it.hasAtLeastOneScriptlerPermission()}">
-        <l:task icon="icon-next icon-md" href="${rootURL}/scriptler" title="${%Run / Edit Scripts}" />
+        <l:task icon="icon-next icon-md" href="${scriptlerRoot}" title="${%Run / Edit Scripts}" />
       </j:if>
       <l:hasPermission permission="${it.scriptlerConfigure}">
-        <l:task icon="icon-new-package icon-md" href="scriptSettings" title="${%Add a new Script}" />
+        <l:task icon="icon-new-package icon-md" href="${scriptlerRoot}/scriptSettings" title="${%Add a New Script}" />
         <j:if test="${!it.disableRemoteCatalog()}">
-              <l:task icon="icon-folder icon-md" href="catalog" title="${%Remote Script catalogs}" />
+              <l:task icon="icon-folder icon-md" href="${scriptlerRoot}/catalog" title="${%Remote Script Catalogs}" />
         </j:if>
-        <l:task icon="icon-setting icon-md" href="settings" title="${%Scriptler settings}" />
-        <l:task icon="symbol-git-compare-outline plugin-ionicons-api" href="${rootURL}/scriptler.git" title="${%Git repo}" />
+        <l:task icon="icon-setting icon-md" href="${scriptlerRoot}/settings" title="${%Scriptler Settings}" />
+        <l:task icon="symbol-git-compare-outline plugin-ionicons-api" href="${rootURL}/${it.gitRepo.urlName}" title="${%Git Repo}" />
       </l:hasPermission>
     </l:tasks>
-    <t:executors computers="${h.singletonList(it)}" />
   </l:side-panel>
 </j:jelly>
