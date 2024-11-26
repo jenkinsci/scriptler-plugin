@@ -18,7 +18,8 @@ public class ControllerGroovyScript extends GroovyScript {
     private final transient Launcher launcher;
 
     /**
-     * This constructor can only be used when the script is executed on the controller, because launcher and build can not be transferred to an agent and therefore the execution will fail
+     * This constructor can only be used when the script is executed on the built-in node, because launcher and build
+     * can not be transferred to an agent and therefore the execution will fail
      * @param script the script to be executed
      * @param parameters the parameters to be passed to the script
      * @param failWithException should the job fail with an exception

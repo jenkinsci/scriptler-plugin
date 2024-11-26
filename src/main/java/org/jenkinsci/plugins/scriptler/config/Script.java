@@ -54,11 +54,17 @@ public class Script implements Comparable<Script>, NamedResource, Serializable {
     // User with Scriptler/RUN_SCRIPT permission can add/edit Scriptler step in projects
     public final boolean nonAdministerUsing;
 
-    // script is runnable only on controller
-    public final boolean onlyController;
+    // script is runnable only on the built-in node
+    public final boolean onlyBuiltIn;
 
     /**
-     * @deprecated Use {@link #onlyController} instead.
+     * @deprecated Use {@link #onlyBuiltIn} instead.
+     */
+    @Deprecated(since = "386")
+    public final Boolean onlyController;
+
+    /**
+     * @deprecated Use {@link #onlyBuiltIn} instead.
      */
     @Deprecated(since = "381")
     public final Boolean onlyMaster;
@@ -72,15 +78,15 @@ public class Script implements Comparable<Script>, NamedResource, Serializable {
             String comment,
             boolean nonAdministerUsing,
             @NonNull List<Parameter> parameters,
-            boolean onlyController) {
-        this(id, name, comment, true, null, null, null, nonAdministerUsing, parameters, onlyController);
+            boolean onlyBuiltIn) {
+        this(id, name, comment, true, null, null, null, nonAdministerUsing, parameters, onlyBuiltIn);
     }
 
     /**
      * used during plugin start to synchronize available scripts
      */
-    public Script(String id, String comment, boolean available, boolean nonAdministerUsing, boolean onlyController) {
-        this(id, id, comment, available, null, null, null, nonAdministerUsing, Collections.emptyList(), onlyController);
+    public Script(String id, String comment, boolean available, boolean nonAdministerUsing, boolean onlyBuiltIn) {
+        this(id, id, comment, available, null, null, null, nonAdministerUsing, List.of(), onlyBuiltIn);
     }
 
     /**
@@ -112,7 +118,7 @@ public class Script implements Comparable<Script>, NamedResource, Serializable {
             String originDate,
             boolean nonAdministerUsing,
             @NonNull List<Parameter> parameters,
-            boolean onlyController) {
+            boolean onlyBuiltIn) {
         this(
                 id,
                 name,
@@ -123,7 +129,7 @@ public class Script implements Comparable<Script>, NamedResource, Serializable {
                 originDate,
                 nonAdministerUsing,
                 parameters,
-                onlyController);
+                onlyBuiltIn);
     }
 
     /**
@@ -139,7 +145,7 @@ public class Script implements Comparable<Script>, NamedResource, Serializable {
             String originDate,
             boolean nonAdministerUsing,
             @NonNull List<Parameter> parameters,
-            boolean onlyController) {
+            boolean onlyBuiltIn) {
         this.id = id;
         this.name = name;
         this.comment = comment;
@@ -149,8 +155,8 @@ public class Script implements Comparable<Script>, NamedResource, Serializable {
         this.originDate = originDate;
         this.nonAdministerUsing = nonAdministerUsing;
         this.parameters = new ArrayList<>(parameters);
-        this.onlyController = onlyController;
-        this.onlyMaster = null;
+        this.onlyBuiltIn = onlyBuiltIn;
+        this.onlyMaster = this.onlyController = null;
     }
 
     public Script copy() {
@@ -164,7 +170,7 @@ public class Script implements Comparable<Script>, NamedResource, Serializable {
                 originDate,
                 nonAdministerUsing,
                 parameters,
-                onlyController);
+                onlyBuiltIn);
     }
 
     /*
@@ -239,7 +245,8 @@ public class Script implements Comparable<Script>, NamedResource, Serializable {
 
     @Serial
     public Object readResolve() {
-        if (onlyMaster != null) {
+        if (onlyMaster != null || onlyController != null) {
+            boolean onlyBuiltIn = onlyMaster == null ? onlyController : onlyMaster;
             return new Script(
                     id,
                     name,
@@ -250,7 +257,7 @@ public class Script implements Comparable<Script>, NamedResource, Serializable {
                     originDate,
                     nonAdministerUsing,
                     parameters,
-                    onlyMaster);
+                    onlyBuiltIn);
         }
         return this;
     }

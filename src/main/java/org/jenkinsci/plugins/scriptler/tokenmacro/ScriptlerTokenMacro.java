@@ -44,7 +44,7 @@ public class ScriptlerTokenMacro extends DataBoundTokenMacro {
         String scriptText = script.getScriptText();
         VirtualChannel channel;
         GroovyScript groovyScript;
-        if (script.onlyController || Jenkins.get().equals(context.getBuiltOn())) {
+        if (script.onlyBuiltIn || Jenkins.get().equals(context.getBuiltOn())) {
             channel = FilePath.localChannel;
             groovyScript = new ControllerGroovyScript(scriptText, List.of(), true, listener, null, context);
         } else {

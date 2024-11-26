@@ -21,6 +21,7 @@ import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.jenkinsci.plugins.scriptler.Messages;
+import org.jenkinsci.plugins.scriptler.NodeNames;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagement;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
 import org.jenkinsci.plugins.scriptler.config.Script;
@@ -170,7 +171,7 @@ public final class ScriptHelper {
             try {
                 Computer comp = Jenkins.get().getComputer(node);
                 TaskListener listener = new StreamTaskListener(sos, StandardCharsets.UTF_8);
-                if (comp == null && "(controller)".equals(node)) {
+                if (comp == null && NodeNames.BUILT_IN.equals(node)) {
                     FilePath.localChannel.call(new GroovyScript(scriptTxt, parameters, false, listener));
                 } else if (comp != null && comp.getChannel() != null) {
                     comp.getChannel().call(new GroovyScript(scriptTxt, parameters, false, listener));
