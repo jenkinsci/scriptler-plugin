@@ -255,8 +255,8 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                         parameter.getName(), TokenMacro.expandAll(build, listener, parameter.getValue())));
             }
             final Object output;
-            if (script.onlyController) {
-                // When run on controller, make build, launcher, listener available to script
+            if (script.onlyBuiltIn) {
+                // When run on the built-in node, make build, launcher, listener available to script
                 output = FilePath.localChannel.call(new ControllerGroovyScript(
                         script.getScriptText(), expandedParams, true, listener, launcher, build));
             } else {

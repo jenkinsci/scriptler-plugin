@@ -47,7 +47,7 @@
 					<f:checkbox name="nonAdministerUsing" />
 				</f:entry>
                 <f:entry title="${%Restriction}" description="${%RestrictionDescription}">
-                    <f:checkbox name="onlyController" checked="${script.onlyController}" />
+                    <f:checkbox name="onlyBuiltIn" checked="${script.onlyBuiltIn}" />
 		</f:entry>
 				<f:entry title="${%Script}">
 					<textarea id="script" name="script" class="${h.isUnitTest ? '' : 'script'}"/>

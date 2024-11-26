@@ -85,7 +85,7 @@ public class ScriptSet {
                 originDate,
                 newScript.nonAdministerUsing,
                 newScript.getParameters(),
-                newScript.onlyController);
+                newScript.onlyBuiltIn);
     }
 
     public final Set<Script> getScripts() {

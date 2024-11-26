@@ -76,11 +76,6 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     private static final String NOT_APPROVED_YET = "notApprovedYet";
     private static final String CAN_BYPASS_APPROVAL = "canByPassScriptApproval";
     private static final String SCRIPT = "script";
-    private static final String MASTER = "(master)";
-    private static final String CONTROLLER = "(controller)";
-    private static final String ALL = "(all)";
-    private static final String ALL_SLAVES = "(all slaves)";
-    private static final String ALL_AGENTS = "(all agents)";
 
     private static final MarkupFormatter INSTANCE = RawHtmlMarkupFormatter.INSTANCE;
 
@@ -244,8 +239,8 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      *            script code
      * @param nonAdministerUsing
      *            allow usage in Scriptler build step
-     * @param onlyController
-     *            this script is only allowed to run on the controller
+     * @param onlyBuiltIn
+     *            this script is only allowed to run on the built-in node
      * @param originCatalogName
      *            (optional) the name of the catalog the script is loaded/added from
      * @param originId
@@ -261,7 +256,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             @QueryParameter("comment") String comment,
             @QueryParameter(SCRIPT) String script,
             @QueryParameter("nonAdministerUsing") boolean nonAdministerUsing,
-            @QueryParameter("onlyController") boolean onlyController,
+            @QueryParameter("onlyBuiltIn") boolean onlyBuiltIn,
             String originCatalogName,
             String originId)
             throws IOException, ServletException {
@@ -271,7 +266,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         List<Parameter> parameters = UIHelper.extractParameters(req.getSubmittedForm());
 
         saveScriptAndForward(
-                id, name, comment, script, nonAdministerUsing, onlyController, originCatalogName, originId, parameters);
+                id, name, comment, script, nonAdministerUsing, onlyBuiltIn, originCatalogName, originId, parameters);
         return new HttpRedirect(INDEX);
     }
 
@@ -286,7 +281,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             String comment,
             String script,
             boolean nonAdministerUsing,
-            boolean onlyController,
+            boolean onlyBuiltIn,
             String originCatalogName,
             String originId,
             @NonNull List<Parameter> parameters)
@@ -330,7 +325,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
                     parameters);
         } else {
             // save (overwrite) the meta information
-            newScript = new Script(finalFileName, displayName, comment, nonAdministerUsing, parameters, onlyController);
+            newScript = new Script(finalFileName, displayName, comment, nonAdministerUsing, parameters, onlyBuiltIn);
         }
         ScriptlerConfiguration cfg = getConfiguration();
         cfg.addOrReplace(newScript);
@@ -520,7 +515,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
         req.setAttribute(SCRIPT, script);
         // set default selection
-        req.setAttribute("currentNode", CONTROLLER);
+        req.setAttribute("currentNode", NodeNames.BUILT_IN);
         req.getView(this, "runScript.jelly").forward(req, rsp);
     }
 
@@ -603,7 +598,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @param script
      *            the script code (groovy)
      * @param node
-     *            the node, to execute the code on, defaults to {@value #CONTROLLER}
+     *            the node, to execute the code on, defaults to {@value NodeNames#BUILT_IN}
      * @param contentType
      *            the contentType to use in the response, defaults to text/plain
      */
@@ -653,7 +648,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
         rsp.setContentType(contentType == null ? "text/plain" : contentType);
 
-        final List<String> computers = resolveComputerNames(node == null ? CONTROLLER : node);
+        final List<String> computers = resolveComputerNames(node == null ? NodeNames.BUILT_IN : node);
         if (computers.size() > 1) {
             rsp.getOutputStream().print(ScriptHelper.runScript(computers, script, paramArray));
         } else {
@@ -678,17 +673,14 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         return params.values();
     }
 
-    private List<String> resolveComputerNames(String nameAlias) {
+    private List<String> resolveComputerNames(String rawNameAlias) {
+        final String nameAlias = NodeNames.normalizeNodeName(rawNameAlias);
         final List<String> computers;
-        if (nameAlias.equalsIgnoreCase(ALL)
-                || nameAlias.equalsIgnoreCase(ALL_AGENTS)
-                || nameAlias.equalsIgnoreCase(ALL_SLAVES)) {
+        if (nameAlias.equalsIgnoreCase(NodeNames.ALL) || nameAlias.equalsIgnoreCase(NodeNames.ALL_AGENTS)) {
             computers = getComputerNames();
-            if (nameAlias.equalsIgnoreCase(ALL)) {
-                computers.add(CONTROLLER);
+            if (nameAlias.equalsIgnoreCase(NodeNames.ALL)) {
+                computers.add(NodeNames.BUILT_IN);
             }
-        } else if (nameAlias.equalsIgnoreCase(MASTER)) {
-            computers = List.of(CONTROLLER);
         } else {
             computers = List.of(nameAlias);
         }
@@ -765,18 +757,18 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
      * @return list with all computer names
      */
     public List<String> getComputerAliases(Script script) {
-        if (script.onlyController) {
-            return List.of(CONTROLLER);
+        if (script.onlyBuiltIn) {
+            return List.of(NodeNames.BUILT_IN);
         }
         final List<String> computerNames = getComputerNames();
-        // add 'magic' name for the controller, so all nodes can be handled the same way
-        computerNames.addAll(0, List.of(CONTROLLER, ALL, ALL_AGENTS));
+        // add 'magic' name for the built-in node, so all nodes can be handled the same way
+        computerNames.addAll(0, List.of(NodeNames.BUILT_IN, NodeNames.ALL, NodeNames.ALL_AGENTS));
         return computerNames;
     }
 
     private List<String> getComputerNames() {
         return Arrays.stream(Jenkins.get().getComputers())
-                // remove the controller's computer as it has an empty name
+                // remove the built-in's computer as it has an empty name
                 .filter(Predicate.not(Jenkins.MasterComputer.class::isInstance))
                 .map(Computer::getName)
                 .collect(Collectors.toCollection(ArrayList::new));
