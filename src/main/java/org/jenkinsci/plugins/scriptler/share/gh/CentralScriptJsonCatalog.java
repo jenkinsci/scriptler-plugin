@@ -12,8 +12,8 @@ import net.sf.json.JsonConfig;
 import org.jenkinsci.plugins.scriptler.share.ScriptInfo;
 
 /**
- * Gets the GitHub catalog from <a href="http://mirrors.jenkins-ci.org/updates/updates/org.jenkinsci.plugins.scriptler.CentralScriptJsonCatalog.json">jenkins-ci/org.jenkinsci.plugins.scriptler.CentralScriptJsonCatalog.json</a>. This catalog is updated by a background crawler on the
- * Jenkins infrastructure site.
+ * Gets the GitHub catalog from <a href="https://mirrors.updates.jenkins.io/updates/org.jenkinsci.plugins.scriptler.CentralScriptJsonCatalog.json">jenkins.io/org.jenkinsci.plugins.scriptler.CentralScriptJsonCatalog.json</a>.
+ * This catalog is updated by <a href="https://github.com/jenkins-infra/crawler/blob/main/scriptler.groovy">a background crawler on the Jenkins infrastructure site</a>.
  *
  * @author Dominik Bartholdi (imod)
  */

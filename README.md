@@ -7,7 +7,7 @@ Besides administering your scripts, Scriptler also provides a way to
 share scripts between users via hosted script catalogs on the
 internet.  
 On GitHub at
-<https://github.com/jenkinsci/jenkins-scripts/tree/master/scriptler> you
+<https://github.com/jenkinsci/jenkins-scripts/tree/main/scriptler> you
 are not only able to find scripts and import it via scriptler in to your
 Jenkins instance, but can also share your own scripts. Just send a pull
 request to <https://github.com/jenkinsci/jenkins-scripts/> and your
