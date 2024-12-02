@@ -97,7 +97,7 @@ Release date: _Nov 7, 2012_
     Would like to create/use a central "catalog" . . . 
 -   Scriptler now understands the format for shared scripts also when
     first time pushed via git into Scriptler (Format description:
-    <https://github.com/jenkinsci/jenkins-scripts/tree/master/scriptler#scriptler-scripts>
+    <https://github.com/jenkinsci/jenkins-scripts/tree/main/scriptler#scriptler-scripts>
     )
 -   now depends on the [Git Server
     Plugin](https://wiki.jenkins.io/display/JENKINS/Git+Server+Plugin)

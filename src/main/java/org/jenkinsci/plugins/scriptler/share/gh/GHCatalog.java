@@ -31,8 +31,10 @@ public class GHCatalog implements ScriptInfoCatalog<ScriptInfo> {
 
     private static final Logger LOGGER = Logger.getLogger(GHCatalog.class.getName());
 
-    public static final String REPO_BASE = "https://github.com/jenkinsci/jenkins-scripts/blob/master/scriptler/{1}";
-    public static final String DOWNLOAD_URL = "https://raw.github.com/jenkinsci/jenkins-scripts/master/scriptler/{1}";
+    private static final String REPO = "jenkinsci/jenkins-scripts";
+    private static final String BRANCH = "main";
+    public static final String REPO_BASE = "https://github.com/" + REPO + "/blob/" + BRANCH + "/scriptler/{1}";
+    public static final String DOWNLOAD_URL = "https://raw.github.com/" + REPO + "/" + BRANCH + "/scriptler/{1}";
 
     public static final CatalogInfo CATALOG_INFO = new CatalogInfo("gh", REPO_BASE, REPO_BASE, DOWNLOAD_URL);
 

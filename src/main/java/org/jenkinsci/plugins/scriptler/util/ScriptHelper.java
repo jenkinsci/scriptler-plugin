@@ -186,12 +186,12 @@ public final class ScriptHelper {
     }
 
     /**
-     * Returns the meta info of a script body, which must follow <a href="https://github.com/jenkinsci/jenkins-scripts/tree/master/scriptler">the convention</a>
+     * Returns the meta info of a script body, which must follow <a href="https://github.com/jenkinsci/jenkins-scripts/tree/main/scriptler">the convention</a>
      *
      * @param fullScriptBody
      *            the script to extract the meta info from
      * @return <code>null</code> if no meta info found
-     * @see <a href="https://github.com/jenkinsci/jenkins-scripts/tree/master/scriptler">...</a>
+     * @see <a href="https://github.com/jenkinsci/jenkins-scripts/tree/main/scriptler">...</a>
      */
     public static ScriptInfo extractScriptInfo(String fullScriptBody) {
         final Matcher matcher = SCRIPT_META_PATTERN.matcher(fullScriptBody);
