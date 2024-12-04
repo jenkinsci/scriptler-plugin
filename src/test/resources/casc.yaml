@@ -1,0 +1,9 @@
+jenkins:
+  authorizationStrategy:
+    projectMatrix:
+      entries:
+        - group:
+            name: authenticated
+            permissions:
+              - "Scriptler/Configure"
+              - "Scriptler/RunScripts"
