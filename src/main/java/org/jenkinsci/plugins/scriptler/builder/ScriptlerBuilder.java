@@ -29,7 +29,12 @@ import jakarta.servlet.ServletException;
 import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -91,8 +96,8 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             @CheckForNull String builderId,
             @CheckForNull String scriptId,
             boolean propagateParams,
-            Parameter[] parameters) {
-        this(builderId, scriptId, propagateParams, Arrays.asList(Objects.requireNonNull(parameters)));
+            @CheckForNull Parameter[] parameters) {
+        this(builderId, scriptId, propagateParams, parameters == null ? List.of() : List.of(parameters));
     }
 
     @DataBoundConstructor
@@ -100,10 +105,10 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             @CheckForNull String builderId,
             @CheckForNull String scriptId,
             boolean propagateParams,
-            @NonNull List<Parameter> parameters) {
+            @CheckForNull List<Parameter> parameters) {
         this.builderId = builderId;
         this.scriptId = scriptId;
-        this.parameters = new ArrayList<>(parameters);
+        this.parameters = parameters == null ? List.of() : List.copyOf(parameters);
         this.propagateParams = propagateParams;
     }
 
@@ -175,7 +180,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
     @NonNull
     public List<Parameter> getParametersList() {
-        return Collections.unmodifiableList(parameters);
+        return parameters;
     }
 
     public String getBuilderId() {
@@ -233,7 +238,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
             // expand the parameters before passing these to the execution, this is to allow any token macro to resolve
             // parameter values
-            List<Parameter> expandedParams = new LinkedList<>();
+            List<Parameter> expandedParams = new ArrayList<>();
 
             if (propagateParams) {
                 final ParametersAction paramsAction = build.getAction(ParametersAction.class);
@@ -371,7 +376,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             }
 
             if (builder == null) {
-                builder = new ScriptlerBuilder(builderId, null, false, Collections.emptyList());
+                builder = new ScriptlerBuilder(builderId, null, false, List.of());
             }
 
             return builder.recreateBuilderWithBuilderIdIfRequired();
@@ -379,9 +384,8 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
         public List<Script> getScripts() {
             // TODO currently only script for RUN_SCRIPT permissions are returned?
-            Set<Script> scripts = getConfig().getScripts();
             List<Script> scriptsForBuilder = new ArrayList<>();
-            for (Script script : scripts) {
+            for (Script script : getConfig().getScripts()) {
                 if (script.nonAdministerUsing) {
                     scriptsForBuilder.add(script);
                 }
