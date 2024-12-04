@@ -8,7 +8,7 @@
 
 	<artifactId>scriptler</artifactId>
 	<name>Scriptler</name>
-	<version>${changelist}</version>
+	<version>376.${changelist}</version>
 	<packaging>hpi</packaging>
 	<url>https://github.com/jenkinsci/scriptler-plugin</url>
 	<inceptionYear>2010</inceptionYear>
