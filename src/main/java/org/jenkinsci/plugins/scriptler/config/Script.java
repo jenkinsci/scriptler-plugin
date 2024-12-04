@@ -24,6 +24,7 @@
 package org.jenkinsci.plugins.scriptler.config;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.*;
 
@@ -118,6 +119,7 @@ public class Script implements Comparable<Script>, NamedResource {
         this.available = available;
     }
 
+    @SuppressFBWarnings("PA_PUBLIC_PRIMITIVE_ATTRIBUTE")
     public void setScript(String script) {
         this.script = script;
     }
