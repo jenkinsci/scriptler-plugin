@@ -25,6 +25,7 @@ package org.jenkinsci.plugins.scriptler.config;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Util;
 import java.io.Serial;
 import java.io.Serializable;
@@ -50,6 +51,12 @@ public class Script implements Comparable<Script>, NamedResource, Serializable {
      * script is only transient, because it will not be saved in the xml but on the file system. Therefore it has to be materialized before usage!
      */
     private transient String scriptText;
+
+    /**
+     * @deprecated Use {@link #getScriptText()} and {@link #setScriptText(String)} instead.
+     */
+    @Deprecated(since = "384")
+    public transient String script;
 
     // User with Scriptler/RUN_SCRIPT permission can add/edit Scriptler step in projects
     public final boolean nonAdministerUsing;
@@ -212,8 +219,11 @@ public class Script implements Comparable<Script>, NamedResource, Serializable {
         return getScriptText();
     }
 
+    @SuppressFBWarnings("PA_PUBLIC_PRIMITIVE_ATTRIBUTE")
+    @SuppressWarnings({"deprecated", "java:S1874"})
     public void setScriptText(String scriptText) {
         this.scriptText = scriptText;
+        script = scriptText;
     }
 
     /**
