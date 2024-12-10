@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -108,7 +109,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
             @CheckForNull List<Parameter> parameters) {
         this.builderId = builderId;
         this.scriptId = scriptId;
-        this.parameters = parameters == null ? List.of() : List.copyOf(parameters);
+        this.parameters = new ArrayList<>(parameters == null ? List.of() : parameters);
         this.propagateParams = propagateParams;
     }
 
@@ -180,7 +181,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
 
     @NonNull
     public List<Parameter> getParametersList() {
-        return parameters;
+        return Collections.unmodifiableList(parameters);
     }
 
     public String getBuilderId() {
