@@ -8,11 +8,9 @@ import hudson.remoting.Channel;
 import hudson.remoting.ChannelClosedException;
 import hudson.remoting.VirtualChannel;
 import java.io.IOException;
-import java.util.List;
-import jenkins.model.Jenkins;
+import java.util.Collections;
 import org.jenkinsci.plugins.scriptler.Messages;
 import org.jenkinsci.plugins.scriptler.config.Script;
-import org.jenkinsci.plugins.scriptler.util.ControllerGroovyScript;
 import org.jenkinsci.plugins.scriptler.util.GroovyScript;
 import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
@@ -41,12 +39,9 @@ public class ScriptlerTokenMacro extends DataBoundTokenMacro {
             throw new MacroEvaluationException(Messages.tokenmacro_AdminScriptOnly(scriptId));
         }
 
-        String scriptText = script.getScriptText();
         VirtualChannel channel;
-        GroovyScript groovyScript;
-        if (script.onlyBuiltIn || Jenkins.get().equals(context.getBuiltOn())) {
+        if (script.onlyBuiltIn) {
             channel = FilePath.localChannel;
-            groovyScript = new ControllerGroovyScript(scriptText, List.of(), true, listener, null, context);
         } else {
             FilePath remoteFilePath = context.getWorkspace();
             if (remoteFilePath == null) {
@@ -54,10 +49,11 @@ public class ScriptlerTokenMacro extends DataBoundTokenMacro {
                 throw new ChannelClosedException((Channel) null, null);
             }
             channel = remoteFilePath.getChannel();
-            groovyScript = new GroovyScript(scriptText, List.of(), true, listener);
         }
 
-        Object output = channel.call(groovyScript);
+        Object output = channel.call(
+                new GroovyScript(script.getScriptText(), Collections.emptyList(), true, listener, null, context));
+
         return output != null ? output.toString() : "";
     }
 
