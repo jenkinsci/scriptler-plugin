@@ -28,7 +28,6 @@ import hudson.Extension;
 import hudson.ExtensionList;
 import hudson.Util;
 import hudson.markup.MarkupFormatter;
-import hudson.markup.RawHtmlMarkupFormatter;
 import hudson.model.*;
 import hudson.security.AccessControlled;
 import hudson.security.Permission;
@@ -76,8 +75,6 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     private static final String NOT_APPROVED_YET = "notApprovedYet";
     private static final String CAN_BYPASS_APPROVAL = "canByPassScriptApproval";
     private static final String SCRIPT = "script";
-
-    private static final MarkupFormatter INSTANCE = RawHtmlMarkupFormatter.INSTANCE;
 
     // used in Jelly view
     public Permission getScriptlerRunScripts() {
@@ -154,7 +151,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
     }
 
     public MarkupFormatter getMarkupFormatter() {
-        return INSTANCE;
+        return Jenkins.get().getMarkupFormatter();
     }
 
     /**
