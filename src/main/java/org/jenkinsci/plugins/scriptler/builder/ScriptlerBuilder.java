@@ -11,13 +11,7 @@ import hudson.Extension;
 import hudson.ExtensionList;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
-import hudson.model.Failure;
-import hudson.model.ParameterValue;
-import hudson.model.ParametersAction;
-import hudson.model.Project;
+import hudson.model.*;
 import hudson.remoting.VirtualChannel;
 import hudson.security.Permission;
 import hudson.tasks.BuildStepDescriptor;
@@ -260,7 +254,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
                         parameter.getName(), TokenMacro.expandAll(build, listener, parameter.getValue())));
             }
             final Object output;
-            if (script.onlyController) {
+            if (script.onlyController || Computer.currentComputer() instanceof Jenkins.MasterComputer) {
                 // When run on controller, make build, launcher, listener available to script
                 output = FilePath.localChannel.call(new ControllerGroovyScript(
                         script.getScriptText(), expandedParams, true, listener, launcher, build));

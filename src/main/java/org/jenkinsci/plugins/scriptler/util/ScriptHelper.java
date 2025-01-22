@@ -170,8 +170,14 @@ public final class ScriptHelper {
             try {
                 Computer comp = Jenkins.get().getComputer(node);
                 TaskListener listener = new StreamTaskListener(sos, StandardCharsets.UTF_8);
-                if (comp == null && "(controller)".equals(node)) {
-                    FilePath.localChannel.call(new GroovyScript(scriptTxt, parameters, false, listener));
+                if ("(controller)".equals(node)) {
+                    FilePath.localChannel.call(new ControllerGroovyScript(
+                            scriptTxt,
+                            parameters,
+                            false,
+                            listener,
+                            Jenkins.get().createLauncher(listener),
+                            null));
                 } else if (comp != null && comp.getChannel() != null) {
                     comp.getChannel().call(new GroovyScript(scriptTxt, parameters, false, listener));
                 }
