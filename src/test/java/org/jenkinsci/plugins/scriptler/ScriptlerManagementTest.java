@@ -15,8 +15,10 @@ import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 @WithJenkins
 class ScriptlerManagementTest {
 
+    private static final String DANGEROUS_TEXT = "<script>alert('PWND!')</script>";
+
     @Test
-    void markupFormatter(@SuppressWarnings("unused") JenkinsRule r) throws IOException {
+    void markupFormatter(JenkinsRule r) throws IOException {
         ScriptlerManagement management = new ScriptlerManagement();
 
         // save text
@@ -24,12 +26,12 @@ class ScriptlerManagementTest {
         assertEquals("Save text", text);
 
         // dangerous text with global formatter
-        text = management.getMarkupFormatter().translate("<script>alert('PWND!')</script>");
+        text = management.getMarkupFormatter().translate(DANGEROUS_TEXT);
         assertEquals("&lt;script&gt;alert(&#039;PWND!&#039;)&lt;/script&gt;", text);
 
         // dangerous text with OWASP formatter
         r.jenkins.setMarkupFormatter(RawHtmlMarkupFormatter.INSTANCE);
-        text = management.getMarkupFormatter().translate("<script>alert('PWND!')</script>");
+        text = management.getMarkupFormatter().translate(DANGEROUS_TEXT);
         assertEquals("", text);
 
         // save text with broken formatter
@@ -40,7 +42,6 @@ class ScriptlerManagementTest {
             }
         };
         r.jenkins.setMarkupFormatter(formatter);
-        assertThrows(
-                IOException.class, () -> management.getMarkupFormatter().translate("<script>alert('PWND!')</script>"));
+        assertThrows(IOException.class, () -> management.getMarkupFormatter().translate(DANGEROUS_TEXT));
     }
 }
