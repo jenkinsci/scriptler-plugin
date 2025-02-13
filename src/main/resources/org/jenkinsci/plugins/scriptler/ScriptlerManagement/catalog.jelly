@@ -37,7 +37,7 @@
             <j:if test="${message != null}">
             <div class="warning">${message}</div>
             </j:if> 
-            <j:set var="catalogName" value="${request.getParameter('catName') ?: 'gh'}" />			
+            <j:set var="catalogName" value="${request2.getParameter('catName') ?: 'gh'}" />			
 			<l:tabBar>
 			     <j:forEach var="c" items="${it.catalogs}">
                     <l:tab name="${c.displayName}" active="${c.info.name == catalogName}" href="./catalog?catName=${c.info.name}" />
