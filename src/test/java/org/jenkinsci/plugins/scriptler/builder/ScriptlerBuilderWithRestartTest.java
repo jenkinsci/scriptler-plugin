@@ -41,17 +41,15 @@ import org.htmlunit.util.NameValuePair;
 import org.htmlunit.xml.XmlPage;
 import org.jenkinsci.plugins.scriptler.ScriptlerManagementHelper;
 import org.jenkinsci.plugins.scriptler.config.Parameter;
-import org.jenkinsci.plugins.scriptler.testharness.RestartableJenkinsExtension;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.hudson.test.RestartableJenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 /**
  * Warning: a user without RUN_SCRIPT can currently only clone an existing builder INSIDE a project.
  * You can search CLONE_NOTE inside this test to see the cases
  */
-@ExtendWith(RestartableJenkinsExtension.class)
+@WithJenkins
 class ScriptlerBuilderWithRestartTest {
     private static final String SCRIPT_CONTENTS = "print 'Hello World!'";
     private static final String SCRIPT_USABLE_1 = "script_usable_1.groovy";
@@ -62,65 +60,49 @@ class ScriptlerBuilderWithRestartTest {
     private static final String SCRIPT_NOT_USABLE = "not_usable.groovy";
 
     @Test
-    void configRoundTrip(RestartableJenkinsRule rule) {
-        rule.then(r -> {
-            r.jenkins.setCrumbIssuer(null);
+    void configRoundTrip(JenkinsRule r) throws Throwable {
+        r.jenkins.setCrumbIssuer(null);
 
-            ScriptlerManagementHelper.saveScript(SCRIPT_USABLE_1, SCRIPT_CONTENTS, true);
-            ScriptlerManagementHelper.saveScript(SCRIPT_USABLE_2, SCRIPT_CONTENTS, true);
-            ScriptlerManagementHelper.saveScript(SCRIPT_USABLE_3, SCRIPT_CONTENTS, true);
-            ScriptlerManagementHelper.saveScript(SCRIPT_USABLE_4, SCRIPT_CONTENTS, true);
-            ScriptlerManagementHelper.saveScript(SCRIPT_NOT_USABLE, SCRIPT_CONTENTS, false);
+        ScriptlerManagementHelper.saveScript(SCRIPT_USABLE_1, SCRIPT_CONTENTS, true);
+        ScriptlerManagementHelper.saveScript(SCRIPT_USABLE_2, SCRIPT_CONTENTS, true);
+        ScriptlerManagementHelper.saveScript(SCRIPT_USABLE_3, SCRIPT_CONTENTS, true);
+        ScriptlerManagementHelper.saveScript(SCRIPT_USABLE_4, SCRIPT_CONTENTS, true);
+        ScriptlerManagementHelper.saveScript(SCRIPT_NOT_USABLE, SCRIPT_CONTENTS, false);
 
-            FreeStyleProject project = r.createFreeStyleProject("test");
+        FreeStyleProject project = r.createFreeStyleProject("test");
 
-            try (JenkinsRule.WebClient wc = r.createWebClient()) {
+        try (JenkinsRule.WebClient wc = r.createWebClient()) {
 
-                WebRequest request =
-                        new WebRequest(new URL(r.getURL() + project.getShortUrl() + "configSubmit"), HttpMethod.POST);
+            WebRequest request =
+                    new WebRequest(new URL(r.getURL() + project.getShortUrl() + "configSubmit"), HttpMethod.POST);
 
-                final String projectName = project.getName();
-                request.setRequestParameters(List.of(new NameValuePair(
-                        "json",
-                        JSONObject.fromObject(Map.of(
-                                        "name",
-                                        projectName,
-                                        "builder",
-                                        Map.of(
-                                                "kind",
-                                                ScriptlerBuilder.class.getName(),
-                                                "builderId",
-                                                "",
-                                                "scriptlerScriptId",
-                                                SCRIPT_USABLE_1,
-                                                "propagateParams",
-                                                true,
-                                                "defineParams",
-                                                Map.of(
-                                                        "parameters",
-                                                        List.of(
-                                                                Map.of("name", "param1", "value", "value1"),
-                                                                Map.of("name", "param2", "value", "value2"))))))
-                                .toString())));
-                HtmlPage page = wc.getPage(request);
-                r.assertGoodStatus(page);
+            final String projectName = project.getName();
+            request.setRequestParameters(List.of(new NameValuePair(
+                    "json",
+                    JSONObject.fromObject(Map.of(
+                                    "name",
+                                    projectName,
+                                    "builder",
+                                    Map.of(
+                                            "kind",
+                                            ScriptlerBuilder.class.getName(),
+                                            "builderId",
+                                            "",
+                                            "scriptlerScriptId",
+                                            SCRIPT_USABLE_1,
+                                            "propagateParams",
+                                            true,
+                                            "defineParams",
+                                            Map.of(
+                                                    "parameters",
+                                                    List.of(
+                                                            Map.of("name", "param1", "value", "value1"),
+                                                            Map.of("name", "param2", "value", "value2"))))))
+                            .toString())));
+            HtmlPage page = wc.getPage(request);
+            r.assertGoodStatus(page);
 
-                ScriptlerBuilder scriptlerBuilder = project.getBuildersList().get(ScriptlerBuilder.class);
-                assertNotNull(scriptlerBuilder);
-                assertNotNull(scriptlerBuilder.getBuilderId());
-                assertEquals(SCRIPT_USABLE_1, scriptlerBuilder.getScriptId());
-                assertTrue(scriptlerBuilder.isPropagateParams());
-                assertIterableEquals(
-                        List.of(new Parameter("param1", "value1"), new Parameter("param2", "value2")),
-                        scriptlerBuilder.getParametersList());
-            }
-        });
-
-        rule.then(r -> {
-            FreeStyleProject p = r.jenkins.getItemByFullName("test", FreeStyleProject.class);
-
-            ScriptlerBuilder scriptlerBuilder =
-                    Objects.requireNonNull(p).getBuildersList().get(ScriptlerBuilder.class);
+            ScriptlerBuilder scriptlerBuilder = project.getBuildersList().get(ScriptlerBuilder.class);
             assertNotNull(scriptlerBuilder);
             assertNotNull(scriptlerBuilder.getBuilderId());
             assertEquals(SCRIPT_USABLE_1, scriptlerBuilder.getScriptId());
@@ -128,32 +110,45 @@ class ScriptlerBuilderWithRestartTest {
             assertIterableEquals(
                     List.of(new Parameter("param1", "value1"), new Parameter("param2", "value2")),
                     scriptlerBuilder.getParametersList());
-        });
+        }
+
+        r.restart();
+
+        FreeStyleProject p = r.jenkins.getItemByFullName("test", FreeStyleProject.class);
+
+        ScriptlerBuilder scriptlerBuilder =
+                Objects.requireNonNull(p).getBuildersList().get(ScriptlerBuilder.class);
+        assertNotNull(scriptlerBuilder);
+        assertNotNull(scriptlerBuilder.getBuilderId());
+        assertEquals(SCRIPT_USABLE_1, scriptlerBuilder.getScriptId());
+        assertTrue(scriptlerBuilder.isPropagateParams());
+        assertIterableEquals(
+                List.of(new Parameter("param1", "value1"), new Parameter("param2", "value2")),
+                scriptlerBuilder.getParametersList());
     }
 
     @Test
-    void configRoundTripConfigXml(RestartableJenkinsRule rule) {
-        rule.then(r -> {
-            r.jenkins.setCrumbIssuer(null);
+    void configRoundTripConfigXml(JenkinsRule r) throws Throwable {
+        r.jenkins.setCrumbIssuer(null);
 
-            ScriptlerManagementHelper.saveScript(SCRIPT_USABLE_1, SCRIPT_CONTENTS, true);
-            ScriptlerManagementHelper.saveScript(SCRIPT_USABLE_2, SCRIPT_CONTENTS, true);
-            ScriptlerManagementHelper.saveScript(SCRIPT_USABLE_3, SCRIPT_CONTENTS, true);
-            ScriptlerManagementHelper.saveScript(SCRIPT_USABLE_4, SCRIPT_CONTENTS, true);
-            ScriptlerManagementHelper.saveScript(SCRIPT_NOT_USABLE, SCRIPT_CONTENTS, false);
+        ScriptlerManagementHelper.saveScript(SCRIPT_USABLE_1, SCRIPT_CONTENTS, true);
+        ScriptlerManagementHelper.saveScript(SCRIPT_USABLE_2, SCRIPT_CONTENTS, true);
+        ScriptlerManagementHelper.saveScript(SCRIPT_USABLE_3, SCRIPT_CONTENTS, true);
+        ScriptlerManagementHelper.saveScript(SCRIPT_USABLE_4, SCRIPT_CONTENTS, true);
+        ScriptlerManagementHelper.saveScript(SCRIPT_NOT_USABLE, SCRIPT_CONTENTS, false);
 
-            FreeStyleProject project = r.createFreeStyleProject("test");
+        FreeStyleProject project = r.createFreeStyleProject("test");
 
-            try (JenkinsRule.WebClient wc = r.createWebClient()) {
+        try (JenkinsRule.WebClient wc = r.createWebClient()) {
 
-                XmlPage xmlPage = wc.goToXml(project.getShortUrl() + "config.xml");
-                r.assertGoodStatus(xmlPage);
-                String xml = xmlPage.getWebResponse().getContentAsString();
+            XmlPage xmlPage = wc.goToXml(project.getShortUrl() + "config.xml");
+            r.assertGoodStatus(xmlPage);
+            String xml = xmlPage.getWebResponse().getContentAsString();
 
-                String modifiedXml = xml.replace(
-                        "<builders/>",
-                        String.format(
-                                """
+            String modifiedXml = xml.replace(
+                    "<builders/>",
+                    String.format(
+                            """
                                 <builders>
                                   <org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder>
                                     <builderId></builderId>
@@ -171,39 +166,38 @@ class ScriptlerBuilderWithRestartTest {
                                     </parameters>
                                   </org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder>
                                 </builders>""",
-                                SCRIPT_USABLE_1));
+                            SCRIPT_USABLE_1));
 
-                WebRequest request = new WebRequest(new URL(project.getAbsoluteUrl() + "config.xml"), HttpMethod.POST);
-                request.setRequestBody(modifiedXml);
-                request.setEncodingType(null);
-                HtmlPage page = wc.getPage(request);
-                r.assertGoodStatus(page);
+            WebRequest request = new WebRequest(new URL(project.getAbsoluteUrl() + "config.xml"), HttpMethod.POST);
+            request.setRequestBody(modifiedXml);
+            request.setEncodingType(null);
+            HtmlPage page = wc.getPage(request);
+            r.assertGoodStatus(page);
 
-                project = r.jenkins.getItemByFullName(project.getFullName(), FreeStyleProject.class);
-                ScriptlerBuilder scriptlerBuilder =
-                        Objects.requireNonNull(project).getBuildersList().get(ScriptlerBuilder.class);
-                assertNotNull(scriptlerBuilder);
-                assertEquals("", scriptlerBuilder.getBuilderId());
-                assertEquals(SCRIPT_USABLE_1, scriptlerBuilder.getScriptId());
-                assertTrue(scriptlerBuilder.isPropagateParams());
-                assertIterableEquals(
-                        List.of(new Parameter("param1", "value1"), new Parameter("param2", "value2")),
-                        scriptlerBuilder.getParametersList());
-            }
-        });
-
-        rule.then(r -> {
-            FreeStyleProject p = r.jenkins.getItemByFullName("test", FreeStyleProject.class);
-
+            project = r.jenkins.getItemByFullName(project.getFullName(), FreeStyleProject.class);
             ScriptlerBuilder scriptlerBuilder =
-                    Objects.requireNonNull(p).getBuildersList().get(ScriptlerBuilder.class);
+                    Objects.requireNonNull(project).getBuildersList().get(ScriptlerBuilder.class);
             assertNotNull(scriptlerBuilder);
-            assertNotNull(scriptlerBuilder.getBuilderId());
+            assertEquals("", scriptlerBuilder.getBuilderId());
             assertEquals(SCRIPT_USABLE_1, scriptlerBuilder.getScriptId());
             assertTrue(scriptlerBuilder.isPropagateParams());
             assertIterableEquals(
                     List.of(new Parameter("param1", "value1"), new Parameter("param2", "value2")),
                     scriptlerBuilder.getParametersList());
-        });
+        }
+
+        r.restart();
+
+        FreeStyleProject p = r.jenkins.getItemByFullName("test", FreeStyleProject.class);
+
+        ScriptlerBuilder scriptlerBuilder =
+                Objects.requireNonNull(p).getBuildersList().get(ScriptlerBuilder.class);
+        assertNotNull(scriptlerBuilder);
+        assertNotNull(scriptlerBuilder.getBuilderId());
+        assertEquals(SCRIPT_USABLE_1, scriptlerBuilder.getScriptId());
+        assertTrue(scriptlerBuilder.isPropagateParams());
+        assertIterableEquals(
+                List.of(new Parameter("param1", "value1"), new Parameter("param2", "value2")),
+                scriptlerBuilder.getParametersList());
     }
 }
