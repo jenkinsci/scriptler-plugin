@@ -318,7 +318,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
                     true,
                     originCatalogName,
                     originId,
-                    new SimpleDateFormat("dd MMM yyyy HH:mm:ss a").format(new Date()),
+                    new SimpleDateFormat("dd MMM yyyy HH:mm:ss").format(new Date()),
                     parameters);
         } else {
             // save (overwrite) the meta information
