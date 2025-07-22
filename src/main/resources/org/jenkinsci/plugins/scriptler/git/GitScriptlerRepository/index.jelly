@@ -7,14 +7,14 @@
             <h1>Accessing Scriptler scripts</h1>
             <p>${%blurb}</p>
             <pre>
-${%git_clone_command(it.httpCloneUrl)}
-<j:if test="${it.sshdPort > 0}">${%git_clone_command(it.sshCloneUrl)}</j:if>
+git clone ${it.httpCloneUrl}
+<j:if test="${it.sshdPort > 0}">git clone ${it.sshCloneUrl}</j:if>
             </pre>
             <j:if test="${it.hasPushPermission()}">
                 <p>
                     ${%reset}
                     <f:form method="POST" action="${app.rootUrl}${it.scriptler.urlName}/hardResetGit">
-                        <f:submit value="${%Hard reset}"/>
+                        <f:submit value="${%hardReset}"/>
                     </f:form>
                 </p>
             </j:if>

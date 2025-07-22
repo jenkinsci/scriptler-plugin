@@ -52,7 +52,7 @@
 										<input type="hidden" name="id" value="${t.id}" />
 										<input type="hidden" name="catalog" value="${catalogName}" />
 										<button type="submit" name="submit_param" value="submit_value" class="scriptler-link-button">
-											<l:icon tooltip="${%import script} '${t.name}'" src="symbol-save-outline plugin-ionicons-api" class="icon-sm jenkins-!-accent-color" />
+											<l:icon tooltip="${%importScript} '${t.name}'" src="symbol-save-outline plugin-ionicons-api" class="icon-sm jenkins-!-accent-color" />
 										</button>
 									</form>
 								</td>
@@ -60,7 +60,7 @@
 									${t.name} <j:if test="${!empty(c.info.scriptDetailUrl)}"> (<a target="_blank" href="${c.info.getReplacedDetailUrl(t.name, t.id)}">details</a>)</j:if>
 								</td>
 								<td class="pane-header">
-									${%by}:
+									by:
 									<j:forEach var="a" items="${t.authors}">
 									   ${a.name}
 									</j:forEach>
@@ -68,10 +68,10 @@
 							</tr>
 							<tr>
 								<td colspan="2">
-								    ${%required core}: ${t.core}
+								    required core: ${t.core}
 								</td>
 								<td rowspan="2" valign="top">
-                                    <b>${%Parameters}:</b><br />
+                                    <b>Parameters:</b><br />
                                     <j:forEach var="p" items="${t.parameters}">
                                        ${p}<br />
                                     </j:forEach>
