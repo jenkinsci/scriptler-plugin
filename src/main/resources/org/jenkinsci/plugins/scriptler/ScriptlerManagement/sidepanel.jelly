@@ -33,15 +33,15 @@ THE SOFTWARE.
     <l:tasks>
       <j:set var="scriptlerRoot" value="${rootURL}/${it.urlName}"/>
       <j:if test="${it.hasAtLeastOneScriptlerPermission()}">
-        <l:task icon="icon-next icon-md" href="${scriptlerRoot}" title="${%Run / Edit Scripts}" />
+        <l:task icon="icon-next icon-md" href="${scriptlerRoot}" title="${%runEditScripts}" />
       </j:if>
       <l:hasPermission permission="${it.scriptlerConfigure}">
-        <l:task icon="icon-new-package icon-md" href="${scriptlerRoot}/scriptSettings" title="${%Add a New Script}" />
+        <l:task icon="icon-new-package icon-md" href="${scriptlerRoot}/scriptSettings" title="${%addNewScript}" />
         <j:if test="${!it.disableRemoteCatalog()}">
-              <l:task icon="icon-folder icon-md" href="${scriptlerRoot}/catalog" title="${%Remote Script Catalogs}" />
+              <l:task icon="icon-folder icon-md" href="${scriptlerRoot}/catalog" title="${%remoteScriptCatalogs}" />
         </j:if>
-        <l:task icon="icon-setting icon-md" href="${scriptlerRoot}/settings" title="${%Scriptler Settings}" />
-        <l:task icon="symbol-git-compare-outline plugin-ionicons-api" href="${rootURL}/${it.gitRepo.urlName}" title="${%Git Repo}" />
+        <l:task icon="icon-setting icon-md" href="${scriptlerRoot}/settings" title="${%scriptlerSettings}" />
+        <l:task icon="symbol-git-compare-outline plugin-ionicons-api" href="${rootURL}/${it.gitRepo.urlName}" title="${%gitRepo}" />
       </l:hasPermission>
     </l:tasks>
   </l:side-panel>
