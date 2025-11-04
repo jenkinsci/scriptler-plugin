@@ -153,10 +153,7 @@ class ScriptlerBuilderTest {
         try (JenkinsRule.WebClient wc = j.createWebClient()) {
 
             String xml = retrieveXmlConfigForProject(wc, project);
-            String modifiedXml = xml.replace(
-                    "<builders/>",
-                    String.format(
-                            """
+            String modifiedXml = xml.replace("<builders/>", String.format("""
                             <builders>
                               <org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder>
                                 <builderId></builderId>
@@ -173,8 +170,7 @@ class ScriptlerBuilderTest {
                                   </org.jenkinsci.plugins.scriptler.config.Parameter>
                                 </parameters>
                               </org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder>
-                            </builders>""",
-                            SCRIPT_USABLE_1));
+                            </builders>""", SCRIPT_USABLE_1));
 
             HtmlPage page = postXmlConfigForProject(wc, project, modifiedXml);
             j.assertGoodStatus(page);
@@ -590,8 +586,7 @@ class ScriptlerBuilderTest {
         return wc.getPage(request);
     }
 
-    private static final String XML_SINGLE_BUILDER_TEMPLATE =
-            """
+    private static final String XML_SINGLE_BUILDER_TEMPLATE = """
                     <org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder>
                         <builderId>%s</builderId>
                         <scriptId>%s</scriptId>
