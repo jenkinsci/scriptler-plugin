@@ -145,10 +145,7 @@ class ScriptlerBuilderWithRestartTest {
             r.assertGoodStatus(xmlPage);
             String xml = xmlPage.getWebResponse().getContentAsString();
 
-            String modifiedXml = xml.replace(
-                    "<builders/>",
-                    String.format(
-                            """
+            String modifiedXml = xml.replace("<builders/>", String.format("""
                                 <builders>
                                   <org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder>
                                     <builderId></builderId>
@@ -165,8 +162,7 @@ class ScriptlerBuilderWithRestartTest {
                                       </org.jenkinsci.plugins.scriptler.config.Parameter>
                                     </parameters>
                                   </org.jenkinsci.plugins.scriptler.builder.ScriptlerBuilder>
-                                </builders>""",
-                            SCRIPT_USABLE_1));
+                                </builders>""", SCRIPT_USABLE_1));
 
             WebRequest request = new WebRequest(new URL(project.getAbsoluteUrl() + "config.xml"), HttpMethod.POST);
             request.setRequestBody(modifiedXml);
