@@ -33,7 +33,7 @@ import java.util.TreeSet;
  */
 public class ScriptSet {
     // have it sorted
-    protected final Set<Script> scriptSet = new TreeSet<>();
+    protected Set<Script> scriptSet = new TreeSet<>();
 
     public Script getScriptById(String id) {
         for (Script scr : scriptSet) {
@@ -89,6 +89,9 @@ public class ScriptSet {
     }
 
     public final Set<Script> getScripts() {
+        if (scriptSet == null) {
+            scriptSet = new TreeSet<>();
+        }
         return Collections.unmodifiableSet(scriptSet);
     }
 
@@ -103,6 +106,9 @@ public class ScriptSet {
     }
 
     public void setScripts(Set<Script> scripts) {
+        if (scriptSet == null) {
+            scriptSet = new TreeSet<>();
+        }
         scriptSet.clear();
         scriptSet.addAll(scripts);
     }
