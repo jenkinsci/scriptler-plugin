@@ -27,6 +27,9 @@ THE SOFTWARE.
 	xmlns:p="/lib/hudson/scriptler">
 
 	<l:layout title="Scriptler - ${%title}" permission="${it.scriptlerRunScripts}" norefresh="true">
+		<st:once>
+			<link rel="stylesheet" href="${resURL}/plugin/scriptler/scriptler.css" />
+		</st:once>
 		<st:include page="sidepanel.jelly" />
 
 		<l:main-panel>
@@ -49,65 +52,55 @@ THE SOFTWARE.
 				<j:out value="${it.markupFormatter.translate(script.comment)}" />
 			</p>
 
-			<form action="triggerScript" method="post" name="triggerscript">
+			<form action="triggerScript" method="post" name="triggerscript" class="scriptler-run-form">
 				<input type="hidden" value="${script.id}" name="id" />
-				<table class="pane">
-					<tr>
-						<td colspan="3">
-							<p>
-								${%executiononclient}
-							</p>
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<j:set var="currentNode" value="${currentNode}" />
-							<f:entry name="node" title="${%SelectionNode}">
-								<select name="node">
-									<j:forEach var="aNode" items="${it.getSlaveAlias(script)}" varStatus="loop">
-										<j:choose>
-											<j:when test="${currentNode==aNode}">
-												<option value="${aNode}" selected="selected">${aNode}</option>
-											</j:when>
-											<j:otherwise>
-												<option value="${aNode}">${aNode}</option>
-											</j:otherwise>
-										</j:choose>
-									</j:forEach>
-								</select>
-							</f:entry>
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<f:optionalBlock name="defineParams" title="${%ParametersDescription}" checked="${!empty(script.parameters)}">
-								<f:entry title="${%Parameters}" field="parameters">
-									<f:repeatable var="param" items="${script.parameters}" name="parameters" noAddButton="true" minimum="1">
-										<table width="100%">
-											<f:entry>
-												${%ParameterName} 
-												<input type="text" name="name" value="${param.name}" size="50" />
-												${%ParameterValue} 
-												<input type="text" name="value" value="${param.value}" size="80" />
-											</f:entry>
-										</table>
-									</f:repeatable>
-								</f:entry>
-							</f:optionalBlock>
-						</td>
-					</tr>
-				</table>
+				<p class="scriptler-runscript-hint">
+					${%executiononclient}
+				</p>
+				<j:set var="currentNode" value="${currentNode}" />
+				<f:entry name="node" title="${%SelectionNode}">
+					<div class="jenkins-select scriptler-node-select">
+						<select name="node" class="jenkins-select__input">
+							<j:forEach var="aNode" items="${it.getSlaveAlias(script)}" varStatus="loop">
+								<j:choose>
+									<j:when test="${currentNode==aNode}">
+										<option value="${aNode}" selected="selected">${aNode}</option>
+									</j:when>
+									<j:otherwise>
+										<option value="${aNode}">${aNode}</option>
+									</j:otherwise>
+								</j:choose>
+							</j:forEach>
+						</select>
+					</div>
+				</f:entry>
+				<f:optionalBlock name="defineParams" title="${%ParametersDescription}" checked="${!empty(script.parameters)}">
+					<f:entry title="${%Parameters}" field="parameters">
+						<div class="scriptler-param-list">
+							<f:repeatable var="param" items="${script.parameters}" name="parameters" noAddButton="true" minimum="1">
+								<div class="scriptler-param-row">
+									<span class="scriptler-param-label">${%ParameterName}</span>
+									<input type="text" name="name" value="${param.name}" class="jenkins-input scriptler-param-input" />
+									<span class="scriptler-param-label">${%ParameterValue}</span>
+									<input type="text" name="value" value="${param.value}" class="jenkins-input scriptler-param-input" />
+								</div>
+							</f:repeatable>
+						</div>
+					</f:entry>
+				</f:optionalBlock>
 
-				<textarea id="script" autofocus="" name="script" class="${h.isUnitTest ? '' : 'script'}">
-					<j:choose>
-						<j:when test="${scriptNotFound}">
-							${%ScriptNotFound}
-						</j:when>
-						<j:otherwise>
-							${script.script}
-						</j:otherwise>
-					</j:choose>
-				</textarea>
+				<f:entry title="${%Script}">
+					<textarea id="script" autofocus="" name="script" class="${h.isUnitTest ? '' : 'script'}">
+						<j:choose>
+							<j:when test="${scriptNotFound}">
+								${%ScriptNotFound}
+							</j:when>
+							<j:otherwise>
+								${script.script}
+							</j:otherwise>
+						</j:choose>
+					</textarea>
+				</f:entry>
 			<j:if test="${notApprovedYet}">
 				<j:choose>
 					<j:when test="${h.hasPermission(it, app.RUN_SCRIPTS)}">

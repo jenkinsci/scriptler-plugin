@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.scriptler.restapi;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -93,6 +94,24 @@ class ScriptlerRestApiTest {
 
             j.assertGoodStatus(page);
             assertTrue(page.getWebResponse().getContentAsString().contains("welcome, world and scriptler!"));
+        }
+    }
+
+    @Test
+    void testSuccessWithChangedParameters() throws Exception {
+        try (JenkinsRule.WebClient webClient = j.createWebClient()) {
+            HtmlPage runScriptPage = webClient.goTo("scriptler/runScript?id=dummy.groovy");
+            HtmlForm triggerscript = runScriptPage.getFormByName("triggerscript");
+            List<HtmlTextInput> valueInputs =
+                    runScriptPage.getByXPath("//div[contains(@class,'scriptler-param-row')]//input[@name='value']");
+            assertEquals(2, valueInputs.size(), "Unexpected amount of parameter value inputs");
+            valueInputs.get(0).setValueAttribute("jenkins");
+            valueInputs.get(1).setValueAttribute("plugin");
+
+            HtmlPage page = j.submit(triggerscript);
+
+            j.assertGoodStatus(page);
+            assertTrue(page.getWebResponse().getContentAsString().contains("hello jenkins, this is plugin."));
         }
     }
 
