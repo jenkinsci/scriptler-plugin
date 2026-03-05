@@ -39,7 +39,7 @@
 							<j:set var="approved" value="${i.approved}" />
 							<j:set var="t" value="${i.script}" />
 							<tr>
-								<td class="scriptler-toolbar" width="1%">
+								<td class="scriptler-toolbar">
 									<j:choose>
 										<j:when test="${approved == null}">
 											<l:icon tooltip="${%fileNotAvailable}" src="symbol-remove-circle plugin-ionicons-api" class="icon-sm jenkins-!-error-color" />

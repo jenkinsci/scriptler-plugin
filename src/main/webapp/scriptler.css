@@ -73,10 +73,14 @@
   white-space: normal;
 }
 
+.scriptler-catalog-params {
+  vertical-align: top;
+}
+
 .scriptler-catalog-import {
   text-align: center;
   white-space: nowrap;
-  width: 1%;
+  width: 20px;
 }
 
 .scriptler-run-form,
