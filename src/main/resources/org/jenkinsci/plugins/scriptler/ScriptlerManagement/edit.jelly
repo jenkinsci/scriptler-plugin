@@ -27,7 +27,7 @@ THE SOFTWARE.
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
 	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:p="/lib/scriptler">
-	
+
 	<l:layout title="Scriptler - ${%title}" permission="${it.scriptlerConfigure}" norefresh="true">
 		<st:once>
 			<link rel="stylesheet" href="${resURL}/plugin/scriptler/scriptler.css" />
@@ -52,19 +52,19 @@ THE SOFTWARE.
 					<f:checkbox name="onlyBuiltIn" checked="${script.onlyBuiltIn}" />
 				</f:entry>
 				<f:block>
-						<div class="scriptler-edit-params">
-							<f:optionalBlock name="defineParams" title="${%ParametersDescription}" checked="${!empty(script.parameters)}">
-								<f:entry title="${%Parameters}" field="parameters">
-									<j:set var="deleteText" value="${%DeleteParameter}" />
-									<f:repeatable var="param" items="${script.parameters}" name="parameters" add="${%AddParameter}"
-																minimum="1">
-											<div class="show-if-not-only">
-												<button class="repeatable-delete danger" type="button" title="${deleteText}" aria-label="${deleteText}">
-													<l:icon src="symbol-close" />
-												</button>
-											</div>
-										<f:entry title="${%ParameterName}">
-											<f:textbox name="name" value="${param.name}"/>
+					<div class="scriptler-edit-params">
+						<f:optionalBlock name="defineParams" title="${%ParametersDescription}" checked="${!empty(script.parameters)}">
+							<f:entry title="${%Parameters}" field="parameters">
+								<j:set var="deleteText" value="${%DeleteParameter}" />
+								<f:repeatable var="param" items="${script.parameters}" name="parameters" add="${%AddParameter}"
+															minimum="1">
+									<div class="show-if-not-only">
+										<button class="repeatable-delete danger" type="button" title="${deleteText}" aria-label="${deleteText}">
+											<l:icon src="symbol-close" />
+										</button>
+									</div>
+									<f:entry title="${%ParameterName}">
+										<f:textbox name="name" value="${param.name}"/>
 									</f:entry>
 									<f:entry title="${%ParameterDefaultValue}">
 										<f:textbox name="value" value="${param.value}"/>
@@ -73,7 +73,7 @@ THE SOFTWARE.
 							</f:entry>
 						</f:optionalBlock>
 					</div>
-				</f:block>					
+				</f:block>
 				<f:entry title="${%Script}">
 					<textarea id="script" name="script" class="script">
 						<j:choose>
@@ -96,14 +96,14 @@ THE SOFTWARE.
 							<j:otherwise>
 								<div class="warning">${%NotApprovedYet}</div>
 							</j:otherwise>
-						</j:choose>			
+						</j:choose>
 						<br />
 					</j:if>
 					<f:submit value="${%Save}" />
 				</f:block>
-				</f:form>
-			</l:main-panel>
-		</l:layout>
-	<st:adjunct includes="org.kohsuke.stapler.codemirror.mode.clike.clike"/>
-    <st:adjunct includes="org.kohsuke.stapler.codemirror.theme.default"/>
+			</f:form>
+		</l:main-panel>
+	</l:layout>
+	<st:adjunct includes="org.kohsuke.stapler.codemirror.mode.clike.clike" />
+	<st:adjunct includes="org.kohsuke.stapler.codemirror.theme.default" />
 </j:jelly>
