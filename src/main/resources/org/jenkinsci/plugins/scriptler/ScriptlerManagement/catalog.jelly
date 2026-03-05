@@ -48,7 +48,7 @@
 					<tbody>
 						<j:forEach var="t" items="${it.getCatalogByName(catalogName).entries}">
 							<tr>
-								<td class="scriptler-catalog-import" width="20">
+								<td class="scriptler-catalog-import">
 									<form method="post" action="downloadScript" class="scriptler-inline">
 										<input type="hidden" name="id" value="${t.id}" />
 										<input type="hidden" name="catalog" value="${catalogName}" />
@@ -71,7 +71,7 @@
 								<td colspan="2" class="scriptler-catalog-meta">
 								    required core: ${t.core}
 								</td>
-								<td rowspan="2" valign="top" class="scriptler-catalog-params">
+								<td rowspan="2" class="scriptler-catalog-params">
                                     <b>Parameters:</b><br />
                                     <j:forEach var="p" items="${t.parameters}">
                                        ${p}<br />
