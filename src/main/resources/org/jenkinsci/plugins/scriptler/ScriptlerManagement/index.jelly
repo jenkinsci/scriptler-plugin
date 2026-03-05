@@ -51,18 +51,16 @@
 											<l:icon tooltip="${%scriptNotYetApproved}" src="symbol-warning plugin-ionicons-api" class="icon-sm jenkins-!-warning-color"/>
 										</j:otherwise>
 									</j:choose>
-									<j:choose>
-										<j:when test="${t.nonAdministerUsing}">
-											<span class="scriptler-icon-slot">
+									<span class="scriptler-icon-slot">
+										<j:choose>
+											<j:when test="${t.nonAdministerUsing}">
 												<l:icon tooltip="${%usableInBuildStep}" src="symbol-construct-outline plugin-ionicons-api" class="icon-sm jenkins-!-text-color-secondary" />
-											</span>
-										</j:when>
-										<j:otherwise>
-											<span class="scriptler-icon-slot">
+											</j:when>
+											<j:otherwise>
 												<l:icon tooltip="${%notUsableInBuildStep}" src="symbol-lock-closed-outline plugin-ionicons-api" class="icon-sm jenkins-!-text-color-secondary" />
-											</span>
-										</j:otherwise>
-									</j:choose>
+											</j:otherwise>
+										</j:choose>
+									</span>
 									<l:hasPermission permission="${it.scriptlerRunScripts}">
 										<a href="runScript?id=${t.id}" class="scriptler-icon-slot">
 											<l:icon tooltip="${%runScript} ${t.name}" src="symbol-terminal-outline plugin-ionicons-api" class="icon-sm jenkins-!-text-color-secondary" />
