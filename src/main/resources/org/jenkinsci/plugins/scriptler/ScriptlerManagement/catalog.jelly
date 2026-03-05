@@ -44,10 +44,11 @@
                  </j:forEach>
             </l:tabBar>
 			<div class="excerpt">
-				<table class="pane">
+				<table class="jenkins-table scriptler-catalog-table">
+					<tbody>
 						<j:forEach var="t" items="${it.getCatalogByName(catalogName).entries}">
-							<tr valign="center" style="border-top: 0px;">
-								<td class="pane" width="20">
+							<tr>
+								<td class="scriptler-catalog-import">
 									<form method="post" action="downloadScript" class="scriptler-inline">
 										<input type="hidden" name="id" value="${t.id}" />
 										<input type="hidden" name="catalog" value="${catalogName}" />
@@ -56,10 +57,10 @@
 										</button>
 									</form>
 								</td>
-								<td class="pane-header">
+								<td class="scriptler-catalog-name">
 									${t.name} <j:if test="${!empty(c.info.scriptDetailUrl)}"> (<a target="_blank" href="${c.info.getReplacedDetailUrl(t.name, t.id)}">details</a>)</j:if>
 								</td>
-								<td class="pane-header">
+								<td class="scriptler-catalog-authors">
 									by:
 									<j:forEach var="a" items="${t.authors}">
 									   ${a.name}
@@ -67,10 +68,10 @@
 								</td>
 							</tr>
 							<tr>
-								<td colspan="2">
+								<td colspan="2" class="scriptler-catalog-meta">
 								    required core: ${t.core}
 								</td>
-								<td rowspan="2" valign="top">
+								<td rowspan="2" class="scriptler-catalog-params">
                                     <b>Parameters:</b><br />
                                     <j:forEach var="p" items="${t.parameters}">
                                        ${p}<br />
@@ -78,11 +79,12 @@
                                 </td>
 							</tr>
 							<tr>
-								<td colspan="2" style="white-space: normal;">
+								<td colspan="2" class="scriptler-catalog-comment">
 									<j:out value="${it.markupFormatter.translate(t.comment)}" />
 								</td>
 							</tr>
 						</j:forEach>
+					</tbody>
 				</table>
 			</div>
 		</l:main-panel>

@@ -26,6 +26,7 @@
 
 .scriptler-toolbar {
   white-space: nowrap;
+  width: 1%;
 }
 
 .scriptler-toolbar .scriptler-icon-slot {
@@ -36,4 +37,234 @@
 
 .scriptler-icon-slot:visited {
   color: inherit;
+}
+
+.scriptler-list-table,
+.scriptler-catalog-table {
+  margin-top: 0.5rem;
+}
+
+.scriptler-list-table .scriptler-toolbar {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.scriptler-script-name,
+.scriptler-catalog-name {
+  font-weight: var(--font-bold-weight);
+}
+
+.scriptler-script-comment {
+  margin-top: 0.3rem;
+}
+
+.scriptler-script-comment,
+.scriptler-origin-cell,
+.scriptler-catalog-authors,
+.scriptler-catalog-meta,
+.scriptler-catalog-params,
+.scriptler-catalog-comment {
+  color: var(--text-color-secondary);
+}
+
+.scriptler-script-comment,
+.scriptler-origin-cell,
+.scriptler-catalog-comment {
+  white-space: normal;
+}
+
+.scriptler-catalog-params {
+  vertical-align: top;
+}
+
+.scriptler-catalog-import {
+  text-align: center;
+  white-space: nowrap;
+  width: 20px;
+}
+
+.scriptler-run-form,
+.scriptler-edit-form {
+  --scriptler-name-input-width: clamp(14rem, 22vw, 16.5rem);
+  --scriptler-param-row-min-height: 38px;
+  --scriptler-delete-btn-size: 1.875rem;
+}
+
+.scriptler-run-form {
+  margin-bottom: 1rem;
+}
+
+.scriptler-runscript-hint {
+  margin: 0.5rem 0 0.8rem;
+}
+
+.scriptler-run-form .jenkins-form-item {
+  margin: 0 0 0.65rem;
+  max-width: var(--form-item-max-width);
+}
+
+.scriptler-run-form .optionalBlock-container {
+  margin-bottom: 0.9rem;
+}
+
+.scriptler-node-select {
+  max-width: 26rem;
+}
+
+.scriptler-param-row {
+  display: grid;
+  gap: 0.35rem 0.65rem;
+  grid-template-columns: auto var(--scriptler-name-input-width) auto minmax(18rem, 1fr);
+}
+
+.scriptler-param-list,
+.scriptler-param-list .repeated-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.scriptler-param-list {
+  max-width: var(--form-item-max-width);
+  width: 100%;
+}
+
+.scriptler-param-list .repeated-chunk {
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--text-color) 4%, transparent);
+  margin: 0;
+}
+
+.scriptler-param-list .repeated-chunk > .repeated-chunk__header,
+.scriptler-edit-form .scriptler-edit-params .repeated-chunk > .repeated-chunk__header {
+  display: none;
+  min-height: 0;
+}
+
+.scriptler-param-list .jenkins-repeated-chunk__content {
+  padding: 0.25rem 0.55rem;
+}
+
+.scriptler-param-label {
+  color: var(--text-color);
+  font-weight: var(--font-bold-weight);
+  white-space: nowrap;
+}
+
+.scriptler-edit-form .jenkins-form-description {
+  margin-top: 0.2rem;
+}
+
+.scriptler-edit-form .jenkins-form-item {
+  margin-bottom: 0.65rem;
+}
+
+.scriptler-edit-form .scriptler-edit-params .repeated-chunk {
+  gap: 0.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.scriptler-edit-form .scriptler-edit-params .form-container.tr {
+  margin-top: 0.25rem;
+  padding-left: 1.75rem;
+}
+
+.scriptler-edit-form .scriptler-edit-params .jenkins-repeated-chunk__content {
+  display: grid;
+  gap: 0.35rem 0.75rem;
+  grid-template-columns: max-content minmax(18rem, 1fr);
+  padding: 0.25rem 2.75rem 0.25rem 0.4rem;
+}
+
+.scriptler-edit-form .scriptler-edit-params .jenkins-repeated-chunk__content > .show-if-not-only {
+  display: contents;
+  margin: 0;
+}
+
+.scriptler-edit-form .scriptler-edit-params .repeated-chunk.only .jenkins-repeated-chunk__content > .show-if-not-only .repeatable-delete {
+  display: none;
+}
+
+.scriptler-edit-form .scriptler-edit-params .jenkins-repeated-chunk__content .repeatable-delete {
+  align-items: center;
+  display: inline-flex;
+  height: var(--scriptler-delete-btn-size);
+  justify-content: center;
+  max-width: var(--scriptler-delete-btn-size);
+  min-width: var(--scriptler-delete-btn-size);
+  padding: 0;
+  transition: none;
+  width: var(--scriptler-delete-btn-size);
+}
+
+.scriptler-edit-form .scriptler-edit-params .jenkins-repeated-chunk__content .repeatable-delete svg {
+  opacity: 1;
+}
+
+.scriptler-param-row,
+.scriptler-edit-form .scriptler-edit-params .jenkins-repeated-chunk__content > .jenkins-form-item,
+.scriptler-edit-form .scriptler-edit-params .jenkins-repeated-chunk__content > .jenkins-form-item .jenkins-form-label {
+  align-items: center;
+  min-height: var(--scriptler-param-row-min-height);
+}
+
+.scriptler-edit-form .scriptler-edit-params .jenkins-repeated-chunk__content > .jenkins-form-item {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.scriptler-edit-form .scriptler-edit-params .jenkins-repeated-chunk__content > .jenkins-form-item .jenkins-form-label {
+  display: inline-flex;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.scriptler-edit-form .scriptler-edit-params .jenkins-repeated-chunk__content > .jenkins-form-item .setting-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.scriptler-edit-form .scriptler-edit-params .jenkins-repeated-chunk__content > .jenkins-form-item .setting-main .jenkins-input[name="name"] {
+  max-width: var(--scriptler-name-input-width);
+  width: var(--scriptler-name-input-width);
+}
+
+.scriptler-edit-form .scriptler-edit-params .jenkins-repeated-chunk__content > .jenkins-form-item,
+.scriptler-edit-form .scriptler-edit-params .jenkins-repeated-chunk__content > .jenkins-form-item .jenkins-form-label,
+.scriptler-edit-form .scriptler-edit-params .jenkins-repeated-chunk__content > .jenkins-form-item .setting-main {
+  margin: 0;
+}
+
+.scriptler-param-input {
+  margin: 0;
+  width: 100%;
+}
+
+.scriptler-edit-form .scriptler-edit-params .jenkins-repeated-chunk__content > .jenkins-form-item .setting-main .jenkins-input {
+  box-sizing: border-box;
+  margin: 0;
+  width: 100%;
+}
+
+.scriptler-edit-form .scriptler-edit-params .repeatable-add {
+  margin-top: 0.2rem;
+}
+
+@media (max-width: 900px) {
+  .scriptler-param-row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .scriptler-param-row .scriptler-param-input {
+    min-width: 0;
+  }
+
+  .scriptler-edit-form .scriptler-edit-params .jenkins-repeated-chunk__content {
+    grid-template-columns: 1fr;
+  }
+
+  .scriptler-edit-form .scriptler-edit-params .jenkins-repeated-chunk__content > .jenkins-form-item .setting-main .jenkins-input[name="name"] {
+    max-width: 100%;
+    width: 100%;
+  }
 }

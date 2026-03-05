@@ -27,12 +27,15 @@ THE SOFTWARE.
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
 	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:p="/lib/scriptler">
-	
+
 	<l:layout title="Scriptler - ${%title}" permission="${it.scriptlerConfigure}" norefresh="true">
+		<st:once>
+			<link rel="stylesheet" href="${resURL}/plugin/scriptler/scriptler.css" />
+		</st:once>
 		<st:include page="sidepanel.jelly" />
 		<l:main-panel>
 			<h1>${%title}</h1>
-			<f:form name="scriptAdd" method="post" action="scriptAdd">
+			<f:form name="scriptAdd" method="post" action="scriptAdd" class="scriptler-edit-form">
 				<f:entry title="${%Id}" description="${%IdDescription}">
 					<f:textbox name="id" value="${script.id}" />
 				</f:entry>
@@ -49,13 +52,16 @@ THE SOFTWARE.
 					<f:checkbox name="onlyBuiltIn" checked="${script.onlyBuiltIn}" />
 				</f:entry>
 				<f:block>
-					<div>
+					<div class="scriptler-edit-params">
 						<f:optionalBlock name="defineParams" title="${%ParametersDescription}" checked="${!empty(script.parameters)}">
 							<f:entry title="${%Parameters}" field="parameters">
+								<j:set var="deleteText" value="${%DeleteParameter}" />
 								<f:repeatable var="param" items="${script.parameters}" name="parameters" add="${%AddParameter}"
 															minimum="1">
 									<div class="show-if-not-only">
-										<f:repeatableDeleteButton value="${%DeleteParameter}"/>
+										<button class="repeatable-delete danger" type="button" title="${deleteText}" aria-label="${deleteText}">
+											<l:icon src="symbol-close" />
+										</button>
 									</div>
 									<f:entry title="${%ParameterName}">
 										<f:textbox name="name" value="${param.name}"/>
@@ -67,7 +73,7 @@ THE SOFTWARE.
 							</f:entry>
 						</f:optionalBlock>
 					</div>
-				</f:block>					
+				</f:block>
 				<f:entry title="${%Script}">
 					<textarea id="script" name="script" class="script">
 						<j:choose>
@@ -90,7 +96,7 @@ THE SOFTWARE.
 							<j:otherwise>
 								<div class="warning">${%NotApprovedYet}</div>
 							</j:otherwise>
-						</j:choose>			
+						</j:choose>
 						<br />
 					</j:if>
 					<f:submit value="${%Save}" />
@@ -98,6 +104,6 @@ THE SOFTWARE.
 			</f:form>
 		</l:main-panel>
 	</l:layout>
-	<st:adjunct includes="org.kohsuke.stapler.codemirror.mode.clike.clike"/>
-    <st:adjunct includes="org.kohsuke.stapler.codemirror.theme.default"/>
+	<st:adjunct includes="org.kohsuke.stapler.codemirror.mode.clike.clike" />
+	<st:adjunct includes="org.kohsuke.stapler.codemirror.theme.default" />
 </j:jelly>
