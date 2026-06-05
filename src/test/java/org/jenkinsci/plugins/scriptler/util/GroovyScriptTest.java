@@ -93,11 +93,6 @@ class GroovyScriptTest {
 
     private GroovyScript newInstance(ByteArrayOutputStream sos, String scriptSource, Parameter... params) {
         return new GroovyScript(
-                scriptSource, Arrays.asList(params), true, new StreamTaskListener(sos, StandardCharsets.UTF_8)) {
-            @Override
-            public ClassLoader getClassLoader() {
-                return Thread.currentThread().getContextClassLoader();
-            }
-        };
+                scriptSource, Arrays.asList(params), true, new StreamTaskListener(sos, StandardCharsets.UTF_8));
     }
 }
