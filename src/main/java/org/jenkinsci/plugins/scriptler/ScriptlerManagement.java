@@ -200,7 +200,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         }
 
         for (ScriptInfoCatalog<ScriptInfo> scriptInfoCatalog : getCatalogs()) {
-            if (catalogName.equals(scriptInfoCatalog.getInfo().name)) {
+            if (catalogName.equals(scriptInfoCatalog.getInfo().name())) {
                 final ScriptInfo info = scriptInfoCatalog.getEntryById(id);
                 final String source = scriptInfoCatalog.getScriptSource(scriptInfoCatalog.getEntryById(id));
                 final List<Parameter> paramList = new ArrayList<>();
@@ -784,7 +784,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         if (catalogName != null && !catalogName.isBlank()) {
             for (ScriptInfoCatalog<ScriptInfo> sic : getCatalogs()) {
                 final CatalogInfo info = sic.getInfo();
-                if (catalogName.equals(info.name)) {
+                if (catalogName.equals(info.name())) {
                     return sic;
                 }
             }
@@ -796,7 +796,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
         if (catalogName != null && !catalogName.isBlank()) {
             for (ScriptInfoCatalog<ScriptInfo> sic : getCatalogs()) {
                 final CatalogInfo info = sic.getInfo();
-                if (catalogName.equals(info.name)) {
+                if (catalogName.equals(info.name())) {
                     return info;
                 }
             }
