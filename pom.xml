@@ -29,7 +29,7 @@
     <spotless.check.skip>false</spotless.check.skip>
     <ban-junit4-imports.skip>false</ban-junit4-imports.skip>
     <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
-    <jenkins.baseline>2.504</jenkins.baseline>
+    <jenkins.baseline>2.541</jenkins.baseline>
     <jenkins.version>${jenkins.baseline}.3</jenkins.version>
   </properties>
 
@@ -38,7 +38,7 @@
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-${jenkins.baseline}.x</artifactId>
-        <version>5983.v443959746f1f</version>
+        <version>6815.v1fb_2a_fee3765</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
