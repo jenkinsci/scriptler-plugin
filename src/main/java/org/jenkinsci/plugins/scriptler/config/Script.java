@@ -30,6 +30,8 @@ import hudson.Util;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 public class Script implements Comparable<Script>, NamedResource, Serializable {
     @Serial
@@ -79,6 +81,7 @@ public class Script implements Comparable<Script>, NamedResource, Serializable {
     /**
      * used to create/update a new script in the UI
      */
+    @DataBoundConstructor
     public Script(
             String id,
             String name,
@@ -219,6 +222,7 @@ public class Script implements Comparable<Script>, NamedResource, Serializable {
         return getScriptText();
     }
 
+    @DataBoundSetter
     @SuppressFBWarnings("PA_PUBLIC_PRIMITIVE_ATTRIBUTE")
     @SuppressWarnings({"deprecated", "java:S1874"})
     public void setScriptText(String scriptText) {
