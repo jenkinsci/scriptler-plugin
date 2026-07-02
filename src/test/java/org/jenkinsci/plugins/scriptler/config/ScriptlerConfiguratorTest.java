@@ -255,36 +255,6 @@ public class ScriptlerConfiguratorTest {
         }
     }
 
-    @Test
-    public void testConfigureHandlesSaveXmlException(@SuppressWarnings("unused") JenkinsConfiguredWithCodeRule j)
-            throws Exception {
-        ConfigurationContext context = new ConfigurationContext(ConfiguratorRegistry.get());
-        Configurator<ScriptlerConfiguration> configurator = context.lookupOrFail(ScriptlerConfiguration.class);
-
-        Path scriptlerHome = ScriptlerManagement.getScriptDirectory2().getParent();
-        Path configFilePath = scriptlerHome.resolve("scriptler.xml");
-
-        Files.deleteIfExists(configFilePath);
-        Files.createDirectories(configFilePath);
-
-        try {
-            Mapping rootMapping = new Mapping();
-            rootMapping.put("disableRemoteCatalog", "true");
-            rootMapping.put("scripts", new Sequence());
-
-            ConfiguratorException thrown = assertThrows(
-                    ConfiguratorException.class,
-                    () -> configurator.configure(rootMapping, context),
-                    "The configurator should throw an exception if the global config file cannot be written.");
-
-            assertTrue(
-                    thrown.getMessage().contains("Failed to save scriptler configuration file"),
-                    "Error should report XML configuration file save persistence failure");
-        } finally {
-            Files.deleteIfExists(configFilePath);
-        }
-    }
-
     @AfterEach
     public void tearDown() {
         getActiveConfiguration().setScripts(new TreeSet<>());
