@@ -8,3 +8,5 @@
 /dummy.groovy
 /.idea
 /scriptler.iml
+.DS_Store
+**/.DS_Store

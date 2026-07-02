@@ -1,0 +1,10 @@
+scriptler:
+  disableRemoteCatalog: true
+  scripts:
+    - id: "test-script.groovy"
+      name: "My Test Script"
+      comment: "A test script deployed via JCasC"
+      scriptText: |
+        println 'Hello World'
+      nonAdministerUsing: false
+      parameters: []
