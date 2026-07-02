@@ -109,13 +109,8 @@ public class ScriptlerConfigurator implements RootElementConfigurator<ScriptlerC
 
                 Mapping scriptMap = node.asMapping();
                 if (scriptMap.containsKey("scriptText")) {
-                    try {
-                        String scriptText =
-                                scriptMap.get("scriptText").asScalar().getValue();
-                        script.setScriptText(scriptText);
-                    } catch (Exception e) {
-                        throw new ConfiguratorException(this, "Failed to parse scriptText for script " + id, e);
-                    }
+                    String scriptText = scriptMap.get("scriptText").asScalar().getValue();
+                    script.setScriptText(scriptText);
                 }
 
                 String fixedFileName = id.endsWith(".groovy") ? id : id + ".groovy";

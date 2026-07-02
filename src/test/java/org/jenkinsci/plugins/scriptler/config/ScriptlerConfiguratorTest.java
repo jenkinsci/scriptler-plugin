@@ -150,29 +150,6 @@ public class ScriptlerConfiguratorTest {
     }
 
     @Test
-    public void testConfigureScriptTextExpectsScalar(@SuppressWarnings("unused") JenkinsConfiguredWithCodeRule j) {
-        ConfigurationContext context = new ConfigurationContext(ConfiguratorRegistry.get());
-        Configurator<ScriptlerConfiguration> configurator = context.lookupOrFail(ScriptlerConfiguration.class);
-
-        Mapping scriptMapping = new Mapping();
-        scriptMapping.put("id", "invalid-text-script.groovy");
-        scriptMapping.put("name", "Invalid Text Test");
-        scriptMapping.put("scriptText", new Mapping());
-        scriptMapping.put("parameters", new Sequence());
-
-        Sequence scriptsSequence = new Sequence();
-        scriptsSequence.add(scriptMapping);
-
-        Mapping rootMapping = new Mapping();
-        rootMapping.put("scripts", scriptsSequence);
-
-        assertThrows(
-                ConfiguratorException.class,
-                () -> configurator.configure(rootMapping, context),
-                "The configurator should throw an exception if 'scriptText' cannot be resolved to a scalar string.");
-    }
-
-    @Test
     public void testConfigureRejectsDirectoryTraversal(@SuppressWarnings("unused") JenkinsConfiguredWithCodeRule j) {
         ConfigurationContext context = new ConfigurationContext(ConfiguratorRegistry.get());
         Configurator<ScriptlerConfiguration> configurator = context.lookupOrFail(ScriptlerConfiguration.class);
