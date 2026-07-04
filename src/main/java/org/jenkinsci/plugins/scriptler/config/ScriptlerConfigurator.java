@@ -70,7 +70,7 @@ public class ScriptlerConfigurator implements RootElementConfigurator<ScriptlerC
                 throw new ConfiguratorException(this, "The 'scripts' attribute must be a sequence (list).", e);
             }
 
-            Configurator<?> scriptConfigurator = context.lookupOrFail(Script.class);
+            Configurator<Script> scriptConfigurator = context.lookupOrFail(Script.class);
 
             for (CNode node : sequence) {
                 scriptConfigurator.check(node, context);
@@ -98,10 +98,9 @@ public class ScriptlerConfigurator implements RootElementConfigurator<ScriptlerC
             Sequence sequence = mapping.get("scripts").asSequence();
             SortedSet<Script> newScriptsSet = new TreeSet<>();
 
-            Configurator<?> scriptConfigurator = context.lookupOrFail(Script.class);
-
+            Configurator<Script> scriptConfigurator = context.lookupOrFail(Script.class);
             for (CNode node : sequence) {
-                Script script = (Script) scriptConfigurator.configure(node, context);
+                Script script = scriptConfigurator.configure(node, context);
                 String id = script.getId();
                 if (id == null || id.isEmpty()) {
                     continue;
@@ -174,7 +173,7 @@ public class ScriptlerConfigurator implements RootElementConfigurator<ScriptlerC
 
         Sequence sequence = new Sequence();
 
-        Configurator<Object> rawConfigurator = context.lookupOrFail(Script.class);
+        Configurator<Script> rawConfigurator = context.lookupOrFail(Script.class);
 
         for (Script s : instance.getScripts()) {
             Script copied = s.copy();
