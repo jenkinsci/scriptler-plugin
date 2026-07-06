@@ -283,7 +283,7 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
             String originId,
             @NonNull List<Parameter> parameters)
             throws IOException {
-        script = script == null ? "TODO" : script;
+        script = Util.fixNull(script);
         if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException("'id' must not be empty!");
         }
@@ -494,8 +494,8 @@ public class ScriptlerManagement extends ManagementLink implements RootAction {
 
         Script script = ScriptHelper.getScript(id, true);
         if (script == null) {
-            // TODO check if we cannot do better here
-            throw new IOException(Messages.scriptNotFound(id));
+            rsp.sendError(HttpServletResponse.SC_NOT_FOUND, Messages.scriptNotFound(id));
+            return;
         }
         if (script.getScriptText() == null) {
             req.setAttribute("scriptNotFound", true);
