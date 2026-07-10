@@ -378,7 +378,7 @@ public class ScriptlerBuilder extends Builder implements Serializable {
         }
 
         public List<Script> getScripts() {
-            // TODO currently only script for RUN_SCRIPT permissions are returned?
+            // Returns only scripts that are allowed to run in a build step.
             List<Script> scriptsForBuilder = new ArrayList<>();
             for (Script script : getConfig().getScripts()) {
                 if (script.nonAdministerUsing) {
