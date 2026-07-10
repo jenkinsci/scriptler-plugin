@@ -70,10 +70,7 @@
 				</f:entry>
 				<f:block>
 					<f:entry title="${File}">
-						<!-- @size is for other browsers, @style is for IE -->
-						<!-- TODO switch to f:file after baseline includes https://github.com/jenkinsci/jenkins/pull/7452 -->
-						<input type="file" name="file" class="jenkins-file-upload" style="width:80%"
-							size='40' />
+						<f:file name="file" />
 					</f:entry>
 				</f:block>
 				<f:block>
