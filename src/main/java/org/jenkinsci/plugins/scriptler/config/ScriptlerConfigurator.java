@@ -1,7 +1,6 @@
 package org.jenkinsci.plugins.scriptler.config;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import hudson.Extension;
 import hudson.ExtensionList;
 import hudson.Util;
 import io.jenkins.plugins.casc.Attribute;
@@ -26,8 +25,9 @@ import org.jenkinsci.plugins.scriptler.util.ScriptHelper;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ApprovalContext;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
 import org.jenkinsci.plugins.scriptsecurity.scripts.languages.GroovyLanguage;
+import org.jenkinsci.plugins.variant.OptionalExtension;
 
-@Extension(optional = true)
+@OptionalExtension(requirePlugins = "configuration-as-code")
 public class ScriptlerConfigurator implements RootElementConfigurator<ScriptlerConfiguration> {
 
     private static final Logger LOGGER = Logger.getLogger(ScriptlerConfigurator.class.getName());
