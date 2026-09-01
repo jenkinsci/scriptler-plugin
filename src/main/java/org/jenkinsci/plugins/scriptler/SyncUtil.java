@@ -86,7 +86,10 @@ public class SyncUtil {
         LOGGER.log(Level.FINE, "Listing files of {0}", scriptDirectory);
 
         try (Stream<Path> contents = Files.list(scriptDirectory)) {
-            return contents.filter(path -> path.getFileName().toString().endsWith(".groovy"))
+            return contents.filter(path -> Optional.ofNullable(path.getFileName())
+                            .map(Object::toString)
+                            .filter(name -> name.endsWith(".groovy"))
+                            .isPresent())
                     .toList();
         }
     }
